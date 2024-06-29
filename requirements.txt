@@ -4,3 +4,5 @@
 
 azure-functions
 fastapi
+uvicorn
+pydantic
