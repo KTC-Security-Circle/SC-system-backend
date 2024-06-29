@@ -1,14 +1,46 @@
-import azure.functions as func 
+import logging
 from fastapi import FastAPI
-from api.routers import hello
+import azure.functions as func
+
+# 正式なAPI用のインポート
+from api.app.routers import auth as app_auth, messages as app_messages
+
+# デモ用APIのインポート
+from api.demo.routers import auth as demo_auth, messages as demo_messages
 
 # http://localhost:7071/ or http://localhost:7071/docs
 
-fast_app = FastAPI() 
-fast_app.include_router(hello.router)
+# FastAPIアプリケーションのインスタンスを作成
+tags_metadata = [
+    {
+        "name": "root",
+        "description": "ルートエンドポイント",
+    },
+    {
+        "name": "api",
+        "description": "運用用APIのエンドポイント",
+    },
+    {
+        "name": "demo",
+        "description": "デモ用APIのエンドポイント",
+    },
+]
+app = FastAPI(openapi_tags=tags_metadata)
 
-@fast_app.get("/")
+# 正式なAPIのルータを登録
+@app.get("/", tags=["root"])
 async def root():
     return {"message":"Hello world"}
 
-app = func.AsgiFunctionApp(app=fast_app, http_auth_level=func.AuthLevel.ANONYMOUS)
+app.include_router(app_auth.router, prefix="/api", tags=["api"])
+app.include_router(app_messages.router, prefix="/api" , tags=["api"])
+
+# デモ用APIのルータを登録
+app.include_router(demo_auth.router, prefix="/demo", tags=["demo"])
+app.include_router(demo_messages.router, prefix="/demo", tags=["demo"])
+
+# ロガーの設定
+logger = logging.getLogger("azure_functions.fastapi")
+logger.setLevel(logging.DEBUG)
+
+app = func.AsgiFunctionApp(app=app, http_auth_level=func.AuthLevel.ANONYMOUS)
