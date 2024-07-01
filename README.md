@@ -33,6 +33,9 @@ LangChainを使用したAgentsも導入予定
         "AzureWebJobsStorage": "",
         "FUNCTIONS_WORKER_RUNTIME": "python",
         "AzureWebJobsFeatureFlags": "EnableWorkerIndexing"
+      },
+      "Host": {
+        "CORS": "*"
       }
     }
     ```
