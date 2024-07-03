@@ -42,12 +42,18 @@ app.include_router(app_messages.router, prefix="/api" , tags=["api"])
 app.include_router(demo_auth.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_messages.router, prefix="/demo", tags=["demo"])
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a64ab901f7d56d1d9ab083337855d1f8b75a0014
 app.include_router(demo_users.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_chats.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_sessions.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_error_log.router, prefix="/demo", tags=["demo"])
+<<<<<<< HEAD
 =======
 >>>>>>> origin
+=======
+>>>>>>> a64ab901f7d56d1d9ab083337855d1f8b75a0014
 
 # ロガーの設定
 logger = logging.getLogger("azure_functions.fastapi")
