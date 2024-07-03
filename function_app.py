@@ -1,6 +1,8 @@
 import logging
 from fastapi import FastAPI
 import azure.functions as func
+from sqlmodel import SQLModel
+from create_database_sqmodel import get_engine 
 
 # 正式なAPI用のインポート
 from api.app.routers import auth as app_auth, messages as app_messages
@@ -30,9 +32,15 @@ tags_metadata = [
 ]
 app = FastAPI(openapi_tags=tags_metadata)
 
+engine = get_engine()
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
 # 正式なAPIのルータを登録
 @app.get("/", tags=["root"])
 async def root():
+    create_db_and_tables()
     return {"message":"Hello world"}
 
 app.include_router(app_auth.router, prefix="/api", tags=["api"])
@@ -41,20 +49,11 @@ app.include_router(app_messages.router, prefix="/api" , tags=["api"])
 # デモ用APIのルータを登録
 app.include_router(demo_auth.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_messages.router, prefix="/demo", tags=["demo"])
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a64ab901f7d56d1d9ab083337855d1f8b75a0014
+
 app.include_router(demo_users.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_chats.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_sessions.router, prefix="/demo", tags=["demo"])
 app.include_router(demo_error_log.router, prefix="/demo", tags=["demo"])
-<<<<<<< HEAD
-=======
->>>>>>> origin
-=======
->>>>>>> a64ab901f7d56d1d9ab083337855d1f8b75a0014
-
 # ロガーの設定
 logger = logging.getLogger("azure_functions.fastapi")
 logger.setLevel(logging.DEBUG)

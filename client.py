@@ -2,8 +2,8 @@ import requests
 import json
 
 res = requests.post(
-  "http://localhost:7071/demo/errorlog/",
-  json={"id": 3, "error_message": "テキストエラー", "pub_data": None,"session_id": 2},
+  "http://localhost:7071/demo/session/",
+  json={"id": 2, "session_name": "Python", "pub_data": None,"user_id": 2},
 )
 print(res.status_code)
 print(res.text)

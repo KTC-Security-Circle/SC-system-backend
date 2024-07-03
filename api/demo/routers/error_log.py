@@ -1,27 +1,31 @@
-from fastapi import APIRouter,HTTPException
-from ..models.database import ErrorLog
-from ..schemas.message import Message
+from fastapi import APIRouter, HTTPException
+from sqlmodel import Session
 from datetime import datetime
-from ...api_db_conn import database
-import sqlite3
+from api.demo.models.database_sqlmodel import ErrorLog  # SQLModelモデルをインポート
+from api.demo.schemas.database import ErrorLog as ErrorLogschemas
+from create_database_sqmodel import get_engine
 
 router = APIRouter()
 
-@database
-async def insert_error_log(cur, errorlog: ErrorLog):
-    try:
-        cur.execute("""
-            INSERT INTO errorlog (id, error_message, pub_data, session_id)
-            VALUES (?, ?, ?, ?)
-        """, (errorlog.id, errorlog.error_message, errorlog.pub_data, errorlog.session_id))
-    except sqlite3.IntegrityError as e:
-        raise HTTPException(status_code=400, detail="ユーザーIDが既に存在します")
+engine = get_engine()
 
-@router.post("/errorlog/", response_model=Message)
-async def create_errorlog(errorlog: ErrorLog):
-  errorlog.pub_data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-  await insert_error_log(errorlog)
-  print(f"エラーが発生しました。\n\
+@router.post("/errorlog/", response_model=ErrorLog)
+async def create_error_log(errorlog: ErrorLogschemas):
+    error_log_data = ErrorLog(
+        id=errorlog.id,
+        error_message=errorlog.error_message,
+        pub_data=datetime.now(),
+        session_id=errorlog.session_id
+    )
+    with Session(engine) as session:
+        try:
+            session.add(error_log_data)
+            session.commit()
+            session.refresh(error_log_data)
+        except Exception as e:
+            session.rollback()
+            raise HTTPException(status_code=400, detail=f"エラーが発生しました: {str(e)}")
+    print(f"エラーが発生しました。\n\
 エラーID:{errorlog.id}\nエラー名:{errorlog.error_message}\n投稿日時:{errorlog.pub_data}\nセッションID:{errorlog.session_id}")
-  result = Message(content=f"エラー: {errorlog.error_message}")
-  return result
+    
+    return error_log_data
