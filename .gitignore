@@ -137,3 +137,4 @@ __azurite_db*__.json
 #append
 test.db
 output/
+database.db
