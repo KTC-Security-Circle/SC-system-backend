@@ -73,3 +73,9 @@ LangChainを使用したAgentsも導入予定
 1. releaseブランチにマージすることでデプロイされます。(ほかメンバーに許可なくやらないこと)
 
 ## コントリビューション
+
+
+## 追加ライブラリ
+sqlmodel,dotenv
+1. pip install sqlmodel dotenv で追加できます。
+2. または、requirements.txtに上記の外部ライブラリを記載してください。

@@ -10,7 +10,7 @@ sessions as app_sessions, error_log as app_error_log
 
 
 # デモ用APIのインポート
-from api.demo import users as demo_users, chats as demo_chats,\
+from api.demo.routers import users as demo_users, chats as demo_chats,\
 sessions as demo_sessions, error_log as demo_error_log
 
 # http://localhost:7071/ or http://localhost:7071/docs
@@ -31,10 +31,10 @@ app.include_router(app_error_log.router, prefix="/api", tags=["api"])
 
 
 # デモ用APIのルータを登録
-# app.include_router(demo_users, prefix="/demo", tags=["demo"])
-# app.include_router(demo_chats, prefix="/demo", tags=["demo"])
-# app.include_router(demo_sessions, prefix="/demo", tags=["demo"])
-# app.include_router(demo_error_log, prefix="/demo", tags=["demo"])
+app.include_router(demo_users.router, prefix="/demo", tags=["demo"])
+app.include_router(demo_chats.router, prefix="/demo", tags=["demo"])
+app.include_router(demo_sessions.router, prefix="/demo", tags=["demo"])
+app.include_router(demo_error_log.router, prefix="/demo", tags=["demo"])
 
 # ロガーの設定
 logger = logging.getLogger("azure_functions.fastapi")
