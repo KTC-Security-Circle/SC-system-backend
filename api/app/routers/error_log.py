@@ -1,15 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from sqlmodel import Session
 from datetime import datetime
-from api.demo.models.database_sqlmodel import ErrorLog  # SQLModelモデルをインポート
-from api.demo.schemas.database import ErrorLog as ErrorLogschemas
-from create_database_sqmodel import get_engine
+from api.app.models import ErrorLog  # SQLModelモデルをインポート
+from api.app.schemas.schemas import ErrorLog as ErrorLogschemas
+from api.app.database.database import get_engine
 
 router = APIRouter()
 
 engine = get_engine()
 
-@router.post("/errorlog/", response_model=ErrorLog)
+@router.post("/app/errorlog/", response_model=ErrorLog)
 async def create_error_log(errorlog: ErrorLogschemas):
     error_log_data = ErrorLog(
         id=errorlog.id,

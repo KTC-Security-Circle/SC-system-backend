@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from ..schemas.token import Token
-from ..models.user import fake_users_db
 
 router = APIRouter()
 

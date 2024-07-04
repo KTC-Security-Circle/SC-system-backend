@@ -1,15 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from sqlmodel import Session
 from datetime import datetime
-from api.demo.models.database_sqlmodel import ChatLog  # SQLModelモデルをインポート
-from create_database_sqmodel import get_engine  # 関数をインポート
+from api.app.models import ChatLog  # SQLModelモデルをインポート
+from api.app.schemas.schemas import ChatLog as ChatLogschemas
+from api.app.database.database import get_engine  # 関数をインポート
 
 router = APIRouter()
 
 engine = get_engine()
 
-@router.post("/chat/", response_model=ChatLog)
-async def create_chatlog(chatlog: ChatLog):
+@router.post("/app/chat/", response_model=ChatLog)
+async def create_chatlog(chatlog: ChatLogschemas):
     chat_log_data = ChatLog(
         id=chatlog.id,
         message=chatlog.message,

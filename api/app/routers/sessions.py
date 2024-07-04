@@ -1,15 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from sqlmodel import Session
 from datetime import datetime
-from api.demo.models.database_sqlmodel import Sessions  # SQLModelモデルをインポート
-from create_database_sqmodel import get_engine
+from api.app.models import Sessions  # SQLModelモデルをインポート
+from api.app.schemas.schemas import Sessions as Sessionsschemas
+from api.app.database.database import get_engine
 
 router = APIRouter()
 
 engine = get_engine()
 
-@router.post("/session/", response_model=Sessions)
-async def create_sessions(session: Sessions):
+@router.post("/app/session/", response_model=Sessions)
+async def create_sessions(session: Sessionsschemas):
     session_data = Sessions(
         id=session.id,
         session_name=session.session_name,
