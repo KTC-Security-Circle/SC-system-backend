@@ -1,5 +1,6 @@
 import logging
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 import azure.functions as func
 from sqlmodel import SQLModel
 from create_database_sqmodel import get_engine 
@@ -14,6 +15,13 @@ sessions as demo_sessions, error_log as demo_error_log
 from api.demo.routers import auth as demo_auth, messages as demo_messages
 
 # http://localhost:7071/ or http://localhost:7071/docs
+
+engine = get_engine()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    SQLModel.metadata.create_all(engine)
+    yield
 
 # FastAPIアプリケーションのインスタンスを作成
 tags_metadata = [
@@ -30,17 +38,12 @@ tags_metadata = [
         "description": "デモ用APIのエンドポイント",
     },
 ]
-app = FastAPI(openapi_tags=tags_metadata)
 
-engine = get_engine()
-
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+app = FastAPI(openapi_tags=tags_metadata,lifespan=lifespan)
 
 # 正式なAPIのルータを登録
 @app.get("/", tags=["root"])
 async def root():
-    create_db_and_tables()
     return {"message":"Hello world"}
 
 app.include_router(app_auth.router, prefix="/api", tags=["api"])
