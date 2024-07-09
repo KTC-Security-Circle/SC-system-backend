@@ -41,12 +41,12 @@ get_endpoints = [
 
 
 # 各エンドポイントにPOSTリクエストを送信
-# for endpoint in post_endpoints:
-#   res = requests.post(endpoint["url"], json=endpoint["data"])
-#   print(f"URL: {endpoint['url']}")
-#   print(f"Status Code: {res.status_code}")
-#   print(f"Response: {res.text}")
-#   print("\n")
+for endpoint in post_endpoints:
+  res = requests.post(endpoint["url"], json=endpoint["data"])
+  print(f"URL: {endpoint['url']}")
+  print(f"Status Code: {res.status_code}")
+  print(f"Response: {res.text}")
+  print("\n")
 for endpoint in get_endpoints:
   res = requests.get(endpoint["url"])
   print(f"URL: {endpoint['url']}")
