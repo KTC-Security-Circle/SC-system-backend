@@ -37,19 +37,51 @@ get_endpoints = [
     "url": f"{base_url}/api/app/view/errorlog/",# ?limit=2&offset=1
   }
 ]
-
+put_endpoints = [
+  {
+    "url": f"{base_url}/api/app/update/user/1/",
+    "data": {"name": "更新済み", "email": "更新済み", "password": "77777777", "authority": "update"}
+  },
+  {
+    "url": f"{base_url}/api/app/update/chat/1/",
+    "data": {"message": "更新済みテキスト", "bot_reply": "更新済み返信テキスト"}
+  },
+  {
+    "url": f"{base_url}/api/app/update/session/1/",
+    "data": {"session_name": "更新済み"}
+  },
+  {
+    "url": f"{base_url}/api/app/update/errorlog/1/",
+    "data": {"error_message": "更新済み"}
+  }
+]
 
 
 # 各エンドポイントにPOSTリクエストを送信
 for endpoint in post_endpoints:
-  res = requests.post(endpoint["url"], json=endpoint["data"])
-  print(f"URL: {endpoint['url']}")
-  print(f"Status Code: {res.status_code}")
-  print(f"Response: {res.text}")
-  print("\n")
+  try:
+    res = requests.post(endpoint["url"], json=endpoint["data"])
+    print(f"URL: {endpoint['url']}")
+    print(f"Status Code: {res.status_code}")
+    print(f"Response: {res.text}")
+    print("\n")
+  except requests.exceptions.RequestException as e:
+    print(f"Request to {endpoint['url']} failed: {e}")
 for endpoint in get_endpoints:
-  res = requests.get(endpoint["url"])
-  print(f"URL: {endpoint['url']}")
-  print(f"Status Code: {res.status_code}")
-  print(f"Response: {res.text}")
-  print("\n")
+  try:
+    res = requests.get(endpoint["url"])
+    print(f"URL: {endpoint['url']}")
+    print(f"Status Code: {res.status_code}")
+    print(f"Response: {res.text}")
+    print("\n")
+  except requests.exceptions.RequestException as e:
+    print(f"Request to {endpoint['url']} failed: {e}")
+for endpoint in put_endpoints:
+  try:
+    res = requests.put(endpoint["url"], json=endpoint["data"])
+    print(f"URL: {endpoint['url']}")
+    print(f"Status Code: {res.status_code}")
+    print(f"Response: {res.text}")
+    print("\n")
+  except requests.exceptions.RequestException as e:
+    print(f"Request to {endpoint['url']} failed: {e}")

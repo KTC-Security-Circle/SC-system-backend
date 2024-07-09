@@ -4,6 +4,7 @@ import os
 from os.path import join, dirname
 from fastapi import HTTPException,Query
 from typing import Optional
+from functools import wraps
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -36,7 +37,6 @@ def get_engine():
     return engine
 engine = get_engine()
 
-
 async def add_db_record(engine,data):
   with Session(engine) as session_db:
       try:
@@ -48,8 +48,8 @@ async def add_db_record(engine,data):
           session_db.rollback()
           raise HTTPException(status_code=400, detail=f"エラーが発生しました: {str(e)}")
 
-def select_table(engine, table, limit: Optional[int] = Query(None, description="Limit the number of results returned"),
-offset: Optional[int] = Query(0, description="Number of records to skip")):
+async def select_table(engine, table,
+limit: Optional[int] = Query(None, description="Limit the number of results returned"),offset: Optional[int] = Query(0, description="Number of records to skip")):
     with Session(engine) as session:
         try:
             stmt = select(table)
@@ -62,3 +62,22 @@ offset: Optional[int] = Query(0, description="Number of records to skip")):
             return rows
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"エラーが発生しました: {str(e)}")
+
+async def update_record(engine, model, conditions: dict, updates: dict):
+    with Session(engine) as session_db:
+        try:
+            stmt = select(model)
+            for field, value in conditions.items():
+                stmt = stmt.where(getattr(model, field) == value)
+            result = session_db.exec(stmt).one_or_none()
+            if not result:
+                raise HTTPException(status_code=404, detail="レコードが見つかりません")
+            for field, value in updates.items():
+                setattr(result, field, value)
+            session_db.add(result)
+            session_db.commit()
+            session_db.refresh(result)
+            return result
+        except Exception as e:
+            session_db.rollback()
+            raise HTTPException(status_code=400, detail=f"エラーが発生しました: {str(e)}")

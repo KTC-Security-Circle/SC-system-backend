@@ -1,12 +1,10 @@
 from fastapi import APIRouter
 from datetime import datetime
 from api.app.models import ErrorLog  # SQLModelモデルをインポート
-from api.app.database.database import get_engine,add_db_record,select_table
+from api.app.database.database import engine,add_db_record,select_table,update_record
 from typing import Optional
 
 router = APIRouter()
-
-engine = get_engine()
 
 @router.post("/app/input/errorlog/", response_model=ErrorLog)
 async def create_error_log(errorlog: ErrorLog):
@@ -23,6 +21,12 @@ async def create_error_log(errorlog: ErrorLog):
 
 @router.get("/app/view/errorlog/", response_model=list[ErrorLog])
 async def view_errorlog(limit: Optional[int] =None, offset: Optional[int] = 0):
-    errorlog = select_table(engine,ErrorLog,offset,limit)
+    errorlog = await select_table(engine,ErrorLog,offset,limit)
     print(errorlog)
     return errorlog
+
+@router.put("/app/update/errorlog/{errorlog_id}/", response_model=ErrorLog)
+async def update_errorlog(errorlog_id: int, updates: dict[str, str]):
+    conditions = {"id": errorlog_id}
+    updated_record = await update_record(engine, ErrorLog, conditions, updates)
+    return updated_record

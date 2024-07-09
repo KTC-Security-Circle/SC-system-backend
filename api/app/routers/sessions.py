@@ -1,12 +1,10 @@
 from fastapi import APIRouter
 from datetime import datetime
 from api.app.models import Sessions  # SQLModelモデルをインポート
-from api.app.database.database import get_engine,add_db_record,select_table
+from api.app.database.database import engine,add_db_record,select_table,update_record
 from typing import Optional
 
 router = APIRouter()
-
-engine = get_engine()
 
 @router.post("/app/input/session/", response_model=Sessions)
 async def create_sessions(session: Sessions):
@@ -23,6 +21,12 @@ async def create_sessions(session: Sessions):
 
 @router.get("/app/view/session/", response_model=list[Sessions])
 async def view_sessions(limit: Optional[int] =None, offset: Optional[int] = 0):
-    sessions = select_table(engine,Sessions,offset,limit)
+    sessions = await select_table(engine,Sessions,offset,limit)
     print(sessions)
     return sessions
+
+@router.put("/app/update/session/{session_id}/", response_model=Sessions)
+async def update_sessions(session_id: int, updates: dict[str, str]):
+    conditions = {"id": session_id}
+    updated_record = await update_record(engine, Sessions, conditions, updates)
+    return updated_record

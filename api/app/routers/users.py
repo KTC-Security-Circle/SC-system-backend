@@ -1,11 +1,9 @@
 from fastapi import APIRouter
 from api.app.models import Users  # SQLModelモデルをインポート
-from api.app.database.database import get_engine,add_db_record,select_table
+from api.app.database.database import engine,add_db_record,select_table,update_record
 from typing import Optional
 
 router = APIRouter()
-
-engine = get_engine()
 
 @router.post("/app/input/user/", response_model=Users)
 async def create_users(user: Users):
@@ -23,6 +21,12 @@ async def create_users(user: Users):
 
 @router.get("/app/view/user/", response_model=list[Users])
 async def view_users(limit: Optional[int] = None, offset: Optional[int] = 0):
-    users = select_table(engine,Users,offset,limit)
+    users = await select_table(engine,Users,offset,limit)
     print(users)
     return users
+
+@router.put("/app/update/user/{user_id}/", response_model=Users)
+async def update_users(user_id: int, updates: dict[str, str]):
+    conditions = {"id": user_id}
+    updated_record = await update_record(engine, Users, conditions, updates)
+    return updated_record
