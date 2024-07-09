@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from datetime import datetime
 from api.app.models import ChatLog  # SQLModelモデルをインポート
-from api.app.database.database import get_engine,add_db_record
+from api.app.database.database import get_engine,add_db_record,select_table
+from typing import Optional
 
 router = APIRouter()
 engine = get_engine()
@@ -19,5 +20,10 @@ async def create_chatlog(chatlog: ChatLog):
     print(f"新しいチャットを登録します。\n\
 チャットID:{chatlog.id}\nチャット内容:{chatlog.message}\nボットの返信:{chatlog.bot_reply}\n\
 投稿日時:{chatlog.pub_data}\nセッションID:{chatlog.session_id}")
-    
     return chat_log_data
+
+@router.get("/app/view/chat/", response_model=list[ChatLog])
+async def view_chatlog(limit: Optional[int] =None, offset: Optional[int] = 0):
+    chatlog = select_table(engine,ChatLog,offset,limit)
+    print(chatlog)
+    return chatlog

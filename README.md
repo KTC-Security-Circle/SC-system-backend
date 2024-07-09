@@ -77,5 +77,5 @@ LangChainを使用したAgentsも導入予定
 
 ## 追加ライブラリ
 sqlmodel,dotenv
-1. pip install sqlmodel dotenv で追加できます。
+1. pip install sqlmodel python-dotenv で追加できます。
 2. または、requirements.txtに上記の外部ライブラリを記載してください。
