@@ -7,26 +7,26 @@ router = APIRouter()
 
 @router.post("/app/input/user/", response_model=Users)
 async def create_users(user: Users):
-    user_data = Users(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        password=user.password,
-        authority=user.authority,
-    )
-    await add_db_record(engine,user_data)
-    print(f"新しいユーザーを登録します。\n\
+  user_data = Users(
+    id=user.id,
+    name=user.name,
+    email=user.email,
+    password=user.password,
+    authority=user.authority,
+  )
+  await add_db_record(engine,user_data)
+  print(f"新しいユーザーを登録します。\n\
 ユーザーID:{user.id}\nユーザー名:{user.name}\nE-mail:{user.email}\nパスワード:{user.password}\n権限情報:{user.authority}")
-    return user_data
+  return user_data
 
 @router.get("/app/view/user/", response_model=list[Users])
 async def view_users(limit: Optional[int] = None, offset: Optional[int] = 0):
-    users = await select_table(engine,Users,offset,limit)
-    print(users)
-    return users
+  users = await select_table(engine,Users,offset,limit)
+  print(users)
+  return users
 
 @router.put("/app/update/user/{user_id}/", response_model=Users)
 async def update_users(user_id: int, updates: dict[str, str]):
-    conditions = {"id": user_id}
-    updated_record = await update_record(engine, Users, conditions, updates)
-    return updated_record
+  conditions = {"id": user_id}
+  updated_record = await update_record(engine, Users, conditions, updates)
+  return updated_record
