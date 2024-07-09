@@ -7,6 +7,7 @@ engine = get_engine()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print(engine)
     SQLModel.metadata.create_all(engine)
     yield
 

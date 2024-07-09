@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from datetime import datetime
 from api.app.models import ErrorLog  # SQLModelモデルをインポート
-from api.app.schemas.schemas import ErrorLog as ErrorLogschemas
 from api.app.database.database import get_engine
 
 router = APIRouter()
@@ -9,7 +8,7 @@ router = APIRouter()
 engine = get_engine()
 
 @router.post("/errorlog/", response_model=ErrorLog)
-async def create_error_log(errorlog: ErrorLogschemas):
+async def create_error_log(errorlog: ErrorLog):
     error_log_data = ErrorLog(
         id=errorlog.id,
         error_message=errorlog.error_message,

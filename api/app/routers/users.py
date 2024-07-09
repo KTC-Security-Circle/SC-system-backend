@@ -1,15 +1,13 @@
-from fastapi import APIRouter, HTTPException
-from sqlmodel import Session
+from fastapi import APIRouter
 from api.app.models import Users  # SQLModelモデルをインポート
-from api.app.schemas.schemas import Users as Usersschemas
-from api.app.database.database import get_engine  # 関数をインポート
+from api.app.database.database import get_engine,add_db_record
 
 router = APIRouter()
 
 engine = get_engine()
 
-@router.post("/app/user/", response_model=Users)
-async def create_users(user: Usersschemas):
+@router.post("/app/input/user/", response_model=Users)
+async def create_users(user: Users):
     user_data = Users(
         id=user.id,
         name=user.name,
@@ -17,14 +15,7 @@ async def create_users(user: Usersschemas):
         password=user.password,
         authority=user.authority,
     )
-    with Session(engine) as session_db:
-        try:
-            session_db.add(user_data)
-            session_db.commit()
-            session_db.refresh(user_data)
-        except Exception as e:
-            session_db.rollback()
-            raise HTTPException(status_code=400, detail=f"エラーが発生しました: {str(e)}")
+    await add_db_record(engine,user_data)
     print(f"新しいユーザーを登録します。\n\
 ユーザーID:{user.id}\nユーザー名:{user.name}\nE-mail:{user.email}\nパスワード:{user.password}\n権限情報:{user.authority}")
     

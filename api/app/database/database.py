@@ -21,19 +21,16 @@ def get_engine():
         database_url = f"{db_type}+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     else:
         raise ValueError("Unsupported DB_TYPE. Use 'sqlite', 'postgresql', or 'mysql'.")
+    engine  = create_engine(database_url, echo=True)
+    return engine
 
-    return create_engine(database_url, echo=True)
-
-def with_session(engine):
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
-            with Session(engine) as session:
-                try:
-                    result = await func(session, *args, **kwargs)
-                    session.commit()
-                    return result
-                except Exception as e:
-                    session.rollback()
-                    raise HTTPException(status_code=400, detail=f"エラーが発生しました: {str(e)}")
-        return wrapper
-    return decorator
+async def add_db_record(engine,data):
+  with Session(engine) as session_db:
+          try:
+              session_db.add(data)
+              session_db.commit()
+              session_db.refresh(data)
+              print(data)
+          except Exception as e:
+              session_db.rollback()
+              raise HTTPException(status_code=400, detail=f"エラーが発生しました: {str(e)}")
