@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from datetime import datetime
 from api.app.models import ChatLog  # SQLModelモデルをインポート
-from api.app.database.database import engine,add_db_record,select_table,update_record
+from api.app.database.database import engine,add_db_record,select_table,update_record,delete_record
 from typing import Optional
 
 router = APIRouter()
@@ -32,3 +32,9 @@ async def update_chatlog(chat_id: int, updates: dict[str, str]):
   conditions = {"id": chat_id}
   updated_record = await update_record(engine, ChatLog, conditions, updates)
   return updated_record
+
+@router.delete("/app/delete/chat/{chat_id}/", response_model=dict)
+async def delete_chatlog(chat_id: int):
+    conditions = {"id": chat_id}
+    result = await delete_record(engine, ChatLog, conditions)
+    return result

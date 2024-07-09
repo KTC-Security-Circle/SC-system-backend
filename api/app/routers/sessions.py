@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from datetime import datetime
 from api.app.models import Sessions  # SQLModelモデルをインポート
-from api.app.database.database import engine,add_db_record,select_table,update_record
+from api.app.database.database import engine,add_db_record,select_table,update_record,delete_record
 from typing import Optional
 
 router = APIRouter()
@@ -30,3 +30,9 @@ async def update_sessions(session_id: int, updates: dict[str, str]):
   conditions = {"id": session_id}
   updated_record = await update_record(engine, Sessions, conditions, updates)
   return updated_record
+
+@router.delete("/app/delete/session/{session_id}/", response_model=dict)
+async def delete_session(session_id: int):
+    conditions = {"id": session_id}
+    result = await delete_record(engine, Sessions, conditions)
+    return result

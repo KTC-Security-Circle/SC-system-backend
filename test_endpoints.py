@@ -55,30 +55,52 @@ put_endpoints = [
     "data": {"error_message": "更新済み"}
   }
 ]
-
+delete_endpoints = [
+  {
+    "url": f"{base_url}/api/app/delete/user/1/",# ?limit=2&offset=1
+  },
+  {
+    "url": f"{base_url}/api/app/delete/chat/1/",# ?limit=2&offset=1
+  },
+  {
+    "url": f"{base_url}/api/app/delete/session/1/",# ?limit=2&offset=1
+  },
+  {
+    "url": f"{base_url}/api/app/delete/errorlog/1/",# ?limit=2&offset=1
+  }
+]
 
 # 各エンドポイントにPOSTリクエストを送信
-for endpoint in post_endpoints:
+# for endpoint in post_endpoints:
+#   try:
+#     res = requests.post(endpoint["url"], json=endpoint["data"])
+#     print(f"URL: {endpoint['url']}")
+#     print(f"Status Code: {res.status_code}")
+#     print(f"Response: {res.text}")
+#     print("\n")
+#   except requests.exceptions.RequestException as e:
+#     print(f"Request to {endpoint['url']} failed: {e}")
+# for endpoint in get_endpoints:
+#   try:
+#     res = requests.get(endpoint["url"])
+#     print(f"URL: {endpoint['url']}")
+#     print(f"Status Code: {res.status_code}")
+#     print(f"Response: {res.text}")
+#     print("\n")
+#   except requests.exceptions.RequestException as e:
+#     print(f"Request to {endpoint['url']} failed: {e}")
+# for endpoint in put_endpoints:
+#   try:
+#     res = requests.put(endpoint["url"], json=endpoint["data"])
+#     print(f"URL: {endpoint['url']}")
+#     print(f"Status Code: {res.status_code}")
+#     print(f"Response: {res.text}")
+#     print("\n")
+#   except requests.exceptions.RequestException as e:
+#     print(f"Request to {endpoint['url']} failed: {e}")
+for endpoint in delete_endpoints:
   try:
-    res = requests.post(endpoint["url"], json=endpoint["data"])
-    print(f"URL: {endpoint['url']}")
-    print(f"Status Code: {res.status_code}")
-    print(f"Response: {res.text}")
-    print("\n")
-  except requests.exceptions.RequestException as e:
-    print(f"Request to {endpoint['url']} failed: {e}")
-for endpoint in get_endpoints:
-  try:
-    res = requests.get(endpoint["url"])
-    print(f"URL: {endpoint['url']}")
-    print(f"Status Code: {res.status_code}")
-    print(f"Response: {res.text}")
-    print("\n")
-  except requests.exceptions.RequestException as e:
-    print(f"Request to {endpoint['url']} failed: {e}")
-for endpoint in put_endpoints:
-  try:
-    res = requests.put(endpoint["url"], json=endpoint["data"])
+    res = requests.delete(endpoint["url"])
     print(f"URL: {endpoint['url']}")
     print(f"Status Code: {res.status_code}")
     print(f"Response: {res.text}")

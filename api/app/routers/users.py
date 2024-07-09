@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from api.app.models import Users  # SQLModelモデルをインポート
-from api.app.database.database import engine,add_db_record,select_table,update_record
+from api.app.database.database import engine,add_db_record,select_table,update_record,delete_record
 from typing import Optional
 
 router = APIRouter()
@@ -30,3 +30,9 @@ async def update_users(user_id: int, updates: dict[str, str]):
   conditions = {"id": user_id}
   updated_record = await update_record(engine, Users, conditions, updates)
   return updated_record
+
+@router.delete("/app/delete/user/{user_id}/", response_model=dict)
+async def delete_user(user_id: int):
+    conditions = {"id": user_id}
+    result = await delete_record(engine, Users, conditions)
+    return result

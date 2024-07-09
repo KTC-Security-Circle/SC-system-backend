@@ -80,3 +80,19 @@ async def update_record(engine, model, conditions: dict, updates: dict):
     except Exception as e:
       session_db.rollback()
       raise HTTPException(status_code=471, detail=f"エラーが発生しました: {str(e)}")
+  
+async def delete_record(engine, model, conditions: dict):
+  with Session(engine) as session_db:
+    try:
+      stmt = select(model)
+      for field, value in conditions.items():
+          stmt = stmt.where(getattr(model, field) == value)
+      result = session_db.exec(stmt).one_or_none()
+      if not result:
+          raise HTTPException(status_code=404, detail="レコードが見つかりません")
+      session_db.delete(result)
+      session_db.commit()
+      return {"detail": "レコードが正常に削除されました"}
+    except Exception as e:
+      session_db.rollback()
+      raise HTTPException(status_code=472, detail=f"エラーが発生しました: {str(e)}")
