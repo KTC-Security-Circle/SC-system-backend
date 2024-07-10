@@ -79,3 +79,16 @@ LangChainを使用したAgentsも導入予定
 sqlmodel,dotenv
 1. pip install sqlmodel python-dotenv で追加できます。
 2. または、requirements.txtに上記の外部ライブラリを記載してください。
+
+## コードの大まかな説明
+SQLModelを使用し、CRUDに基づいたAPIを作成しました。
+
+また、現在idによる検索のみを行っているので、各テーブルidにindex(索引)を追加するか検討中です。
+
+whereによる各データの新たな検索は必要になり次第実装予定となります。
+
+client.pyはdemo/のapi全てとの通信確認用です。
+
+test_connection.pyはapp/のapi全てとの通信確認用です。(こちらはput,deleteメソッドでサーバーサイドに渡すidがデータベースに存在しているかご確認ください)
+
+データベースの設定などは.envファイルで行います。.env.sampleファイルのパラメータを参考にして.envファイルを作成し、環境変数を設定してください。

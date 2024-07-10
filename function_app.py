@@ -1,7 +1,6 @@
 import logging
 import azure.functions as func
-from api.app.database.database import get_engine
-from app_fastapi import app 
+from app_fastapi import app
 
 # 正式なAPI用のインポート
 from api.app.routers import auth as app_auth, messages as app_messages
@@ -14,8 +13,6 @@ from api.demo.routers import users as demo_users, chats as demo_chats,\
 sessions as demo_sessions, error_log as demo_error_log
 
 # http://localhost:7071/ or http://localhost:7071/docs
-
-engine = get_engine()
 
 # 正式なAPIのルータを登録
 @app.get("/", tags=["root"])
