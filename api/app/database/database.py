@@ -65,7 +65,7 @@ limit: Optional[int] = Query(None, description="Limit the number of results retu
     except Exception as e:
       raise HTTPException(status_code=570, detail=f"エラーが発生しました: {str(e)}")
 
-async def update_record(engine, model, conditions: dict, updates: dict):
+async def update_record(engine, model, conditions: Optional[Dict[str, Any]] = None, updates: Optional[Dict[str, Any]] = None):
   with Session(engine) as session_db:
     try:
       stmt = select(model)
@@ -84,7 +84,7 @@ async def update_record(engine, model, conditions: dict, updates: dict):
       session_db.rollback()
       raise HTTPException(status_code=471, detail=f"エラーが発生しました: {str(e)}")
   
-async def delete_record(engine, model, conditions: dict):
+async def delete_record(engine, model, conditions: Optional[Dict[str, Any]] = None):
   with Session(engine) as session_db:
     try:
       stmt = select(model)
@@ -99,4 +99,3 @@ async def delete_record(engine, model, conditions: dict):
     except Exception as e:
       session_db.rollback()
       raise HTTPException(status_code=472, detail=f"エラーが発生しました: {str(e)}")
-

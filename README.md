@@ -76,8 +76,8 @@ LangChainを使用したAgentsも導入予定
 
 
 ## 追加ライブラリ
-sqlmodel,dotenv
-1. pip install sqlmodel python-dotenv で追加できます。
+sqlmodel,python-dotenv,jwt,passlib[bcrypt],python-jose[cryptography]
+1. pip install sqlmodel python-dotenv jwt passlib  bcrypt python-jose[cryptography]で追加できます。
 2. または、requirements.txtに上記の外部ライブラリを記載してください。
 
 ## コードの大まかな説明

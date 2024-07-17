@@ -4,6 +4,45 @@ import json
 # エンドポイントURLの定義
 base_url = "http://localhost:7071"
 
+# サインアップ情報
+signup_url = f"{base_url}/api/signup/"
+signup_data = {
+    "id": None,
+    "name": "Test User",
+    "email": "test@example.jp.com",
+    "password": "12345678",
+    "authority": "admin"
+}
+
+# ログイン情報
+login_url = f"{base_url}/api/login/"
+login_data = {
+    "email": "test@example.jp.com",
+    "password": "12345678"
+}
+
+# # サインアップしてユーザーを登録
+# response = requests.post(signup_url, json=signup_data)
+# if response.status_code == 200:
+#     print("Signup successful")
+# else:
+#     print("Signup failed")
+#     print(response.text)
+#     exit()
+
+# ログインしてトークンを取得
+response = requests.post(login_url, json=login_data)
+if response.status_code == 200:
+    print("Login succeeded")
+    print(response.json()['access_token'])
+    token = response.json()['access_token']
+else:
+    print("Login failed")
+    print(response.text)
+headers = {
+    "Authorization": f"Bearer {token}"
+}
+
 # 各エンドポイントに対するデータ
 post_endpoints = [
   {
@@ -24,38 +63,38 @@ post_endpoints = [
   }
 ]
 get_endpoints = [
-    {
-        "url": f"{base_url}/api/app/view/user/",
-        "params": {
-            "limit": 2,
-            "offset": 1,
-            "conditions": json.dumps({"name": "aaaaaa"})
-        }
-    },
-    {
-        "url": f"{base_url}/api/app/view/chat/",
-        "params": {
-            "limit": 3,
-            "offset": 1,
-            "conditions": json.dumps({"session_id": 1})
-        }
-    },
-    {
-        "url": f"{base_url}/api/app/view/session/",
-        "params": {
-            "limit": 3,
-            "offset": 1,
-            "conditions": json.dumps({"user_id": 1})
-        }
-    },
-    {
-        "url": f"{base_url}/api/app/view/errorlog/",
-        "params": {
-            "limit": 3,
-            "offset": 1,
-            "conditions": json.dumps({"session_id": 1})
-        }
+  {
+    "url": f"{base_url}/api/app/view/user/",
+    "params": {
+      "limit": 2,
+      "offset": 1,
+      "conditions": json.dumps({"name": "aaaaaa"})
     }
+  },
+  {
+    "url": f"{base_url}/api/app/view/chat/",
+    "params": {
+      "limit": 3,
+      "offset": 1,
+      "conditions": json.dumps({"session_id": 1})
+    }
+  },
+  {
+    "url": f"{base_url}/api/app/view/session/",
+    "params": {
+      "limit": 3,
+      "offset": 1,
+      "conditions": json.dumps({"user_id": 1})
+    }
+  },
+  {
+    "url": f"{base_url}/api/app/view/errorlog/",
+    "params": {
+      "limit": 3,
+      "offset": 1,
+      "conditions": json.dumps({"session_id": 1})
+    }
+  }
 ]
 put_endpoints = [
   {
@@ -93,37 +132,43 @@ delete_endpoints = [
 # 各エンドポイントにPOSTリクエストを送信
 for endpoint in post_endpoints:
   try:
-    res = requests.post(endpoint["url"], json=endpoint["data"])
+    res = requests.post(endpoint["url"], json=endpoint["data"], headers=headers)
     print(f"URL: {endpoint['url']}")
     print(f"Status Code: {res.status_code}")
     print(f"Response: {res.text}")
     print("\n")
   except requests.exceptions.RequestException as e:
     print(f"Request to {endpoint['url']} failed: {e}")
+
+# 各エンドポイントにGETリクエストを送信
 for endpoint in get_endpoints:
   try:
-    res = requests.get(endpoint["url"], params=endpoint["params"])
+    res = requests.get(endpoint["url"], params=endpoint["params"], headers=headers)
     print(f"URL: {endpoint['url']}")
     print(f"Status Code: {res.status_code}")
     print(f"Response: {res.text}")
     print("\n")
   except requests.exceptions.RequestException as e:
     print(f"Request to {endpoint['url']} failed: {e}")
-# for endpoint in put_endpoints:
-#   try:
-#     res = requests.put(endpoint["url"], json=endpoint["data"])
-#     print(f"URL: {endpoint['url']}")
-#     print(f"Status Code: {res.status_code}")
-#     print(f"Response: {res.text}")
-#     print("\n")
-#   except requests.exceptions.RequestException as e:
-#     print(f"Request to {endpoint['url']} failed: {e}")
-# for endpoint in delete_endpoints:
-#   try:
-#     res = requests.delete(endpoint["url"])
-#     print(f"URL: {endpoint['url']}")
-#     print(f"Status Code: {res.status_code}")
-#     print(f"Response: {res.text}")
-#     print("\n")
-#   except requests.exceptions.RequestException as e:
-#     print(f"Request to {endpoint['url']} failed: {e}")
+
+# 各エンドポイントにPUTリクエストを送信
+for endpoint in put_endpoints:
+  try:
+    res = requests.put(endpoint["url"], json=endpoint["data"], headers=headers)
+    print(f"URL: {endpoint['url']}")
+    print(f"Status Code: {res.status_code}")
+    print(f"Response: {res.text}")
+    print("\n")
+  except requests.exceptions.RequestException as e:
+    print(f"Request to {endpoint['url']} failed: {e}")
+
+# 各エンドポイントにDELETEリクエストを送信
+for endpoint in delete_endpoints:
+  try:
+    res = requests.delete(endpoint["url"], headers=headers)
+    print(f"URL: {endpoint['url']}")
+    print(f"Status Code: {res.status_code}")
+    print(f"Response: {res.text}")
+    print("\n")
+  except requests.exceptions.RequestException as e:
+    print(f"Request to {endpoint['url']} failed: {e}")
