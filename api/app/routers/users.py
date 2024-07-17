@@ -1,7 +1,8 @@
 from fastapi import APIRouter
-from api.app.models import Users  # SQLModelモデルをインポート
+from api.app.models import Users
 from api.app.database.database import engine,add_db_record,select_table,update_record,delete_record
 from typing import Optional
+import json
 
 router = APIRouter()
 
@@ -20,8 +21,10 @@ async def create_users(user: Users):
   return user_data
 
 @router.get("/app/view/user/", response_model=list[Users])
-async def view_users(limit: Optional[int] = None, offset: Optional[int] = 0):
-  users = await select_table(engine,Users,offset,limit)
+async def view_users(conditions: Optional[str]  = None,limit: Optional[int] = None, offset: Optional[int] = 0):
+  if conditions != None:
+    conditions = json.loads(conditions)
+  users = await select_table(engine,Users,conditions=conditions, limit=limit, offset=offset)
   print(users)
   return users
 
@@ -33,6 +36,6 @@ async def update_users(user_id: int, updates: dict[str, str]):
 
 @router.delete("/app/delete/user/{user_id}/", response_model=dict)
 async def delete_user(user_id: int):
-    conditions = {"id": user_id}
-    result = await delete_record(engine, Users, conditions)
-    return result
+  conditions = {"id": user_id}
+  result = await delete_record(engine, Users, conditions)
+  return result

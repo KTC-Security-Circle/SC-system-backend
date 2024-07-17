@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from datetime import datetime
-from api.app.models import ErrorLog  # SQLModelモデルをインポート
+from api.app.models import ErrorLog
 from api.app.database.database import engine,add_db_record,select_table,update_record,delete_record
 from typing import Optional
+import json
 
 router = APIRouter()
 
@@ -20,8 +21,10 @@ async def create_error_log(errorlog: ErrorLog):
   return error_log_data
 
 @router.get("/app/view/errorlog/", response_model=list[ErrorLog])
-async def view_errorlog(limit: Optional[int] =None, offset: Optional[int] = 0):
-  errorlog = await select_table(engine,ErrorLog,offset,limit)
+async def view_errorlog(conditions: Optional[str]  = None,limit: Optional[int] =None, offset: Optional[int] = 0):
+  if conditions != None:
+    conditions = json.loads(conditions)
+  errorlog = await select_table(engine,ErrorLog,conditions=conditions, limit=limit, offset=offset)
   print(errorlog)
   return errorlog
 
@@ -33,6 +36,6 @@ async def update_errorlog(errorlog_id: int, updates: dict[str, str]):
 
 @router.delete("/app/delete/errorlog/{errorlog_id}/", response_model=dict)
 async def delete_errorlog(errorlog_id: int):
-    conditions = {"id": errorlog_id}
-    result = await delete_record(engine, ErrorLog, conditions)
-    return result
+  conditions = {"id": errorlog_id}
+  result = await delete_record(engine, ErrorLog, conditions)
+  return result

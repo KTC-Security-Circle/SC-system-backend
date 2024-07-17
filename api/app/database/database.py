@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from os.path import join, dirname
 from fastapi import HTTPException,Query
-from typing import Optional
+from typing import Optional, Any, Dict
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -47,11 +47,14 @@ async def add_db_record(engine,data):
       session_db.rollback()
       raise HTTPException(status_code=470, detail=f"エラーが発生しました: {str(e)}")
 
-async def select_table(engine, table,
+async def select_table(engine, table, conditions: Optional[Dict[str, Any]] = None,
 limit: Optional[int] = Query(None, description="Limit the number of results returned"),offset: Optional[int] = Query(0, description="Number of records to skip")):
   with Session(engine) as session:
     try:
       stmt = select(table)
+      if conditions != None:
+        for field, value in conditions.items():
+          stmt = stmt.where(getattr(table, field) == value)
       if offset:
           stmt = stmt.offset(offset)
       if limit:
@@ -96,3 +99,4 @@ async def delete_record(engine, model, conditions: dict):
     except Exception as e:
       session_db.rollback()
       raise HTTPException(status_code=472, detail=f"エラーが発生しました: {str(e)}")
+

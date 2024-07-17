@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from datetime import datetime
-from api.app.models import ChatLog  # SQLModelモデルをインポート
+from api.app.models import ChatLog
 from api.app.database.database import engine,add_db_record,select_table,update_record,delete_record
 from typing import Optional
+import json
 
 router = APIRouter()
 
@@ -22,10 +23,12 @@ async def create_chatlog(chatlog: ChatLog):
   return chat_log_data
 
 @router.get("/app/view/chat/", response_model=list[ChatLog])
-async def view_chatlog(limit: Optional[int] =None, offset: Optional[int] = 0):
-  chatlog = await select_table(engine,ChatLog,offset,limit)
-  print(chatlog)
-  return chatlog
+async def view_chatlog(conditions: Optional[str]  = None,limit: Optional[int] =None, offset: Optional[int] = 0):
+  if conditions != None:
+    conditions = json.loads(conditions)
+  chatlog_all = await select_table(engine, ChatLog, conditions=conditions, limit=limit, offset=offset)
+  print(chatlog_all)
+  return chatlog_all
 
 @router.put("/app/update/chat/{chat_id}/", response_model=ChatLog)
 async def update_chatlog(chat_id: int, updates: dict[str, str]):
@@ -35,6 +38,6 @@ async def update_chatlog(chat_id: int, updates: dict[str, str]):
 
 @router.delete("/app/delete/chat/{chat_id}/", response_model=dict)
 async def delete_chatlog(chat_id: int):
-    conditions = {"id": chat_id}
-    result = await delete_record(engine, ChatLog, conditions)
-    return result
+  conditions = {"id": chat_id}
+  result = await delete_record(engine, ChatLog, conditions)
+  return result
