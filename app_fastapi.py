@@ -1,14 +1,12 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from sqlmodel import SQLModel
 from api.app.database.database import get_engine
 from contextlib import asynccontextmanager
 
-engine = get_engine()
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print(engine)
+    engine = next(get_engine())
     SQLModel.metadata.create_all(engine)
     yield
     SQLModel.metadata.drop_all(engine)

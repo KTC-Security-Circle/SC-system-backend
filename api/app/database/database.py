@@ -10,6 +10,14 @@ load_dotenv(dotenv_path)
 
 
 def get_engine():
+    engine = _get_engine()
+    try:
+        yield engine
+    finally:
+        engine.dispose()
+
+
+def _get_engine():
     db_type = os.getenv("DB_TYPE")
     db_name = os.getenv("DB_NAME")
     db_user = os.getenv("DB_USER")
@@ -39,9 +47,6 @@ def get_engine():
         raise ValueError("Unsupported DB_TYPE. Use 'sqlite', 'postgresql', or 'mysql'.")
     engine = create_engine(database_url, echo=True)
     return engine
-
-
-engine = get_engine()
 
 
 async def add_db_record(engine, data):
