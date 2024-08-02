@@ -23,8 +23,12 @@ async def create_error_log(errorlog: ErrorLog):
     )
     await add_db_record(engine, error_log_data)
     print(
-        f"エラーが発生しました。\n\
-エラーID:{errorlog.id}\nエラー名:{errorlog.error_message}\n投稿日時:{errorlog.pub_data}\nセッションID:{errorlog.session_id}"
+        "エラーが発生しました。",
+        f"エラーID:{errorlog.id}",
+        f"エラー名:{errorlog.error_message}",
+        f"投稿日時:{errorlog.pub_data}",
+        f"セッションID:{errorlog.session_id}",
+        sep="\n",
     )
     return error_log_data
 
