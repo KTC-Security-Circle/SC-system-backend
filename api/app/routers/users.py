@@ -23,8 +23,13 @@ async def create_users(user: Users):
     )
     await add_db_record(engine, user_data)
     print(
-        f"新しいユーザーを登録します。\n\
-ユーザーID:{user.id}\nユーザー名:{user.name}\nE-mail:{user.email}\nパスワード:{user.password}\n権限情報:{user.authority}"
+        "新しいユーザーを登録します。",
+        f"ユーザーID:{user.id}",
+        f"ユーザー名:{user.name}",
+        f"E-mail:{user.email}",
+        f"パスワード:{user.password}",
+        f"権限情報:{user.authority}",
+        sep="\n",
     )
     return user_data
 
