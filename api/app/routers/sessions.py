@@ -23,8 +23,12 @@ async def create_sessions(session: Sessions):
     )
     await add_db_record(engine, session_data)
     print(
-        f"新しいセッションを登録します。\n\
-セッションID:{session.id}\nセッション名:{session.session_name}\n投稿日時:{session.pub_data}\nユーザーID:{session.user_id}"
+        "新しいセッションを登録します。",
+        f"セッションID:{session.id}",
+        f"セッション名:{session.session_name}",
+        f"投稿日時:{session.pub_data}",
+        f"ユーザーID:{session.user_id}",
+        sep="\n",
     )
     return session_data
 
