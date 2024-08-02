@@ -9,7 +9,9 @@ from api.app.database.database import (
     delete_record,
 )
 from typing import Optional
+from api.logger import getLogger
 
+logger = getLogger(__name__)
 router = APIRouter()
 
 
@@ -22,14 +24,11 @@ async def create_error_log(errorlog: ErrorLog, engine=Depends(get_engine)):
         session_id=errorlog.session_id,
     )
     await add_db_record(engine, error_log_data)
-    print(
-        "エラーが発生しました。",
-        f"エラーID:{errorlog.id}",
-        f"エラー名:{errorlog.error_message}",
-        f"投稿日時:{errorlog.pub_data}",
-        f"セッションID:{errorlog.session_id}",
-        sep="\n",
-    )
+    logger.error("エラーが発生しました。")
+    logger.error(f"エラーID:{errorlog.id}")
+    logger.error(f"エラー名:{errorlog.error_message}")
+    logger.error(f"投稿日時:{errorlog.pub_data}")
+    logger.error(f"セッションID:{errorlog.session_id}")
     return error_log_data
 
 
@@ -38,7 +37,7 @@ async def view_errorlog(
     limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
 ):
     errorlog = await select_table(engine, ErrorLog, offset, limit)
-    print(errorlog)
+    logger.debug(errorlog)
     return errorlog
 
 

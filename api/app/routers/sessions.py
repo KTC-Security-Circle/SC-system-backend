@@ -9,7 +9,9 @@ from api.app.database.database import (
     delete_record,
 )
 from typing import Optional
+from api.logger import getLogger
 
+logger = getLogger(__name__)
 router = APIRouter()
 
 
@@ -22,14 +24,11 @@ async def create_sessions(session: Sessions, engine=Depends(get_engine)):
         user_id=session.user_id,
     )
     await add_db_record(engine, session_data)
-    print(
-        "新しいセッションを登録します。",
-        f"セッションID:{session.id}",
-        f"セッション名:{session.session_name}",
-        f"投稿日時:{session.pub_data}",
-        f"ユーザーID:{session.user_id}",
-        sep="\n",
-    )
+    logger.info("新しいセッションを登録します。")
+    logger.info(f"セッションID:{session.id}")
+    logger.info(f"セッション名:{session.session_name}")
+    logger.info(f"投稿日時:{session.pub_data}")
+    logger.info(f"ユーザーID:{session.user_id}")
     return session_data
 
 
@@ -38,7 +37,7 @@ async def view_sessions(
     limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
 ):
     sessions = await select_table(engine, Sessions, offset, limit)
-    print(sessions)
+    logger.debug(sessions)
     return sessions
 
 

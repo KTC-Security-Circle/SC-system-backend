@@ -9,7 +9,9 @@ from api.app.database.database import (
     delete_record,
 )
 from typing import Optional
+from api.logger import getLogger
 
+logger = getLogger(__name__)
 router = APIRouter()
 
 
@@ -23,15 +25,12 @@ async def create_chatlog(chatlog: ChatLog, engine=Depends(get_engine)):
         session_id=chatlog.session_id,
     )
     await add_db_record(engine, chat_log_data)
-    print(
-        "新しいチャットを登録します。",
-        f"チャットID:{chatlog.id}",
-        f"チャット内容:{chatlog.message}",
-        f"ボットの返信:{chatlog.bot_reply}",
-        f"投稿日時:{chatlog.pub_data}",
-        f"セッションID:{chatlog.session_id}",
-        sep="\n",
-    )
+    logger.info("新しいチャットを登録します。")
+    logger.info(f"チャットID:{chatlog.id}")
+    logger.info(f"チャット内容:{chatlog.message}")
+    logger.info(f"ボットの返信:{chatlog.bot_reply}")
+    logger.info(f"投稿日時:{chatlog.pub_data}")
+    logger.info(f"セッションID:{chatlog.session_id}")
     return chat_log_data
 
 
@@ -40,7 +39,7 @@ async def view_chatlog(
     limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
 ):
     chatlog = await select_table(engine, ChatLog, offset, limit)
-    print(chatlog)
+    logger.debug(chatlog)
     return chatlog
 
 

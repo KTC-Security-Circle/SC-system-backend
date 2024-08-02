@@ -8,7 +8,9 @@ from api.app.database.database import (
     delete_record,
 )
 from typing import Optional
+from api.logger import getLogger
 
+logger = getLogger(__name__)
 router = APIRouter()
 
 
@@ -22,15 +24,11 @@ async def create_users(user: Users, engine=Depends(get_engine)):
         authority=user.authority,
     )
     await add_db_record(engine, user_data)
-    print(
-        "新しいユーザーを登録します。",
-        f"ユーザーID:{user.id}",
-        f"ユーザー名:{user.name}",
-        f"E-mail:{user.email}",
-        f"パスワード:{user.password}",
-        f"権限情報:{user.authority}",
-        sep="\n",
-    )
+    logger.info("新しいユーザーを登録します。")
+    logger.info(f"ユーザーID:{user.id}")
+    logger.info(f"ユーザー名:{user.name}")
+    logger.info(f"E-mail:{user.email}")
+    logger.info(f"権限情報:{user.authority}")
     return user_data
 
 
@@ -39,7 +37,7 @@ async def view_users(
     limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
 ):
     users = await select_table(engine, Users, offset, limit)
-    print(users)
+    logger.debug(users)
     return users
 
 

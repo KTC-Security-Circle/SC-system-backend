@@ -4,7 +4,9 @@ import os
 from os.path import join, dirname
 from fastapi import HTTPException, Query
 from typing import Optional
+from api.logger import getLogger
 
+logger = getLogger(__name__, "DEBUG")
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
@@ -26,12 +28,12 @@ def _get_engine():
     db_port = os.getenv("DB_PORT")
 
     # 環境変数のデバッグ出力
-    print(f"DB_TYPE: {db_type}")
-    print(f"DB_NAME: {db_name}")
-    print(f"DB_USER: {db_user}")
-    print(f"DB_PASSWORD: {db_password}")
-    print(f"DB_HOST: {db_host}")
-    print(f"DB_PORT: {db_port}")
+    logger.debug(f"{db_type=}")
+    logger.debug(f"{db_name=}")
+    logger.debug(f"{db_user=}")
+    logger.debug(f"{db_password=}")
+    logger.debug(f"{db_host=}")
+    logger.debug(f"{db_port=}")
 
     if db_type == "sqlite":
         database_url = f"{db_type}:///{db_name}"
@@ -55,7 +57,7 @@ async def add_db_record(engine, data):
             session_db.add(data)
             session_db.commit()
             session_db.refresh(data)
-            print(data)
+            logger.debug(data)
         except Exception as e:
             session_db.rollback()
             raise HTTPException(
