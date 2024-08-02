@@ -24,9 +24,13 @@ async def create_chatlog(chatlog: ChatLog):
     )
     await add_db_record(engine, chat_log_data)
     print(
-        f"新しいチャットを登録します。\n\
-チャットID:{chatlog.id}\nチャット内容:{chatlog.message}\nボットの返信:{chatlog.bot_reply}\n\
-投稿日時:{chatlog.pub_data}\nセッションID:{chatlog.session_id}"
+        "新しいチャットを登録します。",
+        f"チャットID:{chatlog.id}",
+        f"チャット内容:{chatlog.message}",
+        f"ボットの返信:{chatlog.bot_reply}",
+        f"投稿日時:{chatlog.pub_data}",
+        f"セッションID:{chatlog.session_id}",
+        sep="\n",
     )
     return chat_log_data
 
