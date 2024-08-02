@@ -5,27 +5,29 @@ from contextlib import asynccontextmanager
 
 engine = get_engine()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-  print(engine)
-  SQLModel.metadata.create_all(engine)
-  yield
-  SQLModel.metadata.drop_all(engine)
+    print(engine)
+    SQLModel.metadata.create_all(engine)
+    yield
+    SQLModel.metadata.drop_all(engine)
+
 
 # FastAPIアプリケーションのインスタンスを作成
 tags_metadata = [
-  {
-    "name": "root",
-    "description": "ルートエンドポイント",
-  },
-  {
-    "name": "api",
-    "description": "運用用APIのエンドポイント",
-  },
-  {
-    "name": "demo",
-    "description": "デモ用APIのエンドポイント",
-  },
+    {
+        "name": "root",
+        "description": "ルートエンドポイント",
+    },
+    {
+        "name": "api",
+        "description": "運用用APIのエンドポイント",
+    },
+    {
+        "name": "demo",
+        "description": "デモ用APIのエンドポイント",
+    },
 ]
 
-app = FastAPI(openapi_tags=tags_metadata,lifespan=lifespan)
+app = FastAPI(openapi_tags=tags_metadata, lifespan=lifespan)

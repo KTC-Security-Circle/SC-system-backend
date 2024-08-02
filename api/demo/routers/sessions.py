@@ -7,6 +7,7 @@ router = APIRouter()
 
 engine = get_engine()
 
+
 @router.post("/session/", response_model=Sessions)
 async def create_sessions(session: Sessions):
     session_data = Sessions(

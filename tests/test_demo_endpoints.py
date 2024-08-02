@@ -8,20 +8,37 @@ base_url = "http://localhost:7071"
 endpoints = [
     {
         "url": f"{base_url}/demo/user/",
-        "data": {"id": 2, "name": "菅田将暉", "email": "exsample@num.jp", "password": "12345678", "authority": "admin"}
+        "data": {
+            "id": 2,
+            "name": "菅田将暉",
+            "email": "exsample@num.jp",
+            "password": "12345678",
+            "authority": "admin",
+        },
     },
     {
         "url": f"{base_url}/demo/chat/",
-        "data": {"id": 3, "message": "テスト用テキスト", "bot_reply": "テスト用返信テキスト", "pub_data": None, "session_id": 2}
+        "data": {
+            "id": 3,
+            "message": "テスト用テキスト",
+            "bot_reply": "テスト用返信テキスト",
+            "pub_data": None,
+            "session_id": 2,
+        },
     },
     {
         "url": f"{base_url}/demo/session/",
-        "data": {"id": 3, "session_name": "Python", "pub_data": None, "user_id": 2}
+        "data": {"id": 3, "session_name": "Python", "pub_data": None, "user_id": 2},
     },
     {
         "url": f"{base_url}/demo/errorlog/",
-        "data": {"id": 3, "error_message": "テキストエラー", "pub_data": None, "session_id": 2}
-    }
+        "data": {
+            "id": 3,
+            "error_message": "テキストエラー",
+            "pub_data": None,
+            "session_id": 2,
+        },
+    },
 ]
 
 # 各エンドポイントにPOSTリクエストを送信

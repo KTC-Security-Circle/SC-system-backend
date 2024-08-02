@@ -6,6 +6,7 @@ router = APIRouter()
 
 engine = get_engine()
 
+
 @router.post("/user/", response_model=Users)
 async def create_test_user(user: Users):
     user_data = Users(
