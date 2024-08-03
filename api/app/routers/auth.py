@@ -3,9 +3,11 @@ from ..schemas.token import Token
 
 router = APIRouter()
 
+
 @router.post("/token", response_model=Token)
 async def login():
     return {"access_token": "dummy_token", "token_type": "bearer"}
+
 
 @router.get("/users/me")
 async def read_users_me():
