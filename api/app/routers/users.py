@@ -7,6 +7,7 @@ from api.app.database.database import (
     update_record,
     delete_record,
 )
+from api.app.security.jwt_token import get_current_user
 from typing import Optional
 from api.logger import getLogger
 
@@ -15,7 +16,10 @@ router = APIRouter()
 
 
 @router.post("/app/input/user/", response_model=Users)
-async def create_users(user: Users, engine=Depends(get_engine)):
+async def create_users(
+    user: Users,
+    engine=Depends(get_engine)
+):
     user_data = Users(
         id=user.id,
         name=user.name,
@@ -34,7 +38,9 @@ async def create_users(user: Users, engine=Depends(get_engine)):
 
 @router.get("/app/view/user/", response_model=list[Users])
 async def view_users(
-    limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
+    limit: Optional[int] = None,
+    offset: Optional[int] = 0,
+    engine=Depends(get_engine)
 ):
     users = await select_table(engine, Users, offset, limit)
     logger.debug(users)
@@ -43,7 +49,8 @@ async def view_users(
 
 @router.put("/app/update/user/{user_id}/", response_model=Users)
 async def update_users(
-    user_id: int, updates: dict[str, str], engine=Depends(get_engine)
+    user_id: int, updates: dict[str, str],
+    engine=Depends(get_engine),
 ):
     conditions = {"id": user_id}
     updated_record = await update_record(engine, Users, conditions, updates)
@@ -51,7 +58,11 @@ async def update_users(
 
 
 @router.delete("/app/delete/user/{user_id}/", response_model=dict)
-async def delete_user(user_id: int, engine=Depends(get_engine)):
+async def delete_user(
+    user_id: int,
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
+):
     conditions = {"id": user_id}
     result = await delete_record(engine, Users, conditions)
     return result

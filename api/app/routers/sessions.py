@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
-from api.app.models import Sessions  # SQLModelモデルをインポート
+from api.app.models import Users, Sessions  # SQLModelモデルをインポート
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -8,6 +8,7 @@ from api.app.database.database import (
     update_record,
     delete_record,
 )
+from api.app.security.jwt_token import get_current_user
 from typing import Optional
 from api.logger import getLogger
 
@@ -34,7 +35,9 @@ async def create_sessions(session: Sessions, engine=Depends(get_engine)):
 
 @router.get("/app/view/session/", response_model=list[Sessions])
 async def view_sessions(
-    limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
+    limit: Optional[int] = None,
+    offset: Optional[int] = 0,
+    engine=Depends(get_engine)
 ):
     sessions = await select_table(engine, Sessions, offset, limit)
     logger.debug(sessions)
@@ -43,7 +46,9 @@ async def view_sessions(
 
 @router.put("/app/update/session/{session_id}/", response_model=Sessions)
 async def update_sessions(
-    session_id: int, updates: dict[str, str], engine=Depends(get_engine)
+    session_id: int,
+    updates: dict[str, str],
+    engine=Depends(get_engine)
 ):
     conditions = {"id": session_id}
     updated_record = await update_record(engine, Sessions, conditions, updates)
@@ -51,7 +56,11 @@ async def update_sessions(
 
 
 @router.delete("/app/delete/session/{session_id}/", response_model=dict)
-async def delete_session(session_id: int, engine=Depends(get_engine)):
+async def delete_session(
+    session_id: int,
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
+):
     conditions = {"id": session_id}
     result = await delete_record(engine, Sessions, conditions)
     return result

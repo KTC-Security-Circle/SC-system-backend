@@ -67,7 +67,7 @@ async def authenticate_user(db: Session, email: str, password: str):
     return None
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_engine())):
+def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -80,10 +80,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await get_user_by_email(db, email)
-    if user is None:
-        raise credentials_exception
-    return user
+
+    with Session(get_engine) as db:
+        user = get_user_by_email(db, email)
+        if user is None:
+            raise credentials_exception
+        return user
 
 
 async def get_current_active_user(current_user: Users = Depends(get_current_user)):

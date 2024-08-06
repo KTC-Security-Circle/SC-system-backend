@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
-from api.app.models import ErrorLog  # SQLModelモデルをインポート
+from api.app.models import Users, ErrorLog  # SQLModelモデルをインポート
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -8,6 +8,7 @@ from api.app.database.database import (
     update_record,
     delete_record,
 )
+from api.app.security.jwt_token import get_current_user
 from typing import Optional
 from api.logger import getLogger
 
@@ -16,7 +17,10 @@ router = APIRouter()
 
 
 @router.post("/app/input/errorlog/", response_model=ErrorLog)
-async def create_error_log(errorlog: ErrorLog, engine=Depends(get_engine)):
+async def create_error_log(
+    errorlog: ErrorLog,
+    engine=Depends(get_engine)
+):
     error_log_data = ErrorLog(
         id=errorlog.id,
         error_message=errorlog.error_message,
@@ -34,7 +38,9 @@ async def create_error_log(errorlog: ErrorLog, engine=Depends(get_engine)):
 
 @router.get("/app/view/errorlog/", response_model=list[ErrorLog])
 async def view_errorlog(
-    limit: Optional[int] = None, offset: Optional[int] = 0, engine=Depends(get_engine)
+    limit: Optional[int] = None,
+    offset: Optional[int] = 0,
+    engine=Depends(get_engine)
 ):
     errorlog = await select_table(engine, ErrorLog, offset, limit)
     logger.debug(errorlog)
@@ -43,7 +49,9 @@ async def view_errorlog(
 
 @router.put("/app/update/errorlog/{errorlog_id}/", response_model=ErrorLog)
 async def update_errorlog(
-    errorlog_id: int, updates: dict[str, str], engine=Depends(get_engine)
+    errorlog_id: int,
+    updates: dict[str, str],
+    engine=Depends(get_engine)
 ):
     conditions = {"id": errorlog_id}
     updated_record = await update_record(engine, ErrorLog, conditions, updates)
@@ -51,7 +59,11 @@ async def update_errorlog(
 
 
 @router.delete("/app/delete/errorlog/{errorlog_id}/", response_model=dict)
-async def delete_errorlog(errorlog_id: int, engine=Depends(get_engine)):
+async def delete_errorlog(
+    errorlog_id: int,
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
+):
     conditions = {"id": errorlog_id}
     result = await delete_record(engine, ErrorLog, conditions)
     return result
