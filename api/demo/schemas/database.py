@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
 from typing import Optional
 
+
 class ErrorLog(BaseModel):
     id: int
     error_message: str
@@ -18,6 +19,7 @@ class ErrorLog(BaseModel):
             }
         }
     }
+
 
 class ChatLog(BaseModel):
     id: int
@@ -38,6 +40,7 @@ class ChatLog(BaseModel):
         }
     }
 
+
 class Sessions(BaseModel):
     id: int
     session_name: str
@@ -54,6 +57,7 @@ class Sessions(BaseModel):
             }
         }
     }
+
 
 class Users(BaseModel):
     id: int
