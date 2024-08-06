@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 from api.app.models import Users
-from api.app.database.database import engine
+from api.app.database.database import get_engine
 from typing import Optional
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -67,7 +67,7 @@ async def authenticate_user(db: Session, email: str, password: str):
     return None
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(engine)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_engine())):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
