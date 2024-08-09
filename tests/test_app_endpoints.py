@@ -76,7 +76,7 @@ get_endpoints = [
         "params": {
             "limit": 3,
             "offset": 1,
-            "conditions": json.dumps({"session_id": 1})
+            "conditions": json.dumps({"session_id": 2})
         }
     },
     {
@@ -84,7 +84,7 @@ get_endpoints = [
         "params": {
             "limit": 3,
             "offset": 1,
-            "conditions": json.dumps({"user_id": 1})
+            "conditions": json.dumps({"user_id": 2})
         }
     },
     {
@@ -92,7 +92,7 @@ get_endpoints = [
         "params": {
             "limit": 3,
             "offset": 1,
-            "conditions": json.dumps({"session_id": 1})
+            "conditions": json.dumps({"session_id": 2})
         }
     }
 ]

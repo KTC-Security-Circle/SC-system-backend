@@ -8,7 +8,7 @@ router = APIRouter()
 engine = get_engine()
 
 
-@router.post("/errorlog/", response_model=ErrorLog)
+@router.post("/errorlog/", response_model=ErrorLog, tags=["error_log"])
 async def create_error_log(errorlog: ErrorLog):
     error_log_data = ErrorLog(
         id=errorlog.id,

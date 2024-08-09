@@ -16,7 +16,7 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/errorlog/", response_model=ErrorLog)
+@router.post("/app/input/errorlog/", response_model=ErrorLog, tags=["errorlog_post"])
 async def create_error_log(
     errorlog: ErrorLog,
     engine=Depends(get_engine)
@@ -36,7 +36,7 @@ async def create_error_log(
     return error_log_data
 
 
-@router.get("/app/view/errorlog/", response_model=list[ErrorLog])
+@router.get("/app/view/errorlog/", response_model=list[ErrorLog], tags=["errorlog_get"])
 async def view_errorlog(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
@@ -47,7 +47,7 @@ async def view_errorlog(
     return errorlog
 
 
-@router.put("/app/update/errorlog/{errorlog_id}/", response_model=ErrorLog)
+@router.put("/app/update/errorlog/{errorlog_id}/", response_model=ErrorLog, tags=["errorlog_put"])
 async def update_errorlog(
     errorlog_id: int,
     updates: dict[str, str],
@@ -58,7 +58,7 @@ async def update_errorlog(
     return updated_record
 
 
-@router.delete("/app/delete/errorlog/{errorlog_id}/", response_model=dict)
+@router.delete("/app/delete/errorlog/{errorlog_id}/", response_model=dict, tags=["errorlog_delete"])
 async def delete_errorlog(
     errorlog_id: int,
     engine=Depends(get_engine),

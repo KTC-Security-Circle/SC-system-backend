@@ -8,7 +8,7 @@ from api.app.schemas.token import Token, LoginData
 router = APIRouter()
 
 
-@router.post("/signup/", response_model=Users)
+@router.post("/signup/", response_model=Users, tags=["signup"])
 async def signup(user: Users, engine=Depends(get_engine)):
     with Session(engine) as session:
         existing_user = session.exec(
@@ -24,7 +24,7 @@ async def signup(user: Users, engine=Depends(get_engine)):
         return user
 
 
-@router.post("/login/", response_model=Token)
+@router.post("/login/", response_model=Token, tags=["login"])
 async def login(user: LoginData, engine=Depends(get_engine)):
     with Session(engine) as session:
         db_user = session.exec(select(Users).where(

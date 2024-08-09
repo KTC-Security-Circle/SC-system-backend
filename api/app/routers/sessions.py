@@ -16,7 +16,7 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/session/", response_model=Sessions)
+@router.post("/app/input/session/", response_model=Sessions, tags=["sessions_post"])
 async def create_sessions(session: Sessions, engine=Depends(get_engine)):
     session_data = Sessions(
         id=session.id,
@@ -33,7 +33,7 @@ async def create_sessions(session: Sessions, engine=Depends(get_engine)):
     return session_data
 
 
-@router.get("/app/view/session/", response_model=list[Sessions])
+@router.get("/app/view/session/", response_model=list[Sessions], tags=["sessions_get"])
 async def view_sessions(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
@@ -44,7 +44,7 @@ async def view_sessions(
     return sessions
 
 
-@router.put("/app/update/session/{session_id}/", response_model=Sessions)
+@router.put("/app/update/session/{session_id}/", response_model=Sessions, tags=["sessions_put"])
 async def update_sessions(
     session_id: int,
     updates: dict[str, str],
@@ -55,7 +55,7 @@ async def update_sessions(
     return updated_record
 
 
-@router.delete("/app/delete/session/{session_id}/", response_model=dict)
+@router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["sessions_delete"])
 async def delete_session(
     session_id: int,
     engine=Depends(get_engine),

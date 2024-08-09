@@ -5,6 +5,7 @@ from os.path import join, dirname
 from fastapi import HTTPException, Query
 from typing import Optional
 from api.logger import getLogger
+from api.app.models import Users
 
 logger = getLogger(__name__, "DEBUG")
 dotenv_path = join(dirname(__file__), ".env")
@@ -90,7 +91,12 @@ async def select_table(
             )
 
 
-async def update_record(engine, model, conditions: dict, updates: dict):
+async def update_record(
+    engine,
+    model,
+    conditions: dict,
+    updates: dict
+):
     with Session(engine) as session_db:
         try:
             stmt = select(model)
@@ -112,7 +118,11 @@ async def update_record(engine, model, conditions: dict, updates: dict):
             )
 
 
-async def delete_record(engine, model, conditions: dict):
+async def delete_record(
+    engine,
+    model,
+    conditions: dict
+):
     with Session(engine) as session_db:
         try:
             stmt = select(model)
@@ -121,6 +131,10 @@ async def delete_record(engine, model, conditions: dict):
             result = session_db.exec(stmt).one_or_none()
             if not result:
                 raise HTTPException(status_code=404, detail="レコードが見つかりません")
+            # レコードの所有者チェック
+            # if hasattr(result, 'user_id') and result.user_id != current_user.id:
+            #     raise HTTPException(
+            #         status_code=403, detail="このレコードを削除する権限がありません")
             session_db.delete(result)
             session_db.commit()
             return {"detail": "レコードが正常に削除されました"}

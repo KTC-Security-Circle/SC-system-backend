@@ -16,7 +16,7 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/chat/", response_model=ChatLog)
+@router.post("/app/input/chat/", response_model=ChatLog, tags=["chat_post"])
 async def create_chatlog(
     chatlog: ChatLog,
     engine=Depends(get_engine)
@@ -38,7 +38,7 @@ async def create_chatlog(
     return chat_log_data
 
 
-@router.get("/app/view/chat/", response_model=list[ChatLog])
+@router.get("/app/view/chat/", response_model=list[ChatLog], tags=["chat_get"])
 async def view_chatlog(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
@@ -49,7 +49,7 @@ async def view_chatlog(
     return chatlog
 
 
-@router.put("/app/update/chat/{chat_id}/", response_model=ChatLog)
+@router.put("/app/update/chat/{chat_id}/", response_model=ChatLog, tags=["chat_put"])
 async def update_chatlog(
     chat_id: int,
     updates: dict[str, str],
@@ -60,7 +60,7 @@ async def update_chatlog(
     return updated_record
 
 
-@router.delete("/app/delete/chat/{chat_id}/", response_model=dict)
+@router.delete("/app/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
 async def delete_chatlog(
     chat_id: int,
     engine=Depends(get_engine),

@@ -15,7 +15,7 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/user/", response_model=Users)
+@router.post("/app/input/user/", response_model=Users, tags=["users_post"])
 async def create_users(
     user: Users,
     engine=Depends(get_engine)
@@ -36,7 +36,7 @@ async def create_users(
     return user_data
 
 
-@router.get("/app/view/user/", response_model=list[Users])
+@router.get("/app/view/user/", response_model=list[Users], tags=["users_get"])
 async def view_users(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
@@ -47,7 +47,7 @@ async def view_users(
     return users
 
 
-@router.put("/app/update/user/{user_id}/", response_model=Users)
+@router.put("/app/update/user/{user_id}/", response_model=Users, tags=["users_put"])
 async def update_users(
     user_id: int, updates: dict[str, str],
     engine=Depends(get_engine),
@@ -57,7 +57,7 @@ async def update_users(
     return updated_record
 
 
-@router.delete("/app/delete/user/{user_id}/", response_model=dict)
+@router.delete("/app/delete/user/{user_id}/", response_model=dict, tags=["users_delete"])
 async def delete_user(
     user_id: int,
     engine=Depends(get_engine),

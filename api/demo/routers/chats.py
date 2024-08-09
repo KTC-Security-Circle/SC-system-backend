@@ -8,7 +8,7 @@ router = APIRouter()
 engine = get_engine()
 
 
-@router.post("/chat/", response_model=ChatLog)
+@router.post("/chat/", response_model=ChatLog, tags=["chat"])
 async def create_chatlog(chatlog: ChatLog):
     chat_log_data = ChatLog(
         id=chatlog.id,
