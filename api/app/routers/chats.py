@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime
 from api.app.models import Users, ChatLog  # SQLModelモデルをインポート
 from api.app.database.database import (
@@ -11,6 +11,7 @@ from api.app.database.database import (
 from api.app.security.jwt_token import get_current_user
 from typing import Optional
 from api.logger import getLogger
+import json
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -40,11 +41,17 @@ async def create_chatlog(
 
 @router.get("/app/view/chat/", response_model=list[ChatLog], tags=["chat_get"])
 async def view_chatlog(
+    conditions: Optional[str] = Query(None, description="条件を含むJSON文字列"),
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine)
 ):
-    chatlog = await select_table(engine, ChatLog, offset, limit)
+    try:
+        conditions_dict = json.loads(conditions) if conditions else {}
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=400, detail="Invalid JSON format in conditions")
+    chatlog = await select_table(engine, ChatLog, conditions_dict, offset=offset, limit=limit)
     logger.debug(chatlog)
     return chatlog
 

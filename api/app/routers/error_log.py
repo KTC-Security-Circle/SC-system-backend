@@ -38,11 +38,12 @@ async def create_error_log(
 
 @router.get("/app/view/errorlog/", response_model=list[ErrorLog], tags=["errorlog_get"])
 async def view_errorlog(
+    conditions: Optional[dict] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine)
 ):
-    errorlog = await select_table(engine, ErrorLog, offset, limit)
+    errorlog = await select_table(engine, ErrorLog, conditions,offset, limit)
     logger.debug(errorlog)
     return errorlog
 

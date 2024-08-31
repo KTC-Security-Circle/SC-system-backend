@@ -69,7 +69,8 @@ async def add_db_record(engine, data):
 
 async def select_table(
     engine,
-    table,
+    model,
+    conditions: Optional[dict],
     limit: Optional[int] = Query(
         None, description="Limit the number of results returned"
     ),
@@ -77,7 +78,10 @@ async def select_table(
 ):
     with Session(engine) as session:
         try:
-            stmt = select(table)
+            stmt = select(model)
+            if conditions:
+                for field, value in conditions.items():
+                    stmt = stmt.where(getattr(model, field) == value)
             if offset:
                 stmt = stmt.offset(offset)
             if limit:

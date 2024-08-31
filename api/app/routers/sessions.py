@@ -35,11 +35,12 @@ async def create_sessions(session: Sessions, engine=Depends(get_engine)):
 
 @router.get("/app/view/session/", response_model=list[Sessions], tags=["sessions_get"])
 async def view_sessions(
+    conditions: Optional[dict] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine)
 ):
-    sessions = await select_table(engine, Sessions, offset, limit)
+    sessions = await select_table(engine, Sessions, conditions, offset, limit)
     logger.debug(sessions)
     return sessions
 

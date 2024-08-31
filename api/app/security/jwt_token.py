@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from api.app.models import Users
 from api.app.database.database import get_engine
@@ -35,7 +36,22 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+def create_jwt_payload(user: Users) -> dict:
+    """
+    JWTペイロードを生成する関数。ユーザーIDとメールアドレスを含む。
+    他の情報を追加したい場合はここに含める。
+    """
+    return {
+        "sub": user.email,
+        "user_id": user.id
+    }
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """
+    アクセストークンを作成する関数。
+    デフォルトの有効期限は環境変数で設定されるが、明示的な期限を渡すこともできる。
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now() + expires_delta
@@ -76,6 +92,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
+        user_id: int = payload.get("user_id")  # 将来的な利用のために取得
         if email is None:
             raise credentials_exception
     except JWTError:

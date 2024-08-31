@@ -38,11 +38,12 @@ async def create_users(
 
 @router.get("/app/view/user/", response_model=list[Users], tags=["users_get"])
 async def view_users(
+    conditions: Optional[dict] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine)
 ):
-    users = await select_table(engine, Users, offset, limit)
+    users = await select_table(engine, Users, conditions, offset, limit)
     logger.debug(users)
     return users
 
