@@ -6,3 +6,7 @@ azure-functions
 fastapi
 uvicorn
 pydantic
+sqlmodel
+python-dotenv
+jose
+passlib
