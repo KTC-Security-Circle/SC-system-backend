@@ -19,14 +19,14 @@ router = APIRouter()
 
 
 @router.post("/app/input/user/", response_model=UserDTO, tags=["users_post"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def create_users(
     user: Users,
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     hashed_password = get_password_hash(user.password)
     user_data = Users(
-        id=user.id,
         name=user.name,
         email=user.email,
         password=hashed_password,  # ここでパスワードがハッシュされていることを確認
@@ -39,15 +39,17 @@ async def create_users(
     logger.info(f"E-mail:{user.email}")
     logger.info(f"権限情報:{user.authority}")
 
-    return UserDTO(
+    user_dto = UserDTO(
         id=user_data.id,
         name=user_data.name,
         email=user_data.email,
         authority=user_data.authority
     )
+    return user_dto
 
 
 @router.get("/user/me", response_model=UserDTO, tags=["users_get"])
+@role_required(Role.ADMIN)
 async def get_me(current_user: Users = Depends(get_current_user)):
     me_dto = UserDTO(
         id=current_user.id,
@@ -62,18 +64,37 @@ async def get_me(current_user: Users = Depends(get_current_user)):
 @role_required(Role.ADMIN)  # admin権限が必要
 async def view_users(
     name: Optional[str] = None,
+    name_like: Optional[str] = None,  # 名前の部分一致フィルタ
     email: Optional[EmailStr] = None,
+    order_by: Optional[str] = None,  # ソート基準のフィールド名
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine)
 ):
     conditions = {}
+    like_conditions = {}
+
     if name:
         conditions["name"] = name
+
+    if name_like:
+        like_conditions["name"] = name_like
+
     if email:
         conditions["email"] = email
-    users = await select_table(engine, Users, conditions, offset, limit)
+
+    users = await select_table(
+        engine,
+        Users,
+        conditions,
+        like_conditions=like_conditions,
+        offset=offset,
+        limit=limit,
+        order_by=order_by
+    )
+
     logger.debug(users)
+
     user_dto_list = [
         UserDTO(
             id=user.id,
@@ -83,7 +104,9 @@ async def view_users(
         )
         for user in users
     ]
+
     return user_dto_list
+
 
 
 @router.put("/app/update/user/{user_id}/", response_model=UserDTO, tags=["users_put"])

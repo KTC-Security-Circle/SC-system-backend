@@ -11,7 +11,9 @@ from passlib.context import CryptContext
 from dotenv import load_dotenv
 from os.path import join, dirname
 import os
+from api.logger import getLogger
 
+logger = getLogger(__name__)
 # .envファイルを読み込む
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -34,18 +36,6 @@ else:
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-def create_jwt_payload(user: Users) -> dict:
-    """
-    JWTペイロードを生成する関数。ユーザーIDとメールアドレスを含む。
-    他の情報を追加したい場合はここに含める。
-    """
-    return {
-        "sub": user.email,
-        "user_id": user.id
-    }
-
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """
@@ -83,7 +73,8 @@ async def authenticate_user(db: Session, email: str, password: str):
     return None
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
+def get_current_user(token: str = Depends(oauth2_scheme), engine=Depends(get_engine)) -> Users:
+    logger.debug(f"Received token: {token}")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -93,14 +84,23 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         user_id: str = payload.get("user_id")
+        logger.debug(f"Decoded token: email={email}, user_id={user_id}")
         if email is None or user_id is None:
+            logger.error("Email or user_id is None")
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+        logger.error(f"JWT decoding error: {str(e)}")
         raise credentials_exception
 
-    with Session(get_engine()) as db:
-        user = db.exec(select(Users).where(
-            Users.id == user_id, Users.email == email)).first()
-        if user is None:
-            raise credentials_exception
-        return user
+    try:
+        with Session(engine) as db:
+            user = db.exec(select(Users).where(
+                Users.id == user_id, Users.email == email)).first()
+            logger.debug(f"Retrieved user: {user}")
+            if user is None:
+                logger.error("User not found")
+                raise credentials_exception
+            return user
+    except Exception as e:
+        logger.error(f"Error retrieving user: {str(e)}")
+        raise credentials_exception

@@ -84,21 +84,35 @@ async def add_db_record(engine, data):
 async def select_table(
     engine,
     model,
-    conditions: Optional[dict],
+    conditions: Optional[dict] = None,
+    like_conditions: Optional[dict] = None,  # LIKE条件を追加
     limit: Optional[int] = Query(
-        None, description="Limit the number of results returned"
-    ),
+        None, description="Limit the number of results returned"),
     offset: Optional[int] = Query(0, description="Number of records to skip"),
+    order_by: Optional[str] = None  # ORDER BY をサポート
 ):
     with Session(engine) as session:
         stmt = select(model)
+
+        # 等価条件の追加
         if conditions:
             for field, value in conditions.items():
                 stmt = stmt.where(getattr(model, field) == value)
+
+        # LIKE条件の追加
+        if like_conditions:
+            for field, pattern in like_conditions.items():
+                stmt = stmt.where(getattr(model, field).like(f"%{pattern}%"))
+
+        # ORDER BY の追加
+        if order_by:
+            stmt = stmt.order_by(getattr(model, order_by))
+
         if offset:
             stmt = stmt.offset(offset)
         if limit:
             stmt = stmt.limit(limit)
+
         result = session.exec(stmt)
         rows = result.all()
         return rows

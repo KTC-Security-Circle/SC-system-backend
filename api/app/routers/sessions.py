@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from api.app.models import Users, Sessions  # SQLModelモデルをインポート
+from api.app.dto import SessionDTO
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -9,6 +10,7 @@ from api.app.database.database import (
     delete_record,
 )
 from api.app.security.jwt_token import get_current_user
+from api.app.role import Role, role_required
 from typing import Optional
 from api.logger import getLogger
 
@@ -16,36 +18,84 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/session/", response_model=Sessions, tags=["sessions_post"])
-async def create_sessions(session: Sessions, engine=Depends(get_engine)):
+@router.post("/app/input/session/", response_model=SessionDTO, tags=["sessions_post"])
+@role_required(Role.ADMIN)
+async def create_sessions(
+    session: Sessions,
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
+    ):
     session_data = Sessions(
-        id=session.id,
         session_name=session.session_name,
         pub_data=datetime.now(),
-        user_id=session.user_id,
+        user_id=current_user.id,  # 現在のユーザーIDを使用
     )
     await add_db_record(engine, session_data)
     logger.info("新しいセッションを登録します。")
-    logger.info(f"セッションID:{session.id}")
-    logger.info(f"セッション名:{session.session_name}")
-    logger.info(f"投稿日時:{session.pub_data}")
-    logger.info(f"ユーザーID:{session.user_id}")
-    return session_data
+    logger.info(f"セッションID:{session_data.id}")
+    logger.info(f"セッション名:{session_data.session_name}")
+    logger.info(f"投稿日時:{session_data.pub_data}")
+    logger.info(f"ユーザーID:{session_data.user_id}")
+    session_dto = SessionDTO(
+        id=session_data.id,
+        session_name=session_data.session_name,
+        pub_data=session_data.pub_data,
+        user_id=session_data.user_id
+    )
+    return session_dto
 
 
-@router.get("/app/view/session/", response_model=list[Sessions], tags=["sessions_get"])
+@router.get("/app/view/session/", response_model=list[SessionDTO], tags=["sessions_get"])
+@role_required(Role.ADMIN)  # admin権限が必要
 async def view_sessions(
-    conditions: Optional[dict] = None,
+    session_name: Optional[str] = None,
+    session_name_like: Optional[str] = None,  # セッション名の部分一致フィルタ
+    user_id: Optional[int] = None,
+    order_by: Optional[str] = None,  # ソート基準のフィールド名
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine)
 ):
-    sessions = await select_table(engine, Sessions, conditions, offset, limit)
+    conditions = {}
+    like_conditions = {}
+
+    if session_name:
+        conditions["session_name"] = session_name
+
+    if session_name_like:
+        like_conditions["session_name"] = session_name_like
+
+    if user_id:
+        conditions["user_id"] = user_id
+
+    sessions = await select_table(
+        engine,
+        Sessions,
+        conditions,
+        like_conditions=like_conditions,
+        offset=offset,
+        limit=limit,
+        order_by=order_by
+    )
+
     logger.debug(sessions)
-    return sessions
+
+    session_dto_list = [
+        SessionDTO(
+            id=session.id,
+            session_name=session.session_name,
+            pub_data=session.pub_data,
+            user_id=session.user_id
+        )
+        for session in sessions
+    ]
+
+    return session_dto_list
 
 
-@router.put("/app/update/session/{session_id}/", response_model=Sessions, tags=["sessions_put"])
+
+@router.put("/app/update/session/{session_id}/", response_model=SessionDTO, tags=["sessions_put"])
+@role_required(Role.ADMIN)  # admin権限が必要
 async def update_sessions(
     session_id: int,
     updates: dict[str, str],
@@ -53,15 +103,33 @@ async def update_sessions(
 ):
     conditions = {"id": session_id}
     updated_record = await update_record(engine, Sessions, conditions, updates)
-    return updated_record
+    updated_session_dto = SessionDTO(
+        id=updated_record.id,
+        session_name=updated_record.session_name,
+        pub_data=updated_record.pub_data,
+        user_id=updated_record.user_id
+    )
+    return updated_session_dto
 
 
 @router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["sessions_delete"])
+@role_required(Role.ADMIN)  # admin権限が必要
 async def delete_session(
     session_id: int,
     engine=Depends(get_engine),
     current_user: Users = Depends(get_current_user)
 ):
+    # 削除対象のセッションを取得
     conditions = {"id": session_id}
+    session_to_delete = await select_table(engine, Sessions, conditions)
+
+    if not session_to_delete:
+        raise HTTPException(status_code=404, detail="セッションが見つかりません")
+
+    # セッションが現在のユーザーによって作成されたかを確認
+    if session_to_delete[0].user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="このセッションを削除する権限がありません")
+
+    # 削除を実行
     result = await delete_record(engine, Sessions, conditions)
     return result

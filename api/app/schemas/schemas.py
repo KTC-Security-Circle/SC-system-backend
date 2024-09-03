@@ -5,7 +5,7 @@ from typing import Optional
 
 
 class Users(BaseModel):
-    id: int = Field(..., title="ユーザID", description="ユーザを一意に識別するためのID")
+    id: Optional[str] = Field(..., title="ユーザID", description="ユーザを一意に識別するためのID")
     name: str = Field(..., max_length=150, title="名前", description="ユーザの名前")
     email: EmailStr = Field(..., title="メールアドレス", description="ユーザのメールアドレス")
     password: str = Field(..., min_length=8, max_length=12,

@@ -5,7 +5,7 @@ from pydantic import EmailStr
 
 
 class UserDTO(SQLModel):
-    id: str
+    id: Optional[str]
     name: str
     email: EmailStr
     authority: str
@@ -22,7 +22,7 @@ class UserDTO(SQLModel):
 
 
 class ChatLogDTO(SQLModel):
-    id: int
+    id: Optional[int]
     message: str
     bot_reply: Optional[str] = None
     pub_data: Optional[datetime] = None
@@ -41,10 +41,10 @@ class ChatLogDTO(SQLModel):
 
 
 class SessionDTO(SQLModel):
-    id: int
+    id: Optional[int]
     session_name: str
     pub_data: Optional[datetime] = None
-    user_id: int
+    user_id: str
 
     class Config:
         schema_extra = {
