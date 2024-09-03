@@ -92,20 +92,15 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
-        user_id: int = payload.get("user_id")  # 将来的な利用のために取得
-        if email is None:
+        user_id: str = payload.get("user_id")
+        if email is None or user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    with Session(get_engine) as db:
-        user = get_user_by_email(db, email)
+    with Session(get_engine()) as db:
+        user = db.exec(select(Users).where(
+            Users.id == user_id, Users.email == email)).first()
         if user is None:
             raise credentials_exception
         return user
-
-
-async def get_current_active_user(current_user: Users = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user

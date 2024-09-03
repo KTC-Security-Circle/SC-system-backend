@@ -7,7 +7,6 @@ from os.path import join, dirname
 from fastapi import HTTPException, Query
 from typing import Optional
 from api.logger import getLogger
-from api.app.models import Users
 
 logger = getLogger(__name__, "DEBUG")
 dotenv_path = join(dirname(__file__), ".env")

@@ -9,9 +9,8 @@ from api.app.database.database import (
     delete_record,
 )
 from api.app.security.jwt_token import get_current_user
-from typing import Optional
+from typing import Optional, List
 from api.logger import getLogger
-import json
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -39,18 +38,17 @@ async def create_chatlog(
     return chat_log_data
 
 
-@router.get("/app/view/chat/", response_model=list[ChatLog], tags=["chat_get"])
+@router.get("/app/view/chat/", response_model=List[ChatLog], tags=["chat_get"])
 async def view_chatlog(
-    conditions: Optional[str] = Query(None, description="条件を含むJSON文字列"),
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    session_id: Optional[int] = Query(None, description="セッションIDでフィルタリング"),
+    limit: Optional[int] = Query(10, description="取得するレコードの数"),
+    offset: Optional[int] = Query(0, description="取得するレコードの開始位置"),
     engine=Depends(get_engine)
 ):
-    try:
-        conditions_dict = json.loads(conditions) if conditions else {}
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=400, detail="Invalid JSON format in conditions")
+    conditions_dict = {}
+    if session_id is not None:
+        conditions_dict["session_id"] = session_id
+
     chatlog = await select_table(engine, ChatLog, conditions_dict, offset=offset, limit=limit)
     logger.debug(chatlog)
     return chatlog
