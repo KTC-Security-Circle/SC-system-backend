@@ -51,11 +51,11 @@ async def create_chatlog(
 @router.get("/app/view/chat/", response_model=List[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.ADMIN)
 async def view_chatlog(
-    session_id: Optional[int] = Query(None, description="セッションIDでフィルタリング"),
-    message_like: Optional[str] = Query(None, description="メッセージの部分一致フィルタ"),
-    order_by: Optional[str] = Query(None, description="ソート基準のフィールド名"),
-    limit: Optional[int] = Query(10, description="取得するレコードの数"),
-    offset: Optional[int] = Query(0, description="取得するレコードの開始位置"),
+    session_id: Optional[int] = None,
+    message_like: Optional[str] = None,  # メッセージの部分一致フィルタ
+    order_by: Optional[str] = None,  # ソート基準のフィールド名
+    limit: Optional[int] = None,
+    offset: Optional[int] = 0,
     engine=Depends(get_engine),
     current_user: Users = Depends(get_current_user)
 ):
@@ -65,18 +65,17 @@ async def view_chatlog(
     if session_id is not None:
         conditions_dict["session_id"] = session_id
 
-        # セッションIDに基づいてセッションを取得し、ユーザーIDを確認
-        session_conditions = {"id": session_id}
-        session = await select_table(engine, Sessions, session_conditions)
+        # session_conditions = {"id": session_id}
+        # session = await select_table(engine, Sessions, session_conditions)
 
-        if not session or session[0].user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="このチャットログを閲覧する権限がありません")
+        # if not session or session[0].user_id != current_user.id:
+        #     raise HTTPException(
+        #         status_code=403, detail="このチャットログを閲覧する権限がありません"
+        #     )
 
     if message_like:
         like_conditions["message"] = message_like
-
-    # チャットログの取得
+    # チャットログを取得
     chatlog = await select_table(
         engine,
         ChatLog,
@@ -87,7 +86,7 @@ async def view_chatlog(
         order_by=order_by
     )
 
-    logger.debug(chatlog)
+    logger.debug(f"Retrieved chat logs: {chatlog}")
 
     chatlog_dto_list = [
         ChatLogDTO(
@@ -103,13 +102,13 @@ async def view_chatlog(
     return chatlog_dto_list
 
 
-
 @router.put("/app/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def update_chatlog(
     chat_id: int,
     updates: dict[str, str],
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     conditions = {"id": chat_id}
     updated_record = await update_record(engine, ChatLog, conditions, updates)
@@ -132,17 +131,17 @@ async def delete_chatlog(
 ):
     # 削除対象のチャットログを取得
     conditions = {"id": chat_id}
-    chatlog_to_delete = await select_table(engine, ChatLog, conditions)
+    # chatlog_to_delete = await select_table(engine, ChatLog, conditions)
 
-    if not chatlog_to_delete:
-        raise HTTPException(status_code=404, detail="チャットログが見つかりません")
+    # if not chatlog_to_delete:
+    #     raise HTTPException(status_code=404, detail="チャットログが見つかりません")
 
-    # チャットログのセッションIDからセッションを取得し、ユーザーIDを確認
-    session_conditions = {"id": chatlog_to_delete[0].session_id}
-    session = await select_table(engine, Sessions, session_conditions)
+    # # チャットログのセッションIDからセッションを取得し、ユーザーIDを確認
+    # session_conditions = {"id": chatlog_to_delete[0].session_id}
+    # session = await select_table(engine, Sessions, session_conditions)
 
-    if not session or session[0].user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="このチャットログを削除する権限がありません")
+    # if not session or session[0].user_id != current_user.id:
+    #     raise HTTPException(status_code=403, detail="このチャットログを削除する権限がありません")
 
     # 削除を実行
     result = await delete_record(engine, ChatLog, conditions)

@@ -54,7 +54,8 @@ async def view_sessions(
     order_by: Optional[str] = None,  # ソート基準のフィールド名
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     conditions = {}
     like_conditions = {}
@@ -99,7 +100,8 @@ async def view_sessions(
 async def update_sessions(
     session_id: int,
     updates: dict[str, str],
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     conditions = {"id": session_id}
     updated_record = await update_record(engine, Sessions, conditions, updates)
@@ -121,14 +123,14 @@ async def delete_session(
 ):
     # 削除対象のセッションを取得
     conditions = {"id": session_id}
-    session_to_delete = await select_table(engine, Sessions, conditions)
+    # session_to_delete = await select_table(engine, Sessions, conditions)
 
-    if not session_to_delete:
-        raise HTTPException(status_code=404, detail="セッションが見つかりません")
+    # if not session_to_delete:
+    #     raise HTTPException(status_code=404, detail="セッションが見つかりません")
 
-    # セッションが現在のユーザーによって作成されたかを確認
-    if session_to_delete[0].user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="このセッションを削除する権限がありません")
+    # # セッションが現在のユーザーによって作成されたかを確認
+    # if session_to_delete[0].user_id != current_user.id:
+    #     raise HTTPException(status_code=403, detail="このセッションを削除する権限がありません")
 
     # 削除を実行
     result = await delete_record(engine, Sessions, conditions)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from api.app.models import Users, ErrorLog, Sessions
 from api.app.database.database import (
@@ -53,7 +53,8 @@ async def view_errorlog(
     order_by: Optional[str] = None,  # ソート基準のフィールド名
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     conditions = {}
     like_conditions = {}
@@ -95,7 +96,8 @@ async def view_errorlog(
 async def update_errorlog(
     errorlog_id: int,
     updates: dict[str, str],
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     conditions = {"id": errorlog_id}
     updated_record = await update_record(engine, ErrorLog, conditions, updates)
@@ -117,17 +119,17 @@ async def delete_errorlog(
 ):
     # エラーログを取得
     conditions = {"id": errorlog_id}
-    errorlog_to_delete = await select_table(engine, ErrorLog, conditions)
+    # errorlog_to_delete = await select_table(engine, ErrorLog, conditions)
 
-    if not errorlog_to_delete:
-        raise HTTPException(status_code=404, detail="エラーログが見つかりません")
+    # if not errorlog_to_delete:
+    #     raise HTTPException(status_code=404, detail="エラーログが見つかりません")
 
-    # エラーログのセッションIDからセッションを取得し、ユーザーIDを確認
-    session_conditions = {"id": errorlog_to_delete[0].session_id}
-    session = await select_table(engine, Sessions, session_conditions)
+    # # エラーログのセッションIDからセッションを取得し、ユーザーIDを確認
+    # session_conditions = {"id": errorlog_to_delete[0].session_id}
+    # session = await select_table(engine, Sessions, session_conditions)
 
-    if not session or session[0].user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="このエラーログを削除する権限がありません")
+    # if not session or session[0].user_id != current_user.id:
+    #     raise HTTPException(status_code=403, detail="このエラーログを削除する権限がありません")
 
     # 削除を実行
     result = await delete_record(engine, ErrorLog, conditions)

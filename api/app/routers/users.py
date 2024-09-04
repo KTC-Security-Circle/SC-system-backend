@@ -69,7 +69,8 @@ async def view_users(
     order_by: Optional[str] = None,  # ソート基準のフィールド名
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
-    engine=Depends(get_engine)
+    engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     conditions = {}
     like_conditions = {}
@@ -115,6 +116,7 @@ async def update_users(
     user_id: str,
     updates: dict[str, str],
     engine=Depends(get_engine),
+    current_user: Users = Depends(get_current_user)
 ):
     if 'password' in updates:
         updates['password'] = get_password_hash(
