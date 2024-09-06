@@ -20,6 +20,9 @@ login_data = {
     "password": "12345678"
 }
 
+# get_current_userAPI
+get_current_user_url = f"{base_url}/api/user/me"
+
 # # サインアップしてユーザーを登録
 # response = requests.post(signup_url, json=signup_data)
 # if response.status_code == 200:
@@ -44,6 +47,18 @@ headers = {
     "Authorization": f"Bearer {token}"
 }
 
+#現在のユーザー情報を取得
+response = requests.get(get_current_user_url,headers=headers)
+if response.status_code == 200:
+    print("Current User")
+    current_user = response.json()
+    print(current_user)
+    print(type(current_user))
+else:
+    print("GetUser failed")
+    print(response.text)
+    exit()
+
 # 各エンドポイントに対するデータ
 post_endpoints = [
     {
@@ -63,7 +78,6 @@ post_endpoints = [
         "data": {"error_message": "テキストエラー", "pub_data": None, "session_id": 1}
     }
 ]
-
 get_endpoints = [
     {
         "url": f"{base_url}/api/app/view/user/",
@@ -101,7 +115,7 @@ get_endpoints = [
 
 put_endpoints = [
     {
-        "url": f"{base_url}/api/app/update/user/1/",
+        "url": f"{base_url}/api/app/update/user/{current_user['id']}/",
         "data": {"name": "更新済み", "email": "更新済み", "password": "77777777", "authority": "update"}
     },
     {
@@ -120,7 +134,7 @@ put_endpoints = [
 
 delete_endpoints = [
     {
-        "url": f"{base_url}/api/app/delete/user/1/"
+        "url": f"{base_url}/api/app/delete/user/{current_user['id']}/"
     },
     {
         "url": f"{base_url}/api/app/delete/chat/1/"
@@ -133,50 +147,50 @@ delete_endpoints = [
     }
 ]
 
-# # 各エンドポイントにPOSTリクエストを送信
-# for endpoint in post_endpoints:
-#     try:
-#         res = requests.post(
-#             endpoint["url"], json=endpoint["data"], headers=headers)
-#         print(f"URL: {endpoint['url'],headers}")
-#         print(f"Status Code: {res.status_code}")
-#         print(f"Response: {res.text}")
-#         print("\n")
-#     except requests.exceptions.RequestException as e:
-#         print(f"Request to {endpoint['url']} failed: {e}")
-
-# # 各エンドポイントにGETリクエストを送信
-# for endpoint in get_endpoints:
-#     try:
-#         res = requests.get(
-#             endpoint["url"], params=endpoint["params"], headers=headers)
-#         print(f"URL: {endpoint['url']}")
-#         print(f"Params: {endpoint['params']}")
-#         print(f"Status Code: {res.status_code}")
-#         print(f"Response: {res.text}")
-#         print("\n")
-#     except requests.exceptions.RequestException as e:
-#         print(f"Request to {endpoint['url']} failed: {e}")
-
-# # 各エンドポイントにPUTリクエストを送信
-# for endpoint in put_endpoints:
-#     try:
-#         res = requests.put(
-#             endpoint["url"], json=endpoint["data"], headers=headers)
-#         print(f"URL: {endpoint['url']}")
-#         print(f"Status Code: {res.status_code}")
-#         print(f"Response: {res.text}")
-#         print("\n")
-#     except requests.exceptions.RequestException as e:
-#         print(f"Request to {endpoint['url']} failed: {e}")
-
-# 各エンドポイントにDELETEリクエストを送信
-for endpoint in delete_endpoints:
+# 各エンドポイントにPOSTリクエストを送信
+for endpoint in post_endpoints:
     try:
-        res = requests.delete(endpoint["url"], headers=headers)
+        res = requests.post(
+            endpoint["url"], json=endpoint["data"], headers=headers)
+        print(f"URL: {endpoint['url'],headers}")
+        print(f"Status Code: {res.status_code}")
+        print(f"Response: {res.text}")
+        print("\n")
+    except requests.exceptions.RequestException as e:
+        print(f"Request to {endpoint['url']} failed: {e}")
+
+# 各エンドポイントにGETリクエストを送信
+for endpoint in get_endpoints:
+    try:
+        res = requests.get(
+            endpoint["url"], params=endpoint["params"], headers=headers)
+        print(f"URL: {endpoint['url']}")
+        print(f"Params: {endpoint['params']}")
+        print(f"Status Code: {res.status_code}")
+        print(f"Response: {res.text}")
+        print("\n")
+    except requests.exceptions.RequestException as e:
+        print(f"Request to {endpoint['url']} failed: {e}")
+
+# 各エンドポイントにPUTリクエストを送信
+for endpoint in put_endpoints:
+    try:
+        res = requests.put(
+            endpoint["url"], json=endpoint["data"], headers=headers)
         print(f"URL: {endpoint['url']}")
         print(f"Status Code: {res.status_code}")
         print(f"Response: {res.text}")
         print("\n")
     except requests.exceptions.RequestException as e:
         print(f"Request to {endpoint['url']} failed: {e}")
+
+# # 各エンドポイントにDELETEリクエストを送信
+# for endpoint in delete_endpoints:
+#     try:
+#         res = requests.delete(endpoint["url"], headers=headers)
+#         print(f"URL: {endpoint['url']}")
+#         print(f"Status Code: {res.status_code}")
+#         print(f"Response: {res.text}")
+#         print("\n")
+#     except requests.exceptions.RequestException as e:
+#         print(f"Request to {endpoint['url']} failed: {e}")

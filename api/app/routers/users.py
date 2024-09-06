@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from api.app.models import Users  # SQLModelモデルをインポート
 from api.app.dto import UserDTO
 from api.app.database.database import (
@@ -13,6 +13,7 @@ from typing import Optional
 from api.logger import getLogger
 from api.app.role import Role, role_required
 from pydantic import EmailStr
+from sqlmodel import select, Session
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -25,27 +26,54 @@ async def create_users(
     engine=Depends(get_engine),
     current_user: Users = Depends(get_current_user)
 ):
+    # バリデーション用に Session を開く
+    session = Session(engine)
+
+    # 既存のメールアドレスのチェック
+    existing_user = session.exec(
+        select(Users).where(Users.email == user.email)).first()
+
+    if existing_user:
+        session.close()  # セッションを閉じる
+        raise HTTPException(
+            status_code=400, detail="Email already registered")
+
+    # セッションを閉じる
+    session.close()
+    
+    # ここにemailのバリデーションを追加
+
+    # パスワードをハッシュ化
     hashed_password = get_password_hash(user.password)
+
+    # 新しいユーザーオブジェクトを作成
     user_data = Users(
         name=user.name,
         email=user.email,
-        password=hashed_password,  # ここでパスワードがハッシュされていることを確認
+        password=hashed_password,  # ハッシュ化されたパスワードを保存
         authority=user.authority,
     )
-    await add_db_record(engine, user_data)
-    logger.info("新しいユーザーを登録します。")
-    logger.info(f"ユーザーID:{user.id}")
-    logger.info(f"ユーザー名:{user.name}")
-    logger.info(f"E-mail:{user.email}")
-    logger.info(f"権限情報:{user.authority}")
 
+    # データベースにレコードを追加
+    await add_db_record(engine, user_data)
+
+    # ログに情報を出力
+    logger.info("新しいユーザーを登録します。")
+    logger.info(f"ユーザーID:{user_data.id}")
+    logger.info(f"ユーザー名:{user_data.name}")
+    logger.info(f"E-mail:{user_data.email}")
+    logger.info(f"権限情報:{user_data.authority}")
+
+    # UserDTO を作成して返す
     user_dto = UserDTO(
         id=user_data.id,
         name=user_data.name,
         email=user_data.email,
         authority=user_data.authority
     )
+
     return user_dto
+
 
 
 @router.get("/user/me", response_model=UserDTO, tags=["users_get"])
@@ -121,6 +149,7 @@ async def update_users(
     if 'password' in updates:
         updates['password'] = get_password_hash(
             updates['password'])  # パスワードをハッシュ化
+    # ここにemailのバリデーションを追加
     conditions = {"id": user_id}
     updated_record = await update_record(engine, Users, conditions, updates)
     updated_user_dto = UserDTO(
