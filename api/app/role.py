@@ -1,23 +1,21 @@
 from api.app.models import Users
-from typing import Callable
 from functools import wraps
-from fastapi import HTTPException, status, Depends
-from api.app.security.jwt_token import get_current_user
+from fastapi import HTTPException, status
 from enum import Enum
 from api.logger import getLogger
 
 logger = getLogger(__name__)
 class Role(str, Enum):
     ADMIN = "admin"
-    EDITOR = "editor"
-    VIEWER = "viewer"
+    STAFF = "staff"
+    STUDENT = "student"
 
 
 # 権限の優劣を定義
 ROLE_HIERARCHY = {
     Role.ADMIN: 3,
-    Role.EDITOR: 2,
-    Role.VIEWER: 1
+    Role.STAFF: 2,
+    Role.STUDENT: 1
 }
 
 

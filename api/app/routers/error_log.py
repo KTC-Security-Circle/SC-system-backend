@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from datetime import datetime
-from api.app.models import Users, ErrorLog, Sessions
+from api.app.models import User, ErrorLog
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -9,7 +9,7 @@ from api.app.database.database import (
     delete_record,
 )
 from api.app.security.jwt_token import get_current_user
-from api.app.dto import ErrorLogDTO
+from api.app.dtos.errorlog_dtos import ErrorLogDTO
 from api.app.role import Role, role_required
 from typing import Optional
 from api.logger import getLogger
@@ -23,7 +23,7 @@ router = APIRouter()
 async def create_error_log(
     errorlog: ErrorLog,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     error_log_data = ErrorLog(
         error_message=errorlog.error_message,
@@ -54,7 +54,7 @@ async def view_errorlog(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions = {}
     like_conditions = {}
@@ -97,7 +97,7 @@ async def update_errorlog(
     errorlog_id: int,
     updates: dict[str, str],
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions = {"id": errorlog_id}
     updated_record = await update_record(engine, ErrorLog, conditions, updates)
@@ -115,7 +115,7 @@ async def update_errorlog(
 async def delete_errorlog(
     errorlog_id: int,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     # エラーログを取得
     conditions = {"id": errorlog_id}

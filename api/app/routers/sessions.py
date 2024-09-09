@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from datetime import datetime
-from api.app.models import Users, Sessions  # SQLModelモデルをインポート
-from api.app.dto import SessionDTO
+from api.app.models import User, Session
+from api.app.dtos.session_dtos import SessionDTO
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -18,14 +18,14 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/session/", response_model=SessionDTO, tags=["sessions_post"])
+@router.post("/app/input/session/", response_model=SessionDTO, tags=["session_post"])
 @role_required(Role.ADMIN)
-async def create_sessions(
-    session: Sessions,
+async def create_session(
+    session: Session,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
     ):
-    session_data = Sessions(
+    session_data = Session(
         session_name=session.session_name,
         pub_data=datetime.now(),
         user_id=current_user.id,  # 現在のユーザーIDを使用
@@ -45,9 +45,9 @@ async def create_sessions(
     return session_dto
 
 
-@router.get("/app/view/session/", response_model=list[SessionDTO], tags=["sessions_get"])
+@router.get("/app/view/session/", response_model=list[SessionDTO], tags=["session_get"])
 @role_required(Role.ADMIN)  # admin権限が必要
-async def view_sessions(
+async def view_session(
     session_name: Optional[str] = None,
     session_name_like: Optional[str] = None,  # セッション名の部分一致フィルタ
     user_id: Optional[int] = None,
@@ -55,7 +55,7 @@ async def view_sessions(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions = {}
     like_conditions = {}
@@ -71,7 +71,7 @@ async def view_sessions(
 
     sessions = await select_table(
         engine,
-        Sessions,
+        Session,
         conditions,
         like_conditions=like_conditions,
         offset=offset,
@@ -95,16 +95,16 @@ async def view_sessions(
 
 
 
-@router.put("/app/update/session/{session_id}/", response_model=SessionDTO, tags=["sessions_put"])
+@router.put("/app/update/session/{session_id}/", response_model=SessionDTO, tags=["session_put"])
 @role_required(Role.ADMIN)  # admin権限が必要
-async def update_sessions(
+async def update_session(
     session_id: int,
     updates: dict[str, str],
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions = {"id": session_id}
-    updated_record = await update_record(engine, Sessions, conditions, updates)
+    updated_record = await update_record(engine, Session, conditions, updates)
     updated_session_dto = SessionDTO(
         id=updated_record.id,
         session_name=updated_record.session_name,
@@ -114,16 +114,16 @@ async def update_sessions(
     return updated_session_dto
 
 
-@router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["sessions_delete"])
+@router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["session_delete"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def delete_session(
     session_id: int,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     # 削除対象のセッションを取得
     conditions = {"id": session_id}
-    # session_to_delete = await select_table(engine, Sessions, conditions)
+    # session_to_delete = await select_table(engine, Session, conditions)
 
     # if not session_to_delete:
     #     raise HTTPException(status_code=404, detail="セッションが見つかりません")
@@ -133,5 +133,5 @@ async def delete_session(
     #     raise HTTPException(status_code=403, detail="このセッションを削除する権限がありません")
 
     # 削除を実行
-    result = await delete_record(engine, Sessions, conditions)
+    result = await delete_record(engine, Session, conditions)
     return result

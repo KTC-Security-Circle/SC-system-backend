@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from api.app.models import Users  # SQLModelモデルをインポート
-from api.app.dto import UserDTO
+from api.app.models import User  # SQLModelモデルをインポート
+from api.app.dtos.user_dtos import UserDTO, UserUpdate, UserCreateDTO
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -19,35 +19,46 @@ logger = getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/app/input/user/", response_model=UserDTO, tags=["users_post"])
+@router.post("/app/input/user/", response_model=UserDTO, tags=["user_post"])
 @role_required(Role.ADMIN)
-async def create_users(
-    user: Users,
+async def create_user(
+    user: UserCreateDTO,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     # バリデーション用に Session を開く
     session = Session(engine)
-
+    
     # 既存のメールアドレスのチェック
     existing_user = session.exec(
-        select(Users).where(Users.email == user.email)).first()
+        select(User).where(User.email == user.email)).first()
 
     if existing_user:
         session.close()  # セッションを閉じる
         raise HTTPException(
             status_code=400, detail="Email already registered")
+        
+    # メールアドレスのバリデーション
+    try:
+        # EmailStrで形式のバリデーション
+        valid_email = EmailStr(user.email)
+        # 特定ドメインのチェック
+        if not valid_email.endswith('@example.com'):
+            session.close()
+            raise HTTPException(
+                status_code=400, detail="Email must be from the domain @example.com")
+    except ValueError:
+        session.close()
+        raise HTTPException(status_code=400, detail="Invalid email format")
 
     # セッションを閉じる
     session.close()
-    
-    # ここにemailのバリデーションを追加
 
     # パスワードをハッシュ化
     hashed_password = get_password_hash(user.password)
 
     # 新しいユーザーオブジェクトを作成
-    user_data = Users(
+    user_data = User(
         name=user.name,
         email=user.email,
         password=hashed_password,  # ハッシュ化されたパスワードを保存
@@ -76,9 +87,9 @@ async def create_users(
 
 
 
-@router.get("/user/me", response_model=UserDTO, tags=["users_get"])
+@router.get("/user/me", response_model=UserDTO, tags=["user_get"])
 @role_required(Role.ADMIN)
-async def get_me(current_user: Users = Depends(get_current_user)):
+async def get_me(current_user: User = Depends(get_current_user)):
     me_dto = UserDTO(
         id=current_user.id,
         name=current_user.name,
@@ -88,9 +99,9 @@ async def get_me(current_user: Users = Depends(get_current_user)):
     return me_dto
 
 
-@router.get("/app/view/user/", response_model=list[UserDTO], tags=["users_get"])
+@router.get("/app/view/user/", response_model=list[UserDTO], tags=["user_get"])
 @role_required(Role.ADMIN)  # admin権限が必要
-async def view_users(
+async def view_user(
     name: Optional[str] = None,
     name_like: Optional[str] = None,  # 名前の部分一致フィルタ
     email: Optional[EmailStr] = None,
@@ -98,7 +109,7 @@ async def view_users(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions = {}
     like_conditions = {}
@@ -114,7 +125,7 @@ async def view_users(
 
     users = await select_table(
         engine,
-        Users,
+        User,
         conditions,
         like_conditions=like_conditions,
         offset=offset,
@@ -138,20 +149,31 @@ async def view_users(
 
 
 
-@router.put("/app/update/user/{user_id}/", response_model=UserDTO, tags=["users_put"])
+@router.put("/app/update/user/{user_id}/", response_model=UserDTO, tags=["user_put"])
 @role_required(Role.ADMIN)  # admin権限が必要
-async def update_users(
+async def update_user(
     user_id: str,
-    updates: dict[str, str],
+    updates: UserUpdate,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    if 'password' in updates:
-        updates['password'] = get_password_hash(
-            updates['password'])  # パスワードをハッシュ化
-    # ここにemailのバリデーションを追加
+    updates_dict = updates.model_dump(exclude_unset=True)
+    if "email" in updates_dict and updates_dict["email"]:
+        try:
+            # EmailStrのバリデーションを明示的に適用
+            valid_email = EmailStr(updates_dict["email"])
+            if not valid_email.endswith('@example.com'):
+                raise HTTPException(
+                    status_code=400, detail="Email must be from the domain @example.com")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid email format")
+
+    # パスワードのハッシュ化
+    if 'password' in updates_dict:
+        updates_dict['password'] = get_password_hash(updates_dict['password'])
+
     conditions = {"id": user_id}
-    updated_record = await update_record(engine, Users, conditions, updates)
+    updated_record = await update_record(engine, User, conditions, updates)
     updated_user_dto = UserDTO(
         id=updated_record.id,
         name=updated_record.name,
@@ -161,12 +183,12 @@ async def update_users(
     return updated_user_dto
 
 
-@router.delete("/app/delete/user/{user_id}/", response_model=dict, tags=["users_delete"])
+@router.delete("/app/delete/user/{user_id}/", response_model=dict, tags=["user_delete"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def delete_user(
     user_id: str,
     engine=Depends(get_engine),
 ):
     conditions = {"id": user_id}
-    result = await delete_record(engine, Users, conditions)
+    result = await delete_record(engine, User, conditions)
     return result

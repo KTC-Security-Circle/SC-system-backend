@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, Depends
 from datetime import datetime
-from api.app.models import Users, ChatLog, Sessions
-from api.app.dto import ChatLogDTO
+from api.app.models import User, ChatLog
+from api.app.dtos.chatlog_dtos import ChatLogDTO
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -23,7 +23,7 @@ router = APIRouter()
 async def create_chatlog(
     chatlog: ChatLog,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     chat_log_data = ChatLog(
         message=chatlog.message,
@@ -57,7 +57,7 @@ async def view_chatlog(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions_dict = {}
     like_conditions = {}
@@ -66,7 +66,7 @@ async def view_chatlog(
         conditions_dict["session_id"] = session_id
 
         # session_conditions = {"id": session_id}
-        # session = await select_table(engine, Sessions, session_conditions)
+        # session = await select_table(engine, Session, session_conditions)
 
         # if not session or session[0].user_id != current_user.id:
         #     raise HTTPException(
@@ -108,7 +108,7 @@ async def update_chatlog(
     chat_id: int,
     updates: dict[str, str],
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     conditions = {"id": chat_id}
     updated_record = await update_record(engine, ChatLog, conditions, updates)
@@ -127,7 +127,7 @@ async def update_chatlog(
 async def delete_chatlog(
     chat_id: int,
     engine=Depends(get_engine),
-    current_user: Users = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     # 削除対象のチャットログを取得
     conditions = {"id": chat_id}
@@ -138,7 +138,7 @@ async def delete_chatlog(
 
     # # チャットログのセッションIDからセッションを取得し、ユーザーIDを確認
     # session_conditions = {"id": chatlog_to_delete[0].session_id}
-    # session = await select_table(engine, Sessions, session_conditions)
+    # session = await select_table(engine, Session, session_conditions)
 
     # if not session or session[0].user_id != current_user.id:
     #     raise HTTPException(status_code=403, detail="このチャットログを削除する権限がありません")
