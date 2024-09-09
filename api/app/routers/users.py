@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from api.app.models import User  # SQLModelモデルをインポート
-from api.app.dtos.user_dtos import UserDTO, UserUpdate, UserCreateDTO
+from api.app.dtos.user_dtos import (
+    UserDTO,
+    UserCreateDTO,
+    UserSearchDTO,
+    UserOrderBy,
+    UserUpdate
+    )
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -42,11 +48,6 @@ async def create_user(
     try:
         # EmailStrで形式のバリデーション
         valid_email = EmailStr(user.email)
-        # 特定ドメインのチェック
-        if not valid_email.endswith('@example.com'):
-            session.close()
-            raise HTTPException(
-                status_code=400, detail="Email must be from the domain @example.com")
     except ValueError:
         session.close()
         raise HTTPException(status_code=400, detail="Invalid email format")
@@ -102,10 +103,8 @@ async def get_me(current_user: User = Depends(get_current_user)):
 @router.get("/app/view/user/", response_model=list[UserDTO], tags=["user_get"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def view_user(
-    name: Optional[str] = None,
-    name_like: Optional[str] = None,  # 名前の部分一致フィルタ
-    email: Optional[EmailStr] = None,
-    order_by: Optional[str] = None,  # ソート基準のフィールド名
+    search_params: UserSearchDTO = Depends(),
+    order_by: Optional[UserOrderBy] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
@@ -114,14 +113,18 @@ async def view_user(
     conditions = {}
     like_conditions = {}
 
-    if name:
-        conditions["name"] = name
+    # 検索条件をDTOから適用
+    if search_params.name:
+        conditions["name"] = search_params.name
 
-    if name_like:
-        like_conditions["name"] = name_like
+    if search_params.name_like:
+        like_conditions["name"] = search_params.name_like
 
-    if email:
-        conditions["email"] = email
+    if search_params.email:
+        conditions["email"] = search_params.email
+
+    if search_params.authority:
+        conditions["authority"] = search_params.authority
 
     users = await select_table(
         engine,
@@ -162,10 +165,8 @@ async def update_user(
         try:
             # EmailStrのバリデーションを明示的に適用
             valid_email = EmailStr(updates_dict["email"])
-            if not valid_email.endswith('@example.com'):
-                raise HTTPException(
-                    status_code=400, detail="Email must be from the domain @example.com")
         except ValueError:
+            # EmailStrバリデーションで例外が発生した場合
             raise HTTPException(status_code=400, detail="Invalid email format")
 
     # パスワードのハッシュ化

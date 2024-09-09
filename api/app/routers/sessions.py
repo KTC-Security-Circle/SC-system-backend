@@ -1,7 +1,13 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
 from api.app.models import User, Session
-from api.app.dtos.session_dtos import SessionDTO
+from api.app.dtos.session_dtos import (
+    SessionDTO,
+    SessionCreateDTO,
+    SessionOrderBy,
+    SessionSearchDTO,
+    SessionUpdateDTO
+)
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -21,7 +27,7 @@ router = APIRouter()
 @router.post("/app/input/session/", response_model=SessionDTO, tags=["session_post"])
 @role_required(Role.ADMIN)
 async def create_session(
-    session: Session,
+    session: SessionCreateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
     ):
@@ -48,10 +54,8 @@ async def create_session(
 @router.get("/app/view/session/", response_model=list[SessionDTO], tags=["session_get"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def view_session(
-    session_name: Optional[str] = None,
-    session_name_like: Optional[str] = None,  # セッション名の部分一致フィルタ
-    user_id: Optional[int] = None,
-    order_by: Optional[str] = None,  # ソート基準のフィールド名
+    search_params: SessionSearchDTO = Depends(),
+    order_by: Optional[SessionOrderBy] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
@@ -60,14 +64,14 @@ async def view_session(
     conditions = {}
     like_conditions = {}
 
-    if session_name:
-        conditions["session_name"] = session_name
+    if search_params.session_name:
+        conditions["session_name"] = search_params.session_name
 
-    if session_name_like:
-        like_conditions["session_name"] = session_name_like
+    if search_params.session_name_like:
+        like_conditions["session_name"] = search_params.session_name_like
 
-    if user_id:
-        conditions["user_id"] = user_id
+    if search_params.user_id:
+        conditions["user_id"] = search_params.user_id
 
     sessions = await select_table(
         engine,
@@ -94,23 +98,25 @@ async def view_session(
     return session_dto_list
 
 
-
 @router.put("/app/update/session/{session_id}/", response_model=SessionDTO, tags=["session_put"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def update_session(
     session_id: int,
-    updates: dict[str, str],
+    updates: SessionUpdateDTO,  # DTOを使用
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     conditions = {"id": session_id}
-    updated_record = await update_record(engine, Session, conditions, updates)
+    updates_dict = updates.model_dump(exclude_unset=True)  # 送信されていないフィールドは無視
+    updated_record = await update_record(engine, Session, conditions, updates_dict)
+
     updated_session_dto = SessionDTO(
         id=updated_record.id,
         session_name=updated_record.session_name,
         pub_data=updated_record.pub_data,
         user_id=updated_record.user_id
     )
+
     return updated_session_dto
 
 

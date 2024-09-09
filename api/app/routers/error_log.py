@@ -9,7 +9,13 @@ from api.app.database.database import (
     delete_record,
 )
 from api.app.security.jwt_token import get_current_user
-from api.app.dtos.errorlog_dtos import ErrorLogDTO
+from api.app.dtos.errorlog_dtos import (
+    ErrorLogDTO,
+    ErrorLogCreateDTO,
+    ErrorLogOrderBy,
+    ErrorLogSearchDTO,
+    ErrorLogUpdateDTO
+)
 from api.app.role import Role, role_required
 from typing import Optional
 from api.logger import getLogger
@@ -21,13 +27,13 @@ router = APIRouter()
 @router.post("/app/input/errorlog/", response_model=ErrorLogDTO, tags=["errorlog_post"])
 @role_required(Role.ADMIN)
 async def create_error_log(
-    errorlog: ErrorLog,
+    errorlog: ErrorLogCreateDTO,  # DTOを使用
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     error_log_data = ErrorLog(
         error_message=errorlog.error_message,
-        pub_data=datetime.now(),
+        pub_data=errorlog.pub_data or datetime.now(),  # 日時が指定されていない場合は現在時刻を使用
         session_id=errorlog.session_id,
     )
     await add_db_record(engine, error_log_data)
@@ -48,9 +54,8 @@ async def create_error_log(
 @router.get("/app/view/errorlog/", response_model=list[ErrorLogDTO], tags=["errorlog_get"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def view_errorlog(
-    session_id: Optional[int] = None,
-    error_message_like: Optional[str] = None,  # メッセージの部分一致フィルタ
-    order_by: Optional[str] = None,  # ソート基準のフィールド名
+    search_params: ErrorLogSearchDTO = Depends(),
+    order_by: Optional[ErrorLogOrderBy] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
@@ -59,11 +64,11 @@ async def view_errorlog(
     conditions = {}
     like_conditions = {}
 
-    if session_id:
-        conditions["session_id"] = session_id
+    if search_params.session_id:
+        conditions["session_id"] = search_params.session_id
 
-    if error_message_like:
-        like_conditions["error_message"] = error_message_like
+    if search_params.error_message_like:
+        like_conditions["error_message"] = search_params.error_message_like
 
     errorlog = await select_table(
         engine,
@@ -90,17 +95,18 @@ async def view_errorlog(
     return errorlog_dto_list
 
 
-
 @router.put("/app/update/errorlog/{errorlog_id}/", response_model=ErrorLogDTO, tags=["errorlog_put"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def update_errorlog(
     errorlog_id: int,
-    updates: dict[str, str],
+    updates: ErrorLogUpdateDTO,  # DTOを使用
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     conditions = {"id": errorlog_id}
-    updated_record = await update_record(engine, ErrorLog, conditions, updates)
+    updates_dict = updates.model_dump(exclude_unset=True)  # 送信されていないフィールドは無視
+    updated_record = await update_record(engine, ErrorLog, conditions, updates_dict)
+
     updated_errorlog_dto = ErrorLogDTO(
         id=updated_record.id,
         error_message=updated_record.error_message,

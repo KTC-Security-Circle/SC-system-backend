@@ -1,7 +1,13 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
 from api.app.models import User, ChatLog
-from api.app.dtos.chatlog_dtos import ChatLogDTO
+from api.app.dtos.chatlog_dtos import (
+    ChatLogDTO,
+    ChatCreateDTO,
+    ChatOrderBy,
+    ChatSearchDTO,
+    ChatUpdateDTO
+)
 from api.app.database.database import (
     add_db_record,
     get_engine,
@@ -21,23 +27,25 @@ router = APIRouter()
 @router.post("/app/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
 @role_required(Role.ADMIN)
 async def create_chatlog(
-    chatlog: ChatLog,
+    chatlog: ChatCreateDTO,  # DTOを使用
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     chat_log_data = ChatLog(
         message=chatlog.message,
         bot_reply=chatlog.bot_reply,
-        pub_data=datetime.now(),
+        pub_data=chatlog.pub_data or datetime.now(),  # 日時が指定されていない場合は現在時刻を使用
         session_id=chatlog.session_id,
     )
     await add_db_record(engine, chat_log_data)
     logger.info("新しいチャットを登録します。")
+
     logger.info(f"チャットID:{chat_log_data.id}")
     logger.info(f"チャット内容:{chat_log_data.message}")
     logger.info(f"ボットの返信:{chat_log_data.bot_reply}")
     logger.info(f"投稿日時:{chat_log_data.pub_data}")
     logger.info(f"セッションID:{chat_log_data.session_id}")
+
     chat_dto = ChatLogDTO(
         id=chat_log_data.id,
         message=chat_log_data.message,
@@ -51,9 +59,8 @@ async def create_chatlog(
 @router.get("/app/view/chat/", response_model=List[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.ADMIN)
 async def view_chatlog(
-    session_id: Optional[int] = None,
-    message_like: Optional[str] = None,  # メッセージの部分一致フィルタ
-    order_by: Optional[str] = None,  # ソート基準のフィールド名
+    search_params: ChatSearchDTO = Depends(),  # メッセージの部分一致フィルタ
+    order_by: Optional[ChatOrderBy] = None,  # ソート基準のフィールド名
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
@@ -62,20 +69,12 @@ async def view_chatlog(
     conditions_dict = {}
     like_conditions = {}
 
-    if session_id is not None:
-        conditions_dict["session_id"] = session_id
+    if search_params.session_id is not None:
+        conditions_dict["session_id"] = search_params.session_id
 
-        # session_conditions = {"id": session_id}
-        # session = await select_table(engine, Session, session_conditions)
+    if search_params.message_like:
+        like_conditions["message"] = search_params.message_like
 
-        # if not session or session[0].user_id != current_user.id:
-        #     raise HTTPException(
-        #         status_code=403, detail="このチャットログを閲覧する権限がありません"
-        #     )
-
-    if message_like:
-        like_conditions["message"] = message_like
-    # チャットログを取得
     chatlog = await select_table(
         engine,
         ChatLog,
@@ -85,8 +84,6 @@ async def view_chatlog(
         limit=limit,
         order_by=order_by
     )
-
-    logger.debug(f"Retrieved chat logs: {chatlog}")
 
     chatlog_dto_list = [
         ChatLogDTO(
@@ -106,12 +103,14 @@ async def view_chatlog(
 @role_required(Role.ADMIN)  # admin権限が必要
 async def update_chatlog(
     chat_id: int,
-    updates: dict[str, str],
+    updates: ChatUpdateDTO,  # DTOを使用
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     conditions = {"id": chat_id}
-    updated_record = await update_record(engine, ChatLog, conditions, updates)
+    updates_dict = updates.model_dump(exclude_unset=True)  # 送信されていないフィールドは無視
+    updated_record = await update_record(engine, ChatLog, conditions, updates_dict)
+
     updated_chatlog_dto = ChatLogDTO(
         id=updated_record.id,
         message=updated_record.message,
