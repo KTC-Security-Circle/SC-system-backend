@@ -1,13 +1,4 @@
-from fastapi import APIRouter, Depends
-from datetime import datetime
-from api.app.models import User, ErrorLog
-from api.app.database.database import (
-    add_db_record,
-    get_engine,
-    select_table,
-    update_record,
-    delete_record,
-)
+from api.app.models import  ErrorLog
 from api.app.security.jwt_token import get_current_user
 from api.app.dtos.errorlog_dtos import (
     ErrorLogDTO,
@@ -16,12 +7,22 @@ from api.app.dtos.errorlog_dtos import (
     ErrorLogSearchDTO,
     ErrorLogUpdateDTO
 )
-from api.app.role import Role, role_required
-from typing import Optional
-from api.logger import getLogger
-
-logger = getLogger(__name__)
-router = APIRouter()
+from api.app.routers import (
+    logger,
+    router,
+    Depends,
+    datetime,
+    get_current_user,
+    Role,
+    role_required,
+    Optional,
+    add_db_record,
+    get_engine,
+    select_table,
+    update_record,
+    delete_record,
+    User,
+)
 
 
 @router.post("/app/input/errorlog/", response_model=ErrorLogDTO, tags=["errorlog_post"])

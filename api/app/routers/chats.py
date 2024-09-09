@@ -1,6 +1,4 @@
-from fastapi import APIRouter, Depends
-from datetime import datetime
-from api.app.models import User, ChatLog
+from api.app.models import ChatLog
 from api.app.dtos.chatlog_dtos import (
     ChatLogDTO,
     ChatCreateDTO,
@@ -8,21 +6,22 @@ from api.app.dtos.chatlog_dtos import (
     ChatSearchDTO,
     ChatUpdateDTO
 )
-from api.app.database.database import (
+from api.app.routers import (
+    logger,
+    router,
+    Depends,
+    datetime,
+    get_current_user,
+    Role,
+    role_required,
+    Optional,
     add_db_record,
     get_engine,
     select_table,
     update_record,
     delete_record,
+    User,
 )
-from api.app.security.jwt_token import get_current_user
-from api.app.role import Role, role_required
-from typing import Optional, List
-from api.logger import getLogger
-
-logger = getLogger(__name__)
-router = APIRouter()
-
 
 @router.post("/app/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
 @role_required(Role.ADMIN)
@@ -56,7 +55,7 @@ async def create_chatlog(
     return chat_dto
 
 
-@router.get("/app/view/chat/", response_model=List[ChatLogDTO], tags=["chat_get"])
+@router.get("/app/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.ADMIN)
 async def view_chatlog(
     search_params: ChatSearchDTO = Depends(),  # メッセージの部分一致フィルタ

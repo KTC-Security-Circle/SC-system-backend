@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import HTTPException
 from sqlmodel import Session, select
-from api.app.models import User
-from api.app.database.database import get_engine
 from api.app.security.jwt_token import create_access_token, get_password_hash, verify_password
 from api.app.dtos.auth_dtos import Token, LoginData
 from api.app.dtos.user_dtos import UserDTO, UserCreateDTO
 
-router = APIRouter()
+from api.app.routers import (
+    router,
+    Depends,
+    get_engine,
+    User,
+)
 
 
 @router.post("/signup/", response_model=UserDTO, tags=["signup"])

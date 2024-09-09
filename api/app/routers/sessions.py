@@ -1,6 +1,4 @@
-from fastapi import APIRouter, Depends
-from datetime import datetime
-from api.app.models import User, Session
+from api.app.models import Session
 from api.app.dtos.session_dtos import (
     SessionDTO,
     SessionCreateDTO,
@@ -8,20 +6,22 @@ from api.app.dtos.session_dtos import (
     SessionSearchDTO,
     SessionUpdateDTO
 )
-from api.app.database.database import (
+from api.app.routers import (
+    logger,
+    router,
+    Depends,
+    datetime,
+    get_current_user,
+    Role,
+    role_required,
+    Optional,
     add_db_record,
     get_engine,
     select_table,
     update_record,
     delete_record,
+    User,
 )
-from api.app.security.jwt_token import get_current_user
-from api.app.role import Role, role_required
-from typing import Optional
-from api.logger import getLogger
-
-logger = getLogger(__name__)
-router = APIRouter()
 
 
 @router.post("/app/input/session/", response_model=SessionDTO, tags=["session_post"])

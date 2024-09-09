@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-from api.app.models import User
+from fastapi import HTTPException
 from api.app.dtos.user_dtos import (
     UserDTO,
     UserCreateDTO,
@@ -7,22 +6,25 @@ from api.app.dtos.user_dtos import (
     UserOrderBy,
     UserUpdateDTO
     )
-from api.app.database.database import (
+from api.app.security.jwt_token import get_password_hash
+from sqlmodel import select, Session
+
+from api.app.routers import (
+    logger,
+    router,
+    Depends,
+    datetime,
+    get_current_user,
+    Role,
+    role_required,
+    Optional,
     add_db_record,
     get_engine,
     select_table,
     update_record,
     delete_record,
+    User,
 )
-from api.app.security.jwt_token import get_current_user, get_password_hash
-from typing import Optional
-from api.logger import getLogger
-from api.app.role import Role, role_required
-from pydantic import EmailStr
-from sqlmodel import select, Session
-
-logger = getLogger(__name__)
-router = APIRouter()
 
 
 @router.post("/app/input/user/", response_model=UserDTO, tags=["user_post"])
@@ -56,6 +58,7 @@ async def create_user(
         email=user.email,
         password=hashed_password,  # ハッシュ化されたパスワードを保存
         authority=user.authority,
+        pub_data=datetime.now(),
     )
 
     # データベースにレコードを追加
