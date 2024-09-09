@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
-from api.app.models import Users
+from api.app.models import User
 from api.app.database.database import get_engine
 from typing import Optional
 from jose import JWTError, jwt
@@ -61,7 +61,7 @@ def get_password_hash(password):
 
 
 async def get_user_by_email(db: Session, email: str):
-    statement = select(Users).where(Users.email == email)
+    statement = select(User).where(User.email == email)
     results = db.exec(statement)
     return results.first()
 
@@ -73,7 +73,7 @@ async def authenticate_user(db: Session, email: str, password: str):
     return None
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), engine=Depends(get_engine)) -> Users:
+def get_current_user(token: str = Depends(oauth2_scheme), engine=Depends(get_engine)) -> User:
     logger.debug(f"Received token: {token}")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -94,8 +94,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), engine=Depends(get_eng
 
     try:
         with Session(engine) as db:
-            user = db.exec(select(Users).where(
-                Users.id == user_id, Users.email == email)).first()
+            user = db.exec(select(User).where(
+                User.id == user_id, User.email == email)).first()
             logger.debug(f"Retrieved user: {user}")
             if user is None:
                 logger.error("User not found")

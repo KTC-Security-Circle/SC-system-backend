@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from api.app.models import User  # SQLModelモデルをインポート
+from api.app.models import User
 from api.app.dtos.user_dtos import (
     UserDTO,
     UserCreateDTO,

@@ -1,4 +1,4 @@
-from api.app.models import Users
+from api.app.models import User
 from functools import wraps
 from fastapi import HTTPException, status
 from enum import Enum
@@ -22,7 +22,7 @@ ROLE_HIERARCHY = {
 def role_required(min_role: Role):
     def decorator(func):
         @wraps(func)
-        async def wrapper(*args, current_user: Users = None, **kwargs):
+        async def wrapper(*args, current_user: User = None, **kwargs):
             if current_user is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

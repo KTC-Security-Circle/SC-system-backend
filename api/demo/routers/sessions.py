@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from datetime import datetime
-from api.app.models import Sessions  # SQLModelモデルをインポート
+from api.app.models import Session  # SQLModelモデルをインポート
 from api.app.database.database import get_engine
 
 router = APIRouter()
@@ -8,9 +8,9 @@ router = APIRouter()
 engine = get_engine()
 
 
-@router.post("/session/", response_model=Sessions, tags=["sessions"])
-async def create_sessions(session: Sessions):
-    session_data = Sessions(
+@router.post("/session/", response_model=Session, tags=["session"])
+async def create_session(session: Session):
+    session_data = Session(
         id=session.id,
         session_name=session.session_name,
         pub_data=datetime.now(),
