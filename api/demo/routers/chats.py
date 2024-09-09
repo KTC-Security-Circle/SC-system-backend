@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from datetime import datetime
-from api.app.models import ChatLog  # SQLModelモデルをインポート
-from api.app.database.database import get_engine  # 関数をインポート
+from api.app.models import ChatLog
+from api.app.database.database import get_engine
 
 router = APIRouter()
 

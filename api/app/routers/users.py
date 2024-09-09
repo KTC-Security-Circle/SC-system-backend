@@ -43,14 +43,6 @@ async def create_user(
         session.close()  # セッションを閉じる
         raise HTTPException(
             status_code=400, detail="Email already registered")
-        
-    # メールアドレスのバリデーション
-    try:
-        # EmailStrで形式のバリデーション
-        valid_email = EmailStr(user.email)
-    except ValueError:
-        session.close()
-        raise HTTPException(status_code=400, detail="Invalid email format")
 
     # セッションを閉じる
     session.close()
@@ -151,7 +143,6 @@ async def view_user(
     return user_dto_list
 
 
-
 @router.put("/app/update/user/{user_id}/", response_model=UserDTO, tags=["user_put"])
 @role_required(Role.ADMIN)  # admin権限が必要
 async def update_user(
@@ -161,13 +152,20 @@ async def update_user(
     current_user: User = Depends(get_current_user)
 ):
     updates_dict = updates.model_dump(exclude_unset=True)
-    if "email" in updates_dict and updates_dict["email"]:
-        try:
-            # EmailStrのバリデーションを明示的に適用
-            valid_email = EmailStr(updates_dict["email"])
-        except ValueError:
-            # EmailStrバリデーションで例外が発生した場合
-            raise HTTPException(status_code=400, detail="Invalid email format")
+    
+    session = Session(engine)
+
+    # 既存のメールアドレスのチェック
+    existing_user = session.exec(
+        select(User).where(User.email == updates_dict['email'])).first()
+
+    if existing_user:
+        session.close()  # セッションを閉じる
+        raise HTTPException(
+            status_code=400, detail="Email already registered")
+
+    # セッションを閉じる
+    session.close()
 
     # パスワードのハッシュ化
     if 'password' in updates_dict:

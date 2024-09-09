@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from datetime import datetime
-from api.app.models import ErrorLog  # SQLModelモデルをインポート
+from api.app.models import ErrorLog
 from api.app.database.database import get_engine
 
 router = APIRouter()

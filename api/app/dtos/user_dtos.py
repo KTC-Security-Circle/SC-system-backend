@@ -38,11 +38,10 @@ class UserOrderBy(str, Enum):
 
 
 class UserSearchDTO(SQLModel):
-    name: Optional[str]
-    name_like: Optional[str]  # 部分一致フィルタ
-    email: Optional[EmailStr]
-    authority: Optional[str]
-    order_by: Optional[UserOrderBy] = None
+    name: Optional[str] = None
+    name_like: Optional[str] = None  # 部分一致フィルタ
+    email: Optional[EmailStr] = None
+    authority: Optional[str] = None
 
     @field_validator('authority')
     def validate_authority(cls, value):
@@ -50,7 +49,6 @@ class UserSearchDTO(SQLModel):
         if value and value not in valid_roles:
             raise ValueError('Invalid role specified')
         return value
-
 
 
 class UserUpdateDTO(SQLModel):

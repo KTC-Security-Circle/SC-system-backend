@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from api.app.models import User  # SQLModelモデルをインポート
-from api.app.database.database import get_engine  # 関数をインポート
+from api.app.models import User
+from api.app.database.database import get_engine
 
 router = APIRouter()
 
