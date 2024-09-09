@@ -5,7 +5,7 @@ from api.app.dtos.user_dtos import (
     UserCreateDTO,
     UserSearchDTO,
     UserOrderBy,
-    UserUpdate
+    UserUpdateDTO
     )
 from api.app.database.database import (
     add_db_record,
@@ -156,7 +156,7 @@ async def view_user(
 @role_required(Role.ADMIN)  # admin権限が必要
 async def update_user(
     user_id: str,
-    updates: UserUpdate,
+    updates: UserUpdateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
