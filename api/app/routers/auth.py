@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlmodel import Session, select
 from api.app.security.jwt_token import create_access_token, get_password_hash, verify_password
 from api.app.dtos.auth_dtos import Token, LoginData
@@ -9,6 +8,7 @@ from api.app.routers import (
     Depends,
     get_engine,
     User,
+    HTTPException,
 )
 
 

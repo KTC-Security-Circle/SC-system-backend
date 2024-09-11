@@ -1,5 +1,5 @@
 # FastAPI関連の共通インポート
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 # 日付関連
 from datetime import datetime

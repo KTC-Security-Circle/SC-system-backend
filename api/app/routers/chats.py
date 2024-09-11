@@ -23,6 +23,7 @@ from api.app.routers import (
     User,
 )
 
+
 @router.post("/app/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
 @role_required(Role.ADMIN)
 async def create_chatlog(
@@ -30,15 +31,18 @@ async def create_chatlog(
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"チャット作成リクエストを受け付けました。ユーザーID: {current_user.id}")
+
     chat_log_data = ChatLog(
         message=chatlog.message,
         bot_reply=chatlog.bot_reply,
         pub_data=chatlog.pub_data or datetime.now(),  # 日時が指定されていない場合は現在時刻を使用
         session_id=chatlog.session_id,
     )
-    await add_db_record(engine, chat_log_data)
-    logger.info("新しいチャットを登録します。")
 
+    await add_db_record(engine, chat_log_data)
+
+    logger.info("新しいチャットログを登録しました。")
     logger.info(f"チャットID:{chat_log_data.id}")
     logger.info(f"チャット内容:{chat_log_data.message}")
     logger.info(f"ボットの返信:{chat_log_data.bot_reply}")
@@ -65,6 +69,8 @@ async def view_chatlog(
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"チャットログ取得リクエストを受け付けました。検索条件: {search_params}")
+
     conditions_dict = {}
     like_conditions = {}
 
@@ -84,6 +90,8 @@ async def view_chatlog(
         order_by=order_by
     )
 
+    logger.info(f"チャットログ取得完了: {len(chatlog)}件")
+
     chatlog_dto_list = [
         ChatLogDTO(
             id=log.id,
@@ -99,16 +107,21 @@ async def view_chatlog(
 
 
 @router.put("/app/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def update_chatlog(
     chat_id: int,
     updates: ChatUpdateDTO,  # DTOを使用
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"チャットログ更新リクエストを受け付けました。チャットID: {chat_id}")
+
     conditions = {"id": chat_id}
     updates_dict = updates.model_dump(exclude_unset=True)  # 送信されていないフィールドは無視
     updated_record = await update_record(engine, ChatLog, conditions, updates_dict)
+
+    logger.info(
+        f"チャットログを更新しました。チャットID: {updated_record.id}, 更新内容: {updates_dict}")
 
     updated_chatlog_dto = ChatLogDTO(
         id=updated_record.id,
@@ -117,17 +130,19 @@ async def update_chatlog(
         pub_data=updated_record.pub_data,
         session_id=updated_record.session_id
     )
+
     return updated_chatlog_dto
 
 
 @router.delete("/app/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def delete_chatlog(
     chat_id: int,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
-    # 削除対象のチャットログを取得
+    logger.info(f"チャットログ削除リクエストを受け付けました。チャットID: {chat_id}")
+
     conditions = {"id": chat_id}
     # chatlog_to_delete = await select_table(engine, ChatLog, conditions)
 
@@ -140,7 +155,8 @@ async def delete_chatlog(
 
     # if not session or session[0].user_id != current_user.id:
     #     raise HTTPException(status_code=403, detail="このチャットログを削除する権限がありません")
-
-    # 削除を実行
     result = await delete_record(engine, ChatLog, conditions)
+
+    logger.info(f"チャットログを削除しました。チャットID: {chat_id}")
+
     return result

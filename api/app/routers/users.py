@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from api.app.dtos.user_dtos import (
     UserDTO,
     UserCreateDTO,
@@ -24,6 +23,7 @@ from api.app.routers import (
     update_record,
     delete_record,
     User,
+    HTTPException,
 )
 
 
@@ -34,7 +34,9 @@ async def create_user(
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
-    # バリデーション用に Session を開く
+    
+    logger.info("ユーザー作成リクエストを受け付けました。")
+
     session = Session(engine)
     
     # 既存のメールアドレスのチェック
@@ -42,11 +44,11 @@ async def create_user(
         select(User).where(User.email == user.email)).first()
 
     if existing_user:
-        session.close()  # セッションを閉じる
+        session.close()
+        logger.error(f"既に登録済みのメールアドレス: {user.email}")
         raise HTTPException(
             status_code=400, detail="Email already registered")
 
-    # セッションを閉じる
     session.close()
 
     # パスワードをハッシュ化
@@ -65,7 +67,7 @@ async def create_user(
     await add_db_record(engine, user_data)
 
     # ログに情報を出力
-    logger.info("新しいユーザーを登録します。")
+    logger.info("新しいユーザーが作成されました")
     logger.info(f"ユーザーID:{user_data.id}")
     logger.info(f"ユーザー名:{user_data.name}")
     logger.info(f"E-mail:{user_data.email}")
@@ -86,6 +88,7 @@ async def create_user(
 @router.get("/user/me", response_model=UserDTO, tags=["user_get"])
 @role_required(Role.ADMIN)
 async def get_me(current_user: User = Depends(get_current_user)):
+    logger.info(f"現在のユーザー情報を取得: {current_user.email}")
     me_dto = UserDTO(
         id=current_user.id,
         name=current_user.name,
@@ -96,7 +99,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
 
 
 @router.get("/app/view/user/", response_model=list[UserDTO], tags=["user_get"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def view_user(
     search_params: UserSearchDTO = Depends(),
     order_by: Optional[UserOrderBy] = None,
@@ -105,6 +108,7 @@ async def view_user(
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}")
     conditions = {}
     like_conditions = {}
 
@@ -131,7 +135,7 @@ async def view_user(
         order_by=order_by
     )
 
-    logger.debug(users)
+    logger.info(f"ユーザー一覧取得完了: {len(users)}件")
 
     user_dto_list = [
         UserDTO(
@@ -147,13 +151,14 @@ async def view_user(
 
 
 @router.put("/app/update/user/{user_id}/", response_model=UserDTO, tags=["user_put"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def update_user(
     user_id: str,
     updates: UserUpdateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"ユーザー更新リクエストを受け付けました。ユーザーID: {user_id}")
     updates_dict = updates.model_dump(exclude_unset=True)
     
     session = Session(engine)
@@ -163,19 +168,19 @@ async def update_user(
         select(User).where(User.email == updates_dict['email'])).first()
 
     if existing_user:
-        session.close()  # セッションを閉じる
+        session.close()
+        logger.info(f"ユーザー更新リクエストを受け付けました。ユーザーID: {user_id}")
         raise HTTPException(
             status_code=400, detail="Email already registered")
 
-    # セッションを閉じる
     session.close()
 
-    # パスワードのハッシュ化
     if 'password' in updates_dict:
         updates_dict['password'] = get_password_hash(updates_dict['password'])
 
     conditions = {"id": user_id}
     updated_record = await update_record(engine, User, conditions, updates)
+    logger.info(f"ユーザー情報を更新しました。ユーザーID: {updated_record.id}")
     updated_user_dto = UserDTO(
         id=updated_record.id,
         name=updated_record.name,
@@ -186,11 +191,16 @@ async def update_user(
 
 
 @router.delete("/app/delete/user/{user_id}/", response_model=dict, tags=["user_delete"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def delete_user(
     user_id: str,
     engine=Depends(get_engine),
 ):
+    logger.info(f"ユーザー削除リクエストを受け付けました。ユーザーID: {user_id}")
+
     conditions = {"id": user_id}
     result = await delete_record(engine, User, conditions)
+
+    logger.info(f"ユーザーを削除しました。ユーザーID: {user_id}")
+
     return result

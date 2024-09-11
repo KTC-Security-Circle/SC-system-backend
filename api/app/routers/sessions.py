@@ -30,29 +30,33 @@ async def create_session(
     session: SessionCreateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
-    ):
+):
+    logger.info(f"セッション作成リクエストを受け付けました。ユーザーID: {current_user.id}")
     session_data = Session(
         session_name=session.session_name,
         pub_data=datetime.now(),
-        user_id=current_user.id,  # 現在のユーザーIDを使用
+        user_id=current_user.id,
     )
     await add_db_record(engine, session_data)
-    logger.info("新しいセッションを登録します。")
+    
+    logger.info("新しいセッションを登録しました。")
     logger.info(f"セッションID:{session_data.id}")
     logger.info(f"セッション名:{session_data.session_name}")
     logger.info(f"投稿日時:{session_data.pub_data}")
     logger.info(f"ユーザーID:{session_data.user_id}")
+    
     session_dto = SessionDTO(
         id=session_data.id,
         session_name=session_data.session_name,
         pub_data=session_data.pub_data,
         user_id=session_data.user_id
     )
+
     return session_dto
 
 
 @router.get("/app/view/session/", response_model=list[SessionDTO], tags=["session_get"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def view_session(
     search_params: SessionSearchDTO = Depends(),
     order_by: Optional[SessionOrderBy] = None,
@@ -61,6 +65,7 @@ async def view_session(
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"セッション取得リクエストを受け付けました。検索条件: {search_params}")
     conditions = {}
     like_conditions = {}
 
@@ -83,7 +88,7 @@ async def view_session(
         order_by=order_by
     )
 
-    logger.debug(sessions)
+    logger.info(f"セッション取得完了: {len(sessions)}件")
 
     session_dto_list = [
         SessionDTO(
@@ -102,13 +107,17 @@ async def view_session(
 @role_required(Role.ADMIN)
 async def update_session(
     session_id: int,
-    updates: SessionUpdateDTO,  # DTOを使用
+    updates: SessionUpdateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
+    logger.info(f"セッション更新リクエストを受け付けました。セッションID: {session_id}")
     conditions = {"id": session_id}
     updates_dict = updates.model_dump(exclude_unset=True)  # 送信されていないフィールドは無視
     updated_record = await update_record(engine, Session, conditions, updates_dict)
+
+    logger.info(
+        f"セッションを更新しました。セッションID: {updated_record.id}, 更新内容: {updates_dict}")
 
     updated_session_dto = SessionDTO(
         id=updated_record.id,
@@ -121,23 +130,16 @@ async def update_session(
 
 
 @router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["session_delete"])
-@role_required(Role.ADMIN)  # admin権限が必要
+@role_required(Role.ADMIN)
 async def delete_session(
     session_id: int,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
-    # 削除対象のセッションを取得
+    logger.info(f"セッション削除リクエストを受け付けました。セッションID: {session_id}")
     conditions = {"id": session_id}
-    # session_to_delete = await select_table(engine, Session, conditions)
 
-    # if not session_to_delete:
-    #     raise HTTPException(status_code=404, detail="セッションが見つかりません")
-
-    # # セッションが現在のユーザーによって作成されたかを確認
-    # if session_to_delete[0].user_id != current_user.id:
-    #     raise HTTPException(status_code=403, detail="このセッションを削除する権限がありません")
-
-    # 削除を実行
     result = await delete_record(engine, Session, conditions)
+    logger.info(f"セッションを削除しました。セッションID: {session_id}")
+
     return result
