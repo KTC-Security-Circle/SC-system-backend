@@ -120,6 +120,7 @@ app = FastAPI(openapi_tags=tags_metadata, lifespan=lifespan)
 origins = [
     "http://localhost",
     "http://localhost:7071",
+    "https://sc-test-api.azurewebsites.net",
 ]
 
 app.add_middleware(
