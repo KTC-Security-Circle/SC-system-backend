@@ -47,6 +47,10 @@ def _get_engine():
         database_url = (
             f"{db_type}+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         )
+    elif db_type == "sqlserver":
+        database_url = (
+            f"mssql+pyodbc://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
+        )
     else:
         raise ValueError(
             "Unsupported DB_TYPE. Use 'sqlite', 'postgresql', or 'mysql'.")

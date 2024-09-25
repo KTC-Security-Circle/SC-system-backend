@@ -10,3 +10,4 @@ sqlmodel
 python-dotenv
 jose
 passlib
+pyodbc

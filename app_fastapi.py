@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI
+from fastapi import  FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 from api.app.database.database import get_engine
@@ -119,6 +119,7 @@ app = FastAPI(openapi_tags=tags_metadata, lifespan=lifespan)
 
 origins = [
     "http://localhost",
+    "http://localhost:3000",
     "http://localhost:7071",
     "https://sc-test-api.azurewebsites.net",
 ]
