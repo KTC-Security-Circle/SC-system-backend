@@ -39,4 +39,4 @@ app.include_router(demo_error_log.router, prefix="/demo", tags=["demo"])
 logger = logging.getLogger("azure_functions.fastapi")
 logger.setLevel(logging.DEBUG)
 
-app = func.AsgiFunctionApp(app=app, http_auth_level=func.AuthLevel.ANONYMOUS)
+asgi_app = func.AsgiFunctionApp(app=app, http_auth_level=func.AuthLevel.ANONYMOUS)
