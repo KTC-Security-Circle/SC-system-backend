@@ -10,3 +10,5 @@ sqlmodel
 python-dotenv
 jose
 passlib
+opentelemetry-instrumentation-fastapi
+azure-monitor-opentelemetry

@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 from api.app.database.database import get_engine
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
