@@ -1,7 +1,7 @@
 import logging
 import os
 import azure.functions as func
-from app_fastapi import app
+from app_fastapi import app as fastapi_app
 
 # 正式なAPI用のインポート
 from api.app.routers import auth as app_auth, messages as app_messages
@@ -28,34 +28,34 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 configure_azure_monitor(
     connection_string=os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
 )
-FastAPIInstrumentor.instrument_app(app)
+FastAPIInstrumentor.instrument_app(fastapi_app)
 
 # http://localhost:7071/ or http://localhost:7071/docs
 
 # 正式なAPIのルータを登録
 
 
-@app.get("/", tags=["root"])
+@fastapi_app.get("/", tags=["root"])
 async def root():
     return {"message": "Hello world"}
 
 
-app.include_router(app_auth.router, prefix="/api", tags=["api"])
-app.include_router(app_messages.router, prefix="/api", tags=["api"])
-app.include_router(app_users.router, prefix="/api", tags=["api"])
-app.include_router(app_chats.router, prefix="/api", tags=["api"])
-app.include_router(app_sessions.router, prefix="/api", tags=["api"])
-app.include_router(app_error_log.router, prefix="/api", tags=["api"])
+fastapi_app.include_router(app_auth.router, prefix="/api", tags=["api"])
+fastapi_app.include_router(app_messages.router, prefix="/api", tags=["api"])
+fastapi_app.include_router(app_users.router, prefix="/api", tags=["api"])
+fastapi_app.include_router(app_chats.router, prefix="/api", tags=["api"])
+fastapi_app.include_router(app_sessions.router, prefix="/api", tags=["api"])
+fastapi_app.include_router(app_error_log.router, prefix="/api", tags=["api"])
 
 
 # デモ用APIのルータを登録
-app.include_router(demo_users.router, prefix="/demo", tags=["demo"])
-app.include_router(demo_chats.router, prefix="/demo", tags=["demo"])
-app.include_router(demo_sessions.router, prefix="/demo", tags=["demo"])
-app.include_router(demo_error_log.router, prefix="/demo", tags=["demo"])
+fastapi_app.include_router(demo_users.router, prefix="/demo", tags=["demo"])
+fastapi_app.include_router(demo_chats.router, prefix="/demo", tags=["demo"])
+fastapi_app.include_router(demo_sessions.router, prefix="/demo", tags=["demo"])
+fastapi_app.include_router(demo_error_log.router, prefix="/demo", tags=["demo"])
 
 # ロガーの設定
 logger = logging.getLogger("azure_functions.fastapi")
 logger.setLevel(logging.DEBUG)
 
-app = func.AsgiFunctionApp(app=app, http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.AsgiFunctionApp(app=fastapi_app, http_auth_level=func.AuthLevel.ANONYMOUS)
