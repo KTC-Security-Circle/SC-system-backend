@@ -25,7 +25,9 @@ from api.demo.routers import (
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-configure_azure_monitor(connection_string=os.getenv("AZURE_MONITOR_CONNECT_STRING"))
+configure_azure_monitor(
+    connection_string=os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+)
 FastAPIInstrumentor.instrument_app(app)
 
 # http://localhost:7071/ or http://localhost:7071/docs
