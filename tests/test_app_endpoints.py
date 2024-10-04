@@ -32,16 +32,27 @@ get_current_user_url = f"{base_url}/api/user/me"
 #     print(response.text)
 #     exit()
 
-# ログインしてトークンを取得
-response = requests.post(login_url, json=login_data)
-if response.status_code == 200:
-    print("Login succeeded")
-    token = response.json()['access_token']
-    print(token)
-else:
-    print("Login failed")
-    print(response.text)
-    exit()
+with requests.Session() as session:
+    # ログインしてトークンをCookieに保存
+    response = session.post(login_url, json=login_data)
+
+    if response.status_code == 200:
+        print("Login succeeded")
+
+        # Cookieから`access_token`を取得
+        cookies = session.cookies.get_dict()
+        token = cookies.get('access_token')  # access_tokenというCookie名を指定
+
+        if token:
+            print(f"Token from cookie: {token}")
+        else:
+            print("Token not found in cookies")
+            exit()
+
+    else:
+        print("Login failed")
+        print(response.text)
+        exit()
 
 headers = {
     "Authorization": f"Bearer {token}"

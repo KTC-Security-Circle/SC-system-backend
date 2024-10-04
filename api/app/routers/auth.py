@@ -41,7 +41,7 @@ async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
         return signup_dto
 
 
-@router.post("/login/", response_model=Token, tags=["login"])
+@router.post("/login/", response_model=dict, tags=["login"])
 async def login(user: LoginData, response: Response, engine=Depends(get_engine)):
     with Session(engine) as session:
         db_user = session.exec(select(User).where(
