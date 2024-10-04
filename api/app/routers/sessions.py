@@ -25,7 +25,7 @@ from api.app.routers import (
 
 
 @router.post("/app/input/session/", response_model=SessionDTO, tags=["session_post"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def create_session(
     session: SessionCreateDTO,
     engine=Depends(get_engine),
@@ -56,7 +56,7 @@ async def create_session(
 
 
 @router.get("/app/view/session/", response_model=list[SessionDTO], tags=["session_get"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def view_session(
     search_params: SessionSearchDTO = Depends(),
     order_by: Optional[SessionOrderBy] = None,
@@ -104,7 +104,7 @@ async def view_session(
 
 
 @router.put("/app/update/session/{session_id}/", response_model=SessionDTO, tags=["session_put"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def update_session(
     session_id: int,
     updates: SessionUpdateDTO,
@@ -130,7 +130,7 @@ async def update_session(
 
 
 @router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["session_delete"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def delete_session(
     session_id: int,
     engine=Depends(get_engine),

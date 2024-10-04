@@ -25,7 +25,7 @@ from api.app.routers import (
 
 
 @router.post("/app/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def create_chatlog(
     chatlog: ChatCreateDTO,  # DTOを使用
     engine=Depends(get_engine),
@@ -60,7 +60,7 @@ async def create_chatlog(
 
 
 @router.get("/app/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def view_chatlog(
     search_params: ChatSearchDTO = Depends(),  # メッセージの部分一致フィルタ
     order_by: Optional[ChatOrderBy] = None,  # ソート基準のフィールド名
@@ -107,7 +107,7 @@ async def view_chatlog(
 
 
 @router.put("/app/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def update_chatlog(
     chat_id: int,
     updates: ChatUpdateDTO,  # DTOを使用
@@ -135,7 +135,7 @@ async def update_chatlog(
 
 
 @router.delete("/app/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def delete_chatlog(
     chat_id: int,
     engine=Depends(get_engine),
