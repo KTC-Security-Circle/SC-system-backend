@@ -41,6 +41,8 @@ async def create_chatlog(
     )
 
     await add_db_record(engine, chat_log_data)
+    
+    
 
     logger.info("新しいチャットログを登録しました。")
     logger.info(f"チャットID:{chat_log_data.id}")

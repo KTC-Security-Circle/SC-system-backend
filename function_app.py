@@ -1,6 +1,6 @@
 import logging
 import azure.functions as func
-from app_fastapi import app
+from api.app_fastapi import app
 
 # 正式なAPI用のインポート
 from api.app.routers import auth as app_auth, messages as app_messages

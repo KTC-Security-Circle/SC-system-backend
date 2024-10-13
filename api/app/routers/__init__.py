@@ -28,6 +28,8 @@ from api.app.database.database import (
 # ユーザーモデル
 from api.app.models import User
 
+# sc-system-ai
+
 # 共通のインスタンス
 logger = getLogger(__name__)
 router = APIRouter()

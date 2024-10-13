@@ -49,7 +49,7 @@ def _get_engine():
         )
     elif db_type == "sqlserver":
         database_url = (
-            f"mssql+pyodbc://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
+            f"mssql+pymssql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         )
     else:
         raise ValueError(

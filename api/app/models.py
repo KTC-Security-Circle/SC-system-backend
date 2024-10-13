@@ -7,7 +7,7 @@ import uuid
 
 class User(SQLModel, table=True):
     id: Optional[str] = Field(
-        default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+        default_factory=lambda: str(uuid.uuid4()), max_length=255, primary_key=True)
     name: Optional[str] = Field(default="名無し", max_length=150,
                                 title="名前", description="ユーザの名前")
     email: EmailStr = Field(..., title="メールアドレス", description="ユーザのメールアドレス")
@@ -41,10 +41,11 @@ class User(SQLModel, table=True):
 class Session(SQLModel, table=True):
     id: Optional[int] = Field(None, primary_key=True,
                               title="セッションID", description="セッションを一意に識別するためのID")
-    session_name: str = Field("NewSession", title="名前", description="セッション名")
+    session_name: str = Field(
+        "NewSession", max_length=255, title="名前", description="セッション名")
     pub_data: Optional[datetime] = Field(
         None, title="公開日時", description="セッションの公開日時")
-    user_id: str = Field(..., foreign_key="user.id",
+    user_id: str = Field(..., max_length=255, foreign_key="user.id",
                                    title="ユーザID", description="関連するユーザのID")
 
     class Config:
@@ -61,10 +62,10 @@ class Session(SQLModel, table=True):
 class ChatLog(SQLModel, table=True):
     id: Optional[int] = Field(None, primary_key=True,
                               title="チャットID", description="チャットを一意に識別するためのID", index=True)
-    message: str = Field(..., title="メッセージ",
+    message: str = Field(..., max_length=255, title="メッセージ",
                          description="チャットメッセージの内容", index=True)
     bot_reply: Optional[str] = Field(
-        None, title="ボットの返信", description="ボットの返信内容")
+        None, max_length=255, title="ボットの返信", description="ボットの返信内容")
     pub_data: Optional[datetime] = Field(
         None, title="公開日時", description="メッセージの公開日時", index=True)
     session_id: Optional[int] = Field(
@@ -85,7 +86,8 @@ class ChatLog(SQLModel, table=True):
 class ErrorLog(SQLModel, table=True):
     id: Optional[int] = Field(None, primary_key=True,
                               title="エラーログID", description="エラーログを一意に識別するためのID")
-    error_message: str = Field(..., title="エラーメッセージ", description="エラーの内容")
+    error_message: str = Field(..., max_length=255,
+                               title="エラーメッセージ", description="エラーの内容")
     pub_data: Optional[datetime] = Field(
         None, title="公開日時", description="エラーログの公開日時")
     session_id: Optional[int] = Field(..., foreign_key="session.id",
