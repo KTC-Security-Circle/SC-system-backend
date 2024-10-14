@@ -29,6 +29,7 @@ from api.app.database.database import (
 from api.app.models import User
 
 # sc-system-ai
+from sc_system_ai import main as SC_AI
 
 # 共通のインスタンス
 logger = getLogger(__name__)

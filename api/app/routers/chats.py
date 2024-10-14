@@ -21,6 +21,7 @@ from api.app.routers import (
     update_record,
     delete_record,
     User,
+    SC_AI,
 )
 
 
@@ -33,16 +34,25 @@ async def create_chatlog(
 ):
     logger.info(f"チャット作成リクエストを受け付けました。ユーザーID: {current_user.id}")
 
+    # AI応答を生成する
+    chat_instance = SC_AI.Chat(
+        user_name=current_user.name,
+        user_major="fugafuga専攻",
+        conversation=[("human", chatlog.message)]  # 人間のメッセージとして会話履歴を初期化
+    )
+
+    bot_reply = chat_instance.invoke(message=chatlog.message)  # AIが返信を生成
+
+    # チャットログを作成
     chat_log_data = ChatLog(
         message=chatlog.message,
-        bot_reply=chatlog.bot_reply,
+        bot_reply=bot_reply,  # 生成されたAIの応答を設定
         pub_data=chatlog.pub_data or datetime.now(),  # 日時が指定されていない場合は現在時刻を使用
         session_id=chatlog.session_id,
     )
 
+    # データベースにチャットログを追加
     await add_db_record(engine, chat_log_data)
-    
-    
 
     logger.info("新しいチャットログを登録しました。")
     logger.info(f"チャットID:{chat_log_data.id}")
@@ -51,6 +61,7 @@ async def create_chatlog(
     logger.info(f"投稿日時:{chat_log_data.pub_data}")
     logger.info(f"セッションID:{chat_log_data.session_id}")
 
+    # チャットログのDTOを作成
     chat_dto = ChatLogDTO(
         id=chat_log_data.id,
         message=chat_log_data.message,
@@ -58,6 +69,7 @@ async def create_chatlog(
         pub_data=chat_log_data.pub_data,
         session_id=chat_log_data.session_id
     )
+
     return chat_dto
 
 

@@ -23,7 +23,7 @@ login_data = {
 # get_current_userAPI
 get_current_user_url = f"{base_url}/api/user/me"
 
-# # サインアップしてユーザーを登録
+# サインアップしてユーザーを登録
 # response = requests.post(signup_url, json=signup_data)
 # if response.status_code == 200:
 #     print("Signup successful")
@@ -72,32 +72,32 @@ else:
 
 # 各エンドポイントに対するデータ
 post_endpoints = [
-    {
-        "url": f"{base_url}/api/app/input/user/",
-        "data": {"name": "aaaaaa", "email": "exsample@num.jp", "password": "12345678", "authority": "admin"}
-    },
+    # {
+    #     "url": f"{base_url}/api/app/input/user/",
+    #     "data": {"name": "aaaaaa", "email": "exsample@num.jp", "password": "12345678", "authority": "admin"}
+    # },
+    # {
+    #     "url": f"{base_url}/api/app/input/session/",
+    #     "data": {"session_name": "Python", "pub_data": None}
+    # },
     {
         "url": f"{base_url}/api/app/input/chat/",
-        "data": {"message": "aaaaaa", "bot_reply": "テスト用返信テキスト", "pub_data": None, "session_id": 1}
+        "data": {"message": "あなたの役割を教えてください", "pub_data": None, "session_id": 1}
     },
-    {
-        "url": f"{base_url}/api/app/input/session/",
-        "data": {"session_name": "Python", "pub_data": None}
-    },
-    {
-        "url": f"{base_url}/api/app/input/errorlog/",
-        "data": {"error_message": "テキストエラー", "pub_data": None, "session_id": 1}
-    }
+    # {
+    #     "url": f"{base_url}/api/app/input/errorlog/",
+    #     "data": {"error_message": "テキストエラー", "pub_data": None, "session_id": 1}
+    # }
 ]
 get_endpoints = [
-    {
-        "url": f"{base_url}/api/app/view/user/",
-        "params": {
-            "name": "aaaaaa",
-            "limit": 2,
-            "offset": 1
-        }
-    },
+    # {
+    #     "url": f"{base_url}/api/app/view/user/",
+    #     "params": {
+    #         "name": "aaaaaa",
+    #         "limit": 2,
+    #         "offset": 1
+    #     }
+    # },
     {
         "url": f"{base_url}/api/app/view/chat/",
         "params": {
@@ -106,22 +106,22 @@ get_endpoints = [
             "offset": 2
         }
     },
-    {
-        "url": f"{base_url}/api/app/view/session/",
-        "params": {
-            "user_id": 2,
-            "limit": 3,
-            "offset": 1
-        }
-    },
-    {
-        "url": f"{base_url}/api/app/view/errorlog/",
-        "params": {
-            "session_id": 5,
-            "limit": 3,
-            "offset": 1
-        }
-    }
+    # {
+    #     "url": f"{base_url}/api/app/view/session/",
+    #     "params": {
+    #         "user_id": 2,
+    #         "limit": 3,
+    #         "offset": 1
+    #     }
+    # },
+    # {
+    #     "url": f"{base_url}/api/app/view/errorlog/",
+    #     "params": {
+    #         "session_id": 5,
+    #         "limit": 3,
+    #         "offset": 1
+    #     }
+    # }
 ]
 
 put_endpoints = [
@@ -158,17 +158,17 @@ delete_endpoints = [
     }
 ]
 
-# # 各エンドポイントにPOSTリクエストを送信
-# for endpoint in post_endpoints:
-#     try:
-#         res = requests.post(
-#             endpoint["url"], json=endpoint["data"], headers=headers)
-#         print(f"URL: {endpoint['url'],headers}")
-#         print(f"Status Code: {res.status_code}")
-#         print(f"Response: {res.text}")
-#         print("\n")
-#     except requests.exceptions.RequestException as e:
-#         print(f"Request to {endpoint['url']} failed: {e}")
+# 各エンドポイントにPOSTリクエストを送信
+for endpoint in post_endpoints:
+    try:
+        res = requests.post(
+            endpoint["url"], json=endpoint["data"], headers=headers)
+        print(f"URL: {endpoint['url'],headers}")
+        print(f"Status Code: {res.status_code}")
+        print(f"Response: {res.text}")
+        print("\n")
+    except requests.exceptions.RequestException as e:
+        print(f"Request to {endpoint['url']} failed: {e}")
 
 # 各エンドポイントにGETリクエストを送信
 for endpoint in get_endpoints:

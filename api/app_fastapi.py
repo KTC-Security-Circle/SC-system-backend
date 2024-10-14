@@ -9,7 +9,7 @@ async def lifespan(app: FastAPI):
     engine = next(get_engine())
     SQLModel.metadata.create_all(engine)
     yield
-    SQLModel.metadata.drop_all(engine)
+    # SQLModel.metadata.drop_all(engine)
 
 # FastAPIアプリケーションのインスタンスを作成
 tags_metadata = [
