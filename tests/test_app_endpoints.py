@@ -23,7 +23,7 @@ login_data = {
 # get_current_userAPI
 get_current_user_url = f"{base_url}/api/user/me"
 
-# サインアップしてユーザーを登録
+# # サインアップしてユーザーを登録
 # response = requests.post(signup_url, json=signup_data)
 # if response.status_code == 200:
 #     print("Signup successful")

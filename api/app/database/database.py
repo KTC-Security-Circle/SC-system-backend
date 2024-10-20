@@ -9,7 +9,7 @@ from typing import Optional
 from api.logger import getLogger
 
 logger = getLogger(__name__, "DEBUG")
-dotenv_path = join(dirname(__file__), ".env")
+dotenv_path = join(dirname(__file__), "secret/.env")
 load_dotenv(dotenv_path)
 
 
