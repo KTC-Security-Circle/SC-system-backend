@@ -1,17 +1,12 @@
 from fastapi import HTTPException, status
 from functools import wraps
 from sqlmodel import Session, create_engine, select
-from dotenv import load_dotenv
 import os
-from os.path import join, dirname
 from fastapi import HTTPException, Query
 from typing import Optional
 from api.logger import getLogger
 
 logger = getLogger(__name__, "DEBUG")
-dotenv_path = join(dirname(__file__), "secret/.env")
-load_dotenv(dotenv_path)
-
 
 def get_engine():
     engine = _get_engine()

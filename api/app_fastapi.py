@@ -9,7 +9,6 @@ from sqlmodel import SQLModel
 from api.app.database.database import get_engine
 from contextlib import asynccontextmanager
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     engine = next(get_engine())

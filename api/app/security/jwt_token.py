@@ -8,16 +8,10 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from dotenv import load_dotenv
-from os.path import join, dirname
 import os
 from api.logger import getLogger
 
 logger = getLogger(__name__)
-
-# .envファイルを読み込む
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
 
 # 環境変数から設定を読み込む
 SECRET_KEY = os.getenv("SECRET_KEY")

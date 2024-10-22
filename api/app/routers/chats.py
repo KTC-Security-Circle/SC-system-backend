@@ -28,10 +28,10 @@ from api.app.routers import (
 
 
 async def generate_reply(bot_reply: str, end_data, step: int):
+    """AIの応答を分割してストリーミングするジェネレータ"""
     for i in range(0, len(bot_reply), step):
         yield bot_reply[i:i + step]
         await asyncio.sleep(0.1)
-    
     yield end_data
 
 
@@ -39,6 +39,7 @@ async def generate_reply(bot_reply: str, end_data, step: int):
 @role_required(Role.STUDENT)
 async def create_chatlog(
     chatlog: ChatCreateDTO,  # DTOを使用
+    is_realtime: bool = True,  # 新しく引数を追加、デフォルトはリアルタイム通信
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
@@ -80,8 +81,11 @@ async def create_chatlog(
         session_id=chat_log_data.session_id
     )
 
-    return StreamingResponse(generate_reply(bot_reply, chat_dto, 1), media_type="text/plain")
-
+    # リアルタイム通信かどうかでレスポンスを分岐
+    if is_realtime:
+        return StreamingResponse(generate_reply(bot_reply, chat_dto, 1), media_type="text/plain")
+    else:
+        return chat_dto
 
 @router.get("/app/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.STUDENT)
