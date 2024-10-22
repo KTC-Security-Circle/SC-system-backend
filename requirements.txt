@@ -8,3 +8,7 @@ uvicorn
 pydantic
 sqlmodel
 python-dotenv
+jose
+passlib
+pymssql
+pydantic[email]
