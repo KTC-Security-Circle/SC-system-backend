@@ -1,97 +1,91 @@
-from api.app.models import ChatLog
+from fastapi import APIRouter, Depends, HTTPException
+from api.app.dtos.chatlog_dtos import ChatCreateDTO, ChatLogDTO, ChatSearchDTO, ChatUpdateDTO, ChatOrderBy
+from api.app.models import User, ChatLog
+from api.app.role import Role, role_required
+from api.app.security.jwt_token import get_current_user
+from api.app.database.database import add_db_record, select_table, update_record, delete_record
+from api.app.database.engine import get_engine
+from datetime import datetime
+from typing import Optional
+from sc_system_ai import main as SC_AI
+from api.logger import getLogger
+import logging
 import asyncio
 from fastapi.responses import StreamingResponse
-from api.app.dtos.chatlog_dtos import (
-    ChatLogDTO,
-    ChatCreateDTO,
-    ChatOrderBy,
-    ChatSearchDTO,
-    ChatUpdateDTO
-)
-from api.app.routers import (
-    logger,
-    router,
-    Depends,
-    datetime,
-    get_current_user,
-    Role,
-    role_required,
-    Optional,
-    add_db_record,
-    get_engine,
-    select_table,
-    update_record,
-    delete_record,
-    User,
-    SC_AI,
-)
+
+router = APIRouter()
+logger = getLogger("chatlog_router")
+logger.setLevel(logging.DEBUG)
 
 
-async def generate_reply(bot_reply: str, end_data, step: int):
-    """AIの応答を分割してストリーミングするジェネレータ"""
-    for i in range(0, len(bot_reply), step):
-        yield bot_reply[i:i + step]
-        await asyncio.sleep(0.1)
-    yield end_data
+# 通常のジェネレータを非同期ジェネレータに変換するラッパー関数
+async def async_wrap(generator):
+    for item in generator:
+        yield item
+        await asyncio.sleep(0)  # イテレーション間にコンテキストの切り替えを可能にする
 
 
-@router.post("/app/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
+@router.post("/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
 @role_required(Role.STUDENT)
 async def create_chatlog(
-    chatlog: ChatCreateDTO,  # DTOを使用
-    is_realtime: bool = True,  # 新しく引数を追加、デフォルトはリアルタイム通信
+    chatlog: ChatCreateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     logger.info(f"チャット作成リクエストを受け付けました。ユーザーID: {current_user.id}")
 
-    # AI応答を生成する
-    chat_instance = SC_AI.Chat(
-        user_name=current_user.name,
-        user_major="fugafuga専攻",
-        conversation=[("human", chatlog.message)]  # 人間のメッセージとして会話履歴を初期化
-    )
+    try:
+        # ユーザー情報を設定
+        user_info = User(name=current_user.name, major=current_user.major)
 
-    bot_reply = chat_instance.invoke(message=chatlog.message)  # AIが返信を生成
+        # AI応答を生成するためのエージェントを作成
+        agent = SC_AI.Agent(user_info=user_info, is_streaming=True)
 
-    # チャットログを作成
-    chat_log_data = ChatLog(
-        message=chatlog.message,
-        bot_reply=bot_reply,  # 生成されたAIの応答を設定
-        pub_data=chatlog.pub_data or datetime.now(),  # 日時が指定されていない場合は現在時刻を使用
-        session_id=chatlog.session_id,
-    )
+        # AIがメッセージに対してストリーミング返信を生成
+        bot_reply_generator = async_wrap(agent.invoke(message=chatlog.message))
 
-    # データベースにチャットログを追加
-    await add_db_record(engine, chat_log_data)
+        # ストリーミングレスポンス用のジェネレータ関数
+        async def bot_reply_streamer():
+            try:
+                async for chunk in bot_reply_generator:
+                    yield chunk
+                    await asyncio.sleep(0.1)  # 少しの遅延を入れてリアルタイム感を強調
+            except Exception as stream_err:
+                logger.error(f"ストリーミング中にエラーが発生しました: {str(stream_err)}")
+                yield "[ストリーミングエラー: 応答の一部が欠落しています]"
 
-    logger.info("新しいチャットログを登録しました。")
-    logger.info(f"チャットID:{chat_log_data.id}")
-    logger.info(f"チャット内容:{chat_log_data.message}")
-    logger.info(f"ボットの返信:{chat_log_data.bot_reply}")
-    logger.info(f"投稿日時:{chat_log_data.pub_data}")
-    logger.info(f"セッションID:{chat_log_data.session_id}")
+        # チャットログを作成
+        chat_log_data = ChatLog(
+            message=chatlog.message,
+            bot_reply="",  # ストリーミング中のため、完全なレスポンスは後で取得
+            pub_data=chatlog.pub_data or datetime.now(),
+            session_id=chatlog.session_id,
+        )
 
-    # チャットログのDTOを作成
-    chat_dto = ChatLogDTO(
-        id=chat_log_data.id,
-        message=chat_log_data.message,
-        bot_reply=chat_log_data.bot_reply,
-        pub_data=chat_log_data.pub_data,
-        session_id=chat_log_data.session_id
-    )
+        # データベースにチャットログを追加
+        await add_db_record(engine, chat_log_data)
 
-    # リアルタイム通信かどうかでレスポンスを分岐
-    if is_realtime:
-        return StreamingResponse(generate_reply(bot_reply, chat_dto, 1), media_type="text/plain")
-    else:
-        return chat_dto
+        logger.info("新しいチャットログを登録しました。")
+        logger.info(f"チャットID:{chat_log_data.id}")
+        logger.info(f"チャット内容:{chat_log_data.message}")
+        logger.info(f"投稿日時:{chat_log_data.pub_data}")
+        logger.info(f"セッションID:{chat_log_data.session_id}")
 
-@router.get("/app/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
+        # リアルタイムでストリーミングレスポンスを返す
+        return StreamingResponse(bot_reply_streamer(), media_type="text/plain")
+
+    except Exception as e:
+        logger.error(f"チャットログ作成中にエラーが発生しました: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"チャットログの作成中にエラーが発生しました。{str(e)}"
+        )
+
+
+@router.get("/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.STUDENT)
 async def view_chatlog(
-    search_params: ChatSearchDTO = Depends(),  # メッセージの部分一致フィルタ
-    order_by: Optional[ChatOrderBy] = None,  # ソート基準のフィールド名
+    search_params: ChatSearchDTO = Depends(),
+    order_by: Optional[ChatOrderBy] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
@@ -134,18 +128,18 @@ async def view_chatlog(
     return chatlog_dto_list
 
 
-@router.put("/app/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
+@router.put("/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
 @role_required(Role.STUDENT)
 async def update_chatlog(
     chat_id: int,
-    updates: ChatUpdateDTO,  # DTOを使用
+    updates: ChatUpdateDTO,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user)
 ):
     logger.info(f"チャットログ更新リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
-    updates_dict = updates.model_dump(exclude_unset=True)  # 送信されていないフィールドは無視
+    updates_dict = updates.model_dump(exclude_unset=True)
     updated_record = await update_record(engine, ChatLog, conditions, updates_dict)
 
     logger.info(
@@ -162,7 +156,7 @@ async def update_chatlog(
     return updated_chatlog_dto
 
 
-@router.delete("/app/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
+@router.delete("/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
 @role_required(Role.STUDENT)
 async def delete_chatlog(
     chat_id: int,
@@ -172,19 +166,8 @@ async def delete_chatlog(
     logger.info(f"チャットログ削除リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
-    # chatlog_to_delete = await select_table(engine, ChatLog, conditions)
-
-    # if not chatlog_to_delete:
-    #     raise HTTPException(status_code=404, detail="チャットログが見つかりません")
-
-    # # チャットログのセッションIDからセッションを取得し、ユーザーIDを確認
-    # session_conditions = {"id": chatlog_to_delete[0].session_id}
-    # session = await select_table(engine, Session, session_conditions)
-
-    # if not session or session[0].user_id != current_user.id:
-    #     raise HTTPException(status_code=403, detail="このチャットログを削除する権限がありません")
     result = await delete_record(engine, ChatLog, conditions)
 
     logger.info(f"チャットログを削除しました。チャットID: {chat_id}")
 
-    return result
+    return {"message": "チャットログが削除されました"}

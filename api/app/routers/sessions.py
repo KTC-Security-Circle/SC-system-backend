@@ -1,30 +1,19 @@
-from api.app.models import Session
-from api.app.dtos.session_dtos import (
-    SessionDTO,
-    SessionCreateDTO,
-    SessionOrderBy,
-    SessionSearchDTO,
-    SessionUpdateDTO
-)
-from api.app.routers import (
-    logger,
-    router,
-    Depends,
-    datetime,
-    get_current_user,
-    Role,
-    role_required,
-    Optional,
-    add_db_record,
-    get_engine,
-    select_table,
-    update_record,
-    delete_record,
-    User,
-)
+from fastapi import APIRouter, Depends
+from api.app.dtos.session_dtos import SessionCreateDTO, SessionDTO, SessionSearchDTO, SessionUpdateDTO, SessionOrderBy
+from api.app.models import User, Session
+from api.app.role import Role, role_required
+from api.app.security.jwt_token import get_current_user
+from api.app.database.database import add_db_record, select_table, update_record, delete_record
+from api.app.database.engine import get_engine
+from datetime import datetime
+from typing import Optional
+from api.logger import getLogger
+
+router = APIRouter()
+logger = getLogger("session_router")
 
 
-@router.post("/app/input/session/", response_model=SessionDTO, tags=["session_post"])
+@router.post("/input/session/", response_model=SessionDTO, tags=["session_post"])
 @role_required(Role.STUDENT)
 async def create_session(
     session: SessionCreateDTO,
@@ -38,13 +27,13 @@ async def create_session(
         user_id=current_user.id,
     )
     await add_db_record(engine, session_data)
-    
+
     logger.info("新しいセッションを登録しました。")
     logger.info(f"セッションID:{session_data.id}")
     logger.info(f"セッション名:{session_data.session_name}")
     logger.info(f"投稿日時:{session_data.pub_data}")
     logger.info(f"ユーザーID:{session_data.user_id}")
-    
+
     session_dto = SessionDTO(
         id=session_data.id,
         session_name=session_data.session_name,
@@ -55,7 +44,7 @@ async def create_session(
     return session_dto
 
 
-@router.get("/app/view/session/", response_model=list[SessionDTO], tags=["session_get"])
+@router.get("/view/session/", response_model=list[SessionDTO], tags=["session_get"])
 @role_required(Role.STUDENT)
 async def view_session(
     search_params: SessionSearchDTO = Depends(),
@@ -103,7 +92,7 @@ async def view_session(
     return session_dto_list
 
 
-@router.put("/app/update/session/{session_id}/", response_model=SessionDTO, tags=["session_put"])
+@router.put("/update/session/{session_id}/", response_model=SessionDTO, tags=["session_put"])
 @role_required(Role.STUDENT)
 async def update_session(
     session_id: int,
@@ -129,7 +118,7 @@ async def update_session(
     return updated_session_dto
 
 
-@router.delete("/app/delete/session/{session_id}/", response_model=dict, tags=["session_delete"])
+@router.delete("/delete/session/{session_id}/", response_model=dict, tags=["session_delete"])
 @role_required(Role.STUDENT)
 async def delete_session(
     session_id: int,
