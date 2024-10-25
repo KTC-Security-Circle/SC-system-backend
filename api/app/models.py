@@ -81,24 +81,3 @@ class ChatLog(SQLModel, table=True):
                 "session_id": 1
             }
         }
-
-
-class ErrorLog(SQLModel, table=True):
-    id: Optional[int] = Field(None, primary_key=True,
-                              title="エラーログID", description="エラーログを一意に識別するためのID")
-    error_message: str = Field(..., max_length=255,
-                               title="エラーメッセージ", description="エラーの内容")
-    pub_data: Optional[datetime] = Field(
-        None, title="公開日時", description="エラーログの公開日時")
-    session_id: Optional[int] = Field(..., foreign_key="session.id",
-                                      title="セッションID", description="関連するセッションのID")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "id": 1,
-                "error_message": "データベース接続エラー",
-                "pub_data": "2024-06-29T12:36:00",
-                "session_id": 1
-            }
-        }
