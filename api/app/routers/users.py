@@ -1,3 +1,4 @@
+from fastapi.responses import JSONResponse
 from api.app.dtos.user_dtos import (
     UserDTO,
     UserCreateDTO,
@@ -24,6 +25,7 @@ from api.app.routers import (
     delete_record,
     User,
     HTTPException,
+    Response,
 )
 
 
@@ -194,13 +196,21 @@ async def update_user(
 @role_required(Role.ADMIN)
 async def delete_user(
     user_id: str,
+    response: Response,
     engine=Depends(get_engine),
+    current_user: User = Depends(get_current_user)
 ):
-    logger.info(f"ユーザー削除リクエストを受け付けました。ユーザーID: {user_id}")
+    logger.info(
+        f"ユーザー削除リクエストを受け付けました。削除対象: {user_id}, ログイン中のユーザー: {current_user.id}")
 
     conditions = {"id": user_id}
     result = await delete_record(engine, User, conditions)
-
     logger.info(f"ユーザーを削除しました。ユーザーID: {user_id}")
 
-    return result
+    # 自分自身のアカウントを削除した場合はログアウト処理を行う
+    if current_user.id == user_id:
+        response.delete_cookie("access_token")
+        logger.info(f"ユーザー自身が削除されました。Cookieを削除し、ログアウト処理を実行します。")
+        return {"message": "User deleted and logged out successfully."}
+    
+    return {"message": "User deleted successfully"}
