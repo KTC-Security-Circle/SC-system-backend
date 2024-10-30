@@ -54,13 +54,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         logger.error(f"トークンの生成中にエラーが発生しました: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="トークンの生成に失敗しました。再試行してください。"
+            detail="トークンの生成に失敗しました。再試行してください。",
         )
     except Exception as e:
         logger.error(f"予期しないエラーが発生しました: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="予期しないエラーが発生しました。"
+            detail="予期しないエラーが発生しました。",
         )
 
 
@@ -85,7 +85,9 @@ async def authenticate_user(db: Session, email: str, password: str):
     return None
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), engine=Depends(get_engine)) -> User:
+def get_current_user(
+    token: str = Depends(oauth2_scheme), engine=Depends(get_engine)
+) -> User:
     logger.debug(f"Received token: {token}")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -106,8 +108,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), engine=Depends(get_eng
 
     try:
         with Session(engine) as db:
-            user = db.exec(select(User).where(
-                User.id == user_id, User.email == email)).first()
+            user = db.exec(
+                select(User).where(User.id == user_id, User.email == email)
+            ).first()
             logger.debug(f"Retrieved user: {user}")
             if user is None:
                 logger.error("User not found")

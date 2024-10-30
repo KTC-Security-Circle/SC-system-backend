@@ -20,14 +20,14 @@ login_data = {
     "password": "12345678"
 }
 
-# # サインアップしてユーザーを登録
-# response = requests.post(signup_url, json=signup_data)
-# if response.status_code == 200:
-#     print("Signup successful")
-# else:
-#     print("Signup failed")
-#     print(response.text)
-#     exit()
+# サインアップしてユーザーを登録
+response = requests.post(signup_url, json=signup_data)
+if response.status_code == 200:
+    print("Signup successful")
+else:
+    print("Signup failed")
+    print(response.text)
+    exit()
 
 with requests.Session() as session:
     # ログインしてトークンをCookieに保存

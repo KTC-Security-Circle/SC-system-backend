@@ -1,9 +1,20 @@
 from fastapi import APIRouter, HTTPException, Depends, Response
-from api.app.dtos.user_dtos import UserCreateDTO, UserDTO, UserSearchDTO, UserUpdateDTO, UserOrderBy
+from api.app.dtos.user_dtos import (
+    UserCreateDTO,
+    UserDTO,
+    UserSearchDTO,
+    UserUpdateDTO,
+    UserOrderBy,
+)
 from api.app.models import User
 from api.app.role import Role, role_required
 from api.app.security.jwt_token import get_current_user, get_password_hash
-from api.app.database.database import add_db_record, select_table, update_record, delete_record
+from api.app.database.database import (
+    add_db_record,
+    select_table,
+    update_record,
+    delete_record,
+)
 from api.app.database.engine import get_engine
 from datetime import datetime
 from sqlmodel import Session, select
@@ -20,7 +31,7 @@ logger = getLogger("user_router")
 async def create_user(
     user: UserCreateDTO,
     engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
 
     logger.info("ユーザー作成リクエストを受け付けました。")
@@ -28,14 +39,12 @@ async def create_user(
     session = Session(engine)
 
     # 既存のメールアドレスのチェック
-    existing_user = session.exec(
-        select(User).where(User.email == user.email)).first()
+    existing_user = session.exec(select(User).where(User.email == user.email)).first()
 
     if existing_user:
         session.close()
         logger.error(f"既に登録済みのメールアドレス: {user.email}")
-        raise HTTPException(
-            status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     session.close()
 
@@ -69,7 +78,7 @@ async def create_user(
         name=user_data.name,
         email=user_data.email,
         authority=user_data.authority,
-        major=user_data.major
+        major=user_data.major,
     )
 
     return user_dto
@@ -86,14 +95,15 @@ async def get_me(current_user: User = Depends(get_current_user)):
             name=current_user.name,
             email=current_user.email,
             authority=current_user.authority,
-            major=current_user.major
+            major=current_user.major,
         )
         return me_dto
 
     except Exception as e:
         logger.error(f"ユーザー情報取得中にエラーが発生しました: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"ユーザー情報の取得中にエラーが発生しました。{str(e)}"
+            status_code=500,
+            detail=f"ユーザー情報の取得中にエラーが発生しました。{str(e)}",
         )
 
 
@@ -105,9 +115,11 @@ async def view_user(
     limit: Optional[int] = None,
     offset: Optional[int] = 0,
     engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
-    logger.info(f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}")
+    logger.info(
+        f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}"
+    )
     conditions = {}
     like_conditions = {}
 
@@ -134,7 +146,7 @@ async def view_user(
         like_conditions=like_conditions,
         offset=offset,
         limit=limit,
-        order_by=order_by
+        order_by=order_by,
     )
 
     logger.info(f"ユーザー一覧取得完了: {len(users)}件")
@@ -145,7 +157,7 @@ async def view_user(
             name=user.name,
             email=user.email,
             authority=user.authority,
-            major=user.major
+            major=user.major,
         )
         for user in users
     ]
@@ -159,7 +171,7 @@ async def update_user(
     user_id: str,
     updates: UserUpdateDTO,
     engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     logger.info(f"ユーザー更新リクエストを受け付けました。ユーザーID: {user_id}")
     updates_dict = updates.model_dump(exclude_unset=True)
@@ -167,21 +179,21 @@ async def update_user(
     session = Session(engine)
 
     # 既存のメールアドレスのチェック
-    if 'email' in updates_dict:
+    if "email" in updates_dict:
         existing_user = session.exec(
-            select(User).where(User.email == updates_dict['email'])).first()
+            select(User).where(User.email == updates_dict["email"])
+        ).first()
 
         if existing_user:
             session.close()
             logger.info(f"既に登録済みのメールアドレス: {updates_dict['email']}")
-            raise HTTPException(
-                status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=400, detail="Email already registered")
 
     session.close()
 
     # パスワードのハッシュ化
-    if 'password' in updates_dict:
-        updates_dict['password'] = get_password_hash(updates_dict['password'])
+    if "password" in updates_dict:
+        updates_dict["password"] = get_password_hash(updates_dict["password"])
 
     # 更新内容を辞書形式でupdate_record関数に渡す
     conditions = {"id": user_id}
@@ -192,7 +204,7 @@ async def update_user(
         name=updated_record.name,
         email=updated_record.email,
         authority=updated_record.authority,
-        major=updated_record.major
+        major=updated_record.major,
     )
     return updated_user_dto
 
@@ -203,10 +215,11 @@ async def delete_user(
     user_id: str,
     response: Response,
     engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     logger.info(
-        f"ユーザー削除リクエストを受け付けました。削除対象: {user_id}, ログイン中のユーザー: {current_user.id}")
+        f"ユーザー削除リクエストを受け付けました。削除対象: {user_id}, ログイン中のユーザー: {current_user.id}"
+    )
 
     conditions = {"id": user_id}
     result = await delete_record(engine, User, conditions)
@@ -215,7 +228,9 @@ async def delete_user(
     # 自分自身のアカウントを削除した場合はログアウト処理を行う
     if current_user.id == user_id:
         response.delete_cookie("access_token")
-        logger.info(f"ユーザー自身が削除されました。Cookieを削除し、ログアウト処理を実行します。")
+        logger.info(
+            f"ユーザー自身が削除されました。Cookieを削除し、ログアウト処理を実行します。"
+        )
         return {"message": "User deleted and logged out successfully."}
 
     return {"message": "User deleted successfully"}

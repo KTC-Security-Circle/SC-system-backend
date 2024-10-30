@@ -22,9 +22,11 @@ def db_error_handling(default_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
             except Exception as e:
                 raise HTTPException(
                     status_code=default_status_code,
-                    detail=f"エラーが発生しました: {str(e)}"
+                    detail=f"エラーが発生しました: {str(e)}",
                 )
+
         return wrapper
+
     return decorator
 
 
@@ -43,10 +45,9 @@ async def select_table(
     model,
     conditions: Optional[dict] = None,
     like_conditions: Optional[dict] = None,  # LIKE条件を追加
-    limit: Optional[int] = Query(
-        None, description="Limit the number of results returned"),
-    offset: Optional[int] = Query(0, description="Number of records to skip"),
-    order_by: Optional[str] = None  # ORDER BY をサポート
+    limit: Optional[int] = None,  # Queryを外して直接Optional[int]
+    offset: Optional[int] = 0,
+    order_by: Optional[str] = None,  # ORDER BY をサポート
 ):
     with Session(engine) as session:
         stmt = select(model)
@@ -76,12 +77,7 @@ async def select_table(
 
 
 @db_error_handling(default_status_code=471)
-async def update_record(
-    engine,
-    model,
-    conditions: dict,
-    updates: dict
-):
+async def update_record(engine, model, conditions: dict, updates: dict):
     try:
         with Session(engine) as session_db:
             # 条件に一致するレコードの検索
@@ -113,18 +109,11 @@ async def update_record(
         # ロールバックを行い、500エラーを返す
         session_db.rollback()
         logger.error(f"予期しないエラーが発生しました: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="予期しないエラーが発生しました。"
-        )
+        raise HTTPException(status_code=500, detail="予期しないエラーが発生しました。")
 
 
 @db_error_handling(default_status_code=472)
-async def delete_record(
-    engine,
-    model,
-    conditions: dict
-):
+async def delete_record(engine, model, conditions: dict):
     with Session(engine) as session_db:
         stmt = select(model)
         for field, value in conditions.items():
