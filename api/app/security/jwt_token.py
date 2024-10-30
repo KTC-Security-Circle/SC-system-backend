@@ -1,9 +1,8 @@
 from sqlmodel import Session, select
 from api.app.models import User
-from api.app.database.database import get_engine
+from api.app.database.engine import get_engine
 from typing import Optional
-from jose import JWTError
-import jwt
+from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
@@ -32,6 +31,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """
     アクセストークンを作成する関数。
@@ -42,9 +42,26 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.now() + expires_delta
     else:
         expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+
+    try:
+        # トークンをエンコード
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        logger.debug(f"アクセストークンの生成に成功しました: {encoded_jwt}")
+        return encoded_jwt
+    except JWTError as e:
+        logger.error(f"トークンの生成中にエラーが発生しました: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="トークンの生成に失敗しました。再試行してください。"
+        )
+    except Exception as e:
+        logger.error(f"予期しないエラーが発生しました: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="予期しないエラーが発生しました。"
+        )
 
 
 def verify_password(plain_password, hashed_password):

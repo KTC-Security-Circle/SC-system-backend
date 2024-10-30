@@ -1,56 +1,14 @@
-from fastapi import HTTPException, status
+# api/app/database/database.py
+import logging
+from sqlmodel import Session, select
+from sqlmodel.sql.expression import Select
+from fastapi import HTTPException, status, Query
 from functools import wraps
-from sqlmodel import Session, create_engine, select
-import os
-from fastapi import HTTPException, Query
 from typing import Optional
-from api.logger import getLogger
 
-logger = getLogger(__name__, "DEBUG")
+logger = logging.getLogger("database")
 
-def get_engine():
-    engine = _get_engine()
-    try:
-        yield engine
-    finally:
-        engine.dispose()
-
-
-def _get_engine():
-    db_type = os.getenv("DB_TYPE")
-    db_name = os.getenv("DB_NAME")
-    db_user = os.getenv("DB_USER")
-    db_password = os.getenv("DB_PASSWORD")
-    db_host = os.getenv("DB_HOST")
-    db_port = os.getenv("DB_PORT")
-
-    # 環境変数のデバッグ出力
-    logger.debug(f"{db_type=}")
-    logger.debug(f"{db_name=}")
-    logger.debug(f"{db_user=}")
-    logger.debug(f"{db_password=}")
-    logger.debug(f"{db_host=}")
-    logger.debug(f"{db_port=}")
-
-    if db_type == "sqlite":
-        database_url = f"{db_type}:///{db_name}"
-    elif db_type == "postgresql":
-        database_url = (
-            f"{db_type}://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-        )
-    elif db_type == "mysql":
-        database_url = (
-            f"{db_type}+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-        )
-    elif db_type == "sqlserver":
-        database_url = (
-            f"mssql+pymssql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-        )
-    else:
-        raise ValueError(
-            "Unsupported DB_TYPE. Use 'sqlite', 'postgresql', or 'mysql'.")
-    engine = create_engine(database_url, echo=True)
-    return engine
+# デコレーターによるエラーハンドリング
 
 
 def db_error_handling(default_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
@@ -124,19 +82,41 @@ async def update_record(
     conditions: dict,
     updates: dict
 ):
-    with Session(engine) as session_db:
-        stmt = select(model)
-        for field, value in conditions.items():
-            stmt = stmt.where(getattr(model, field) == value)
-        result = session_db.exec(stmt).one_or_none()
-        if not result:
-            raise HTTPException(status_code=404, detail="レコードが見つかりません")
-        for field, value in updates.items():
-            setattr(result, field, value)
-        session_db.add(result)
-        session_db.commit()
-        session_db.refresh(result)
-        return result
+    try:
+        with Session(engine) as session_db:
+            # 条件に一致するレコードの検索
+            stmt: Select = select(model)
+            for field, value in conditions.items():
+                stmt = stmt.where(getattr(model, field) == value)
+            result = session_db.exec(stmt).one_or_none()
+
+            # レコードが見つからない場合は404エラーを返す
+            if not result:
+                raise HTTPException(status_code=404, detail="レコードが見つかりません")
+
+            # 更新対象のフィールドに新しい値を設定
+            for field, value in updates.items():
+                setattr(result, field, value)
+
+            session_db.add(result)
+            session_db.commit()
+            session_db.refresh(result)
+            return result
+
+    except HTTPException as e:
+        # すでに定義されているHTTPエラーを再度送出
+        logger.error(f"HTTPエラーが発生しました: {e.detail}")
+        raise
+
+    except Exception as e:
+        # その他の予期しないエラーをキャッチしてログに記録
+        # ロールバックを行い、500エラーを返す
+        session_db.rollback()
+        logger.error(f"予期しないエラーが発生しました: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="予期しないエラーが発生しました。"
+        )
 
 
 @db_error_handling(default_status_code=472)

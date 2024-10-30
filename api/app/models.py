@@ -1,6 +1,6 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import EmailStr, field_validator
 import uuid
 
@@ -48,6 +48,10 @@ class Session(SQLModel, table=True):
     user_id: str = Field(..., max_length=255, foreign_key="user.id",
                          title="ユーザID", description="関連するユーザのID")
 
+    chat_logs: List["ChatLog"] = Relationship(
+        back_populates="session", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+
     class Config:
         schema_extra = {
             "example": {
@@ -69,7 +73,10 @@ class ChatLog(SQLModel, table=True):
     pub_data: Optional[datetime] = Field(
         None, title="公開日時", description="メッセージの公開日時", index=True)
     session_id: Optional[int] = Field(
-        None, foreign_key="session.id", title="セッションID", description="関連するセッションのID")
+        None, foreign_key="session.id", title="セッションID", description="関連するセッションのID"
+    )
+
+    session: Optional[Session] = Relationship(back_populates="chat_logs")
 
     class Config:
         schema_extra = {
