@@ -3,7 +3,11 @@ from api.app.dtos.user_dtos import UserCreateDTO, UserDTO
 from api.app.dtos.auth_dtos import LoginData
 from api.app.models import User
 from api.app.database.engine import get_engine
-from api.app.security.jwt_token import create_access_token, get_password_hash, verify_password
+from api.app.security.jwt_token import (
+    create_access_token,
+    get_password_hash,
+    verify_password,
+)
 from datetime import timedelta
 from sqlmodel import Session, select
 from api.logger import getLogger
@@ -18,10 +22,10 @@ logger = getLogger("auth_router")
 async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
     with Session(engine) as session:
         existing_user = session.exec(
-            select(User).where(User.email == user.email)).first()
+            select(User).where(User.email == user.email)
+        ).first()
         if existing_user:
-            raise HTTPException(
-                status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=400, detail="Email already registered")
 
         # パスワードをハッシュ化して保存
         hashed_password = get_password_hash(user.password)
@@ -30,7 +34,7 @@ async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
             email=user.email,
             password=hashed_password,
             authority=user.authority,
-            major=user.major  # 専攻を追加
+            major=user.major,  # 専攻を追加
         )
         session.add(new_user)
         session.commit()
@@ -42,7 +46,7 @@ async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
             name=new_user.name,
             email=new_user.email,
             authority=new_user.authority,
-            major=new_user.major  # 専攻を追加
+            major=new_user.major,  # 専攻を追加
         )
         return signup_dto
 
@@ -51,16 +55,14 @@ async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
 @router.post("/login/", response_model=dict, tags=["login"])
 async def login(user: LoginData, response: Response, engine=Depends(get_engine)):
     with Session(engine) as session:
-        db_user = session.exec(select(User).where(
-            User.email == user.email)).first()
+        db_user = session.exec(select(User).where(User.email == user.email)).first()
         if not db_user or not verify_password(user.password, db_user.password):
-            raise HTTPException(
-                status_code=400, detail="Invalid email or password")
+            raise HTTPException(status_code=400, detail="Invalid email or password")
 
         # トークンにメールアドレスとユーザーIDを含める
         access_token = create_access_token(
             data={"sub": db_user.email, "user_id": db_user.id},
-            expires_delta=timedelta(minutes=30)
+            expires_delta=timedelta(minutes=30),
         )
 
         response.set_cookie(
@@ -70,6 +72,10 @@ async def login(user: LoginData, response: Response, engine=Depends(get_engine))
             max_age=1800,
             expires=1800,
             secure=False,
-            samesite="Lax"
+            samesite="Lax",
         )
-        return {"access_token": access_token, "token_type": "bearer", "message": "Login successful"}
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "message": "Login successful",
+        }
