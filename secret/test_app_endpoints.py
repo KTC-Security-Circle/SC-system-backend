@@ -59,7 +59,7 @@ url = f"{base_url}/api/input/chat/"
 
 payload = {
     "message": "これはテストメッセージです",
-    "session_id": 4  # Replace with the actual session ID
+    "session_id": 2  # Replace with the actual session ID
 }
 
 response = requests.post(url, json=payload, headers=headers, stream=True)
