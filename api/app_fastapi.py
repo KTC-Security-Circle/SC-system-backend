@@ -9,6 +9,9 @@ from api.app.routers.auth import router as auth_router
 from api.app.routers.users import router as user_router
 from api.app.routers.sessions import router as session_router
 from api.app.routers.chats import router as chatlog_router
+from api.demo.routers.users import router as user_demo_router
+from api.demo.routers.sessions import router as session_demo_router
+from api.demo.routers.chats import router as chatlog_demo_router
 
 
 logger = getLogger("azure_functions.fastapi")
@@ -29,22 +32,25 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:7071",
-    "https://sc-test-api.azurewebsites.net",
-]
+# origins = [
+#     "http://localhost",
+#     "http://localhost:3000",
+#     "http://localhost:7071",
+#     "https://sc-test-api.azurewebsites.net",
+# ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
-app.include_router(auth_router, prefix="/auth")
-app.include_router(user_router, prefix="/api")
-app.include_router(session_router, prefix="/api")
-app.include_router(chatlog_router, prefix="/api")
+# app.include_router(auth_router, prefix="/auth")
+# app.include_router(user_router, prefix="/api")
+# app.include_router(session_router, prefix="/api")
+# app.include_router(chatlog_router, prefix="/api")
+app.include_router(user_demo_router, prefix="/api")
+app.include_router(session_demo_router, prefix="/api")
+app.include_router(chatlog_demo_router, prefix="/api")

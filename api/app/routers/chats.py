@@ -30,11 +30,38 @@ logger = getLogger("chatlog_router")
 logger.setLevel(logging.DEBUG)
 
 
-# 通常のジェネレータを非同期ジェネレータに変換するラッパー関数
+# テキストストリーム用の非同期ジェネレータラッパー
 async def async_wrap(generator):
     for item in generator:
         yield item
-        await asyncio.sleep(0)  # イテレーション間にコンテキストの切り替えを可能にする
+        await asyncio.sleep(0)
+
+
+# StreamingResponseでのリアルタイムレスポンス
+async def text_stream(bot_reply_generator, chatlog, engine, current_user):
+    bot_reply = ""
+    async for chunk in bot_reply_generator:
+        bot_reply += chunk
+        yield chunk  # 各チャンクをリアルタイムに返す
+
+    # ストリームが終了したら、チャットログをデータベースに保存
+    chat_log_data = ChatLog(
+        message=chatlog.message,
+        bot_reply=bot_reply,
+        pub_data=chatlog.pub_data or datetime.now(),
+        session_id=chatlog.session_id,
+    )
+    await add_db_record(engine, chat_log_data)
+
+    # 最後にDTOをJSON形式で返す
+    dto = ChatLogDTO(
+        id=chat_log_data.id,
+        message=chat_log_data.message,
+        bot_reply=chat_log_data.bot_reply,
+        pub_data=chat_log_data.pub_data,
+        session_id=chat_log_data.session_id,
+    )
+    yield f"\n\n{dto.model_dump_json()}"  # DTOをJSONとして出力
 
 
 @router.post("/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
@@ -60,38 +87,17 @@ async def create_chatlog(
             user_name=current_user.name,
             user_major=current_user.major,
             conversation=tagged_conversations,
+            is_streaming=True,
+            return_length=5
         )
 
         # メッセージに対するAI応答を生成し、非同期で取得
         bot_reply_generator = async_wrap(resp.invoke(message=chatlog.message))
-        bot_reply = ""
-        async for chunk in bot_reply_generator:
-            bot_reply += chunk
 
-        # チャットログを作成
-        chat_log_data = ChatLog(
-            message=chatlog.message,
-            bot_reply=bot_reply,
-            pub_data=chatlog.pub_data or datetime.now(),
-            session_id=chatlog.session_id,
-        )
-
-        # データベースにチャットログを非同期で追加
-        await add_db_record(engine, chat_log_data)
-
-        logger.info("新しいチャットログを登録しました。")
-        logger.info(f"チャットID:{chat_log_data.id}")
-        logger.info(f"チャット内容:{chat_log_data.message}")
-        logger.info(f"投稿日時:{chat_log_data.pub_data}")
-        logger.info(f"セッションID:{chat_log_data.session_id}")
-
-        # DTOとして静的なデータを返す
-        return ChatLogDTO(
-            id=chat_log_data.id,
-            message=chat_log_data.message,
-            bot_reply=chat_log_data.bot_reply,
-            pub_data=chat_log_data.pub_data,
-            session_id=chat_log_data.session_id,
+        # StreamingResponseでリアルタイムにAI応答を返却し、最後にDTOを返す
+        return StreamingResponse(
+            text_stream(bot_reply_generator, chatlog, engine, current_user),
+            media_type="text/plain",
         )
 
     except Exception as e:
