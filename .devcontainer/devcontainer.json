@@ -1,0 +1,39 @@
+{
+  "name": "sc-system-backend-dev",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/app",
+
+  "remoteUser": "appuser",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "editor.renderWhitespace": "all",
+        "python.defaultInterpreterPath": ".venv/bin/python",
+        "python.linting.pylintEnabled": false,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+          },
+          "mypy-type-checker.path": [".venv/bin/mypy"],
+          "mypy-type-checker.args": [
+            "--config=${workspaceFolder}/pyproject.toml"
+          ]
+        }
+      },
+      "extensions": [
+        "ms-python.python",
+        "GitHub.copilot",
+        "charliermarsh.ruff",
+        "esbenp.prettier-vscode",
+        "ms-python.mypy-type-checker"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x .devcontainer/scripts/*.sh && ./.devcontainer/scripts/post-create.sh",
+  "postAttachCommand": ".devcontainer/scripts/post-attach.sh"
+}

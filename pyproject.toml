@@ -1,0 +1,71 @@
+[tool.poetry]
+name = "sc-system-backend"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "api"}]
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115.0"
+uvicorn = "^0.31.0"
+azure-functions = "^1.21.1"
+sqlmodel = "^0.0.22"
+python-dotenv = "^1.0.1"
+pydantic = {extras = ["email"], version = "^2.9.2"}
+sc-system-ai = {git = "https://github.com/KTC-Security-Circle/SC-system-ai.git", rev = "v0.4.3"}
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.7.2"
+mypy = "^1.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+# Ruffの設定
+[tool.ruff]
+target-version = "py310"
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+]
+
+line-length = 120
+indent-width = 4
+
+
+[tool.ruff.lint]
+# PEP8のどのルールを対象に警告を出すか
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "B",
+    "PL",
+    "UP",
+]
+ignore = [
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.pylint]
+max-args = 9
+
+
+[tool.mypy]
+show_error_context = true # エラー時のメッセージを詳細表示
+show_column_numbers = true # エラー発生箇所の行数/列数を表示
+ignore_missing_imports = true # import 先のチェックを行わない (デフォルトだとサードパーティーライブラリまでチェックする)
+disallow_untyped_defs = true # 関数定義の引数/戻り値に型アノテーション必須
+no_implicit_optional = true # デフォルト引数に None を取る場合型アノテーションに Optional 必須
+warn_return_any = true # 戻り値が Any 型ではない関数の戻り値の型アノテーションが Any のとき警告
+warn_unused_ignores = true # mypy エラーに該当しない箇所に `# type: ignore` コメントが付与されていたら警告
+warn_redundant_casts = true # 冗長なキャストに警告

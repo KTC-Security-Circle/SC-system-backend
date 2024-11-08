@@ -138,3 +138,4 @@ __azurite_db*__.json
 test.db
 output/
 database.db
+.ruff_cache/
