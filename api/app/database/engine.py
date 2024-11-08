@@ -1,7 +1,8 @@
+import logging
 import os
+
 from dotenv import load_dotenv
 from sqlmodel import create_engine
-import logging
 
 # .envファイルから環境変数を読み込む
 load_dotenv()

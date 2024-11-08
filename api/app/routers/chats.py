@@ -1,29 +1,29 @@
+import asyncio
+import logging
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+from sc_system_ai import main as SC_AI
+
+from api.app.database.database import (
+    add_db_record,
+    delete_record,
+    select_table,
+    update_record,
+)
+from api.app.database.engine import get_engine
 from api.app.dtos.chatlog_dtos import (
     ChatCreateDTO,
     ChatLogDTO,
+    ChatOrderBy,
     ChatSearchDTO,
     ChatUpdateDTO,
-    ChatOrderBy,
 )
-from api.app.models import User, ChatLog
+from api.app.models import ChatLog, User
 from api.app.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
-from api.app.database.database import (
-    add_db_record,
-    select_table,
-    update_record,
-    delete_record,
-)
-from api.app.database.engine import get_engine
-from datetime import datetime
-from sqlmodel import select
-from typing import Optional
-from sc_system_ai import main as SC_AI
 from api.logger import getLogger
-import logging
-import asyncio
-from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 logger = getLogger("chatlog_router")
@@ -138,7 +138,7 @@ async def get_tagged_conversations(session_id: int, engine) -> list[tuple[str, s
                 tagged_conversations.append(("human", chat.message))
             if chat.bot_reply:
                 tagged_conversations.append(("ai", chat.bot_reply))
-        
+
         logger.info(f"タグ付けした会話履歴: {tagged_conversations}")
 
     except Exception as e:
@@ -153,9 +153,9 @@ async def get_tagged_conversations(session_id: int, engine) -> list[tuple[str, s
 @role_required(Role.STUDENT)
 async def view_chatlog(
     search_params: ChatSearchDTO = Depends(),
-    order_by: Optional[ChatOrderBy] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    order_by: ChatOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user),
 ):

@@ -1,5 +1,3 @@
-import requests
-import json
 
 # エンドポイントURLの定義
 base_url = "http://localhost:7071"

@@ -1,14 +1,14 @@
-from sqlmodel import SQLModel
 from datetime import datetime
-from typing import Optional
 from enum import Enum
+
 from pydantic import Field
+from sqlmodel import SQLModel
 
 
 class SessionDTO(SQLModel):
-    id: Optional[int]
+    id: int | None
     session_name: str
-    pub_data: Optional[datetime] = None
+    pub_data: datetime | None = None
     user_id: str
 
     class Config:
@@ -23,8 +23,8 @@ class SessionDTO(SQLModel):
 
 
 class SessionCreateDTO(SQLModel):
-    session_name: Optional[str] = Field(default="New Session", max_length=100)
-    pub_data: Optional[datetime] = None
+    session_name: str | None = Field(default="New Session", max_length=100)
+    pub_data: datetime | None = None
 
 
 class SessionOrderBy(str, Enum):
@@ -34,11 +34,11 @@ class SessionOrderBy(str, Enum):
 
 
 class SessionSearchDTO(SQLModel):
-    session_name: Optional[str] = None
-    session_name_like: Optional[str] = None
-    user_id: Optional[str] = None
+    session_name: str | None = None
+    session_name_like: str | None = None
+    user_id: str | None = None
 
 
 class SessionUpdateDTO(SQLModel):
-    session_name: Optional[str] = Field(default="New Session", max_length=100)
-    pub_data: Optional[datetime] = None
+    session_name: str | None = Field(default="New Session", max_length=100)
+    pub_data: datetime | None = None

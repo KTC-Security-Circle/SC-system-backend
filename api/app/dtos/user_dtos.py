@@ -1,7 +1,7 @@
+from enum import Enum
+
 from pydantic import EmailStr, Field, field_validator
 from sqlmodel import SQLModel
-from typing import Optional
-from enum import Enum
 
 
 class UserDTO(SQLModel):
@@ -24,11 +24,11 @@ class UserDTO(SQLModel):
 
 
 class UserCreateDTO(SQLModel):
-    name: Optional[str] = Field(default="名無し", max_length=150)
+    name: str | None = Field(default="名無し", max_length=150)
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=12)
-    authority: Optional[str] = Field(default="student")
-    major: Optional[str] = Field(default="fugafuga専攻", max_length=255)
+    authority: str | None = Field(default="student")
+    major: str | None = Field(default="fugafuga専攻", max_length=255)
 
 
 class UserOrderBy(str, Enum):
@@ -40,11 +40,11 @@ class UserOrderBy(str, Enum):
 
 
 class UserSearchDTO(SQLModel):
-    name: Optional[str] = None
-    name_like: Optional[str] = None
-    email: Optional[EmailStr] = None
-    authority: Optional[str] = None
-    major_like: Optional[str] = None  # 部分一致フィルタ
+    name: str | None = None
+    name_like: str | None = None
+    email: EmailStr | None = None
+    authority: str | None = None
+    major_like: str | None = None  # 部分一致フィルタ
 
     @field_validator('authority')
     def validate_authority(cls, value):
@@ -55,11 +55,11 @@ class UserSearchDTO(SQLModel):
 
 
 class UserUpdateDTO(SQLModel):
-    name: Optional[str] = Field(None, max_length=150)
-    email: Optional[EmailStr]
-    password: Optional[str] = Field(None, min_length=8, max_length=12)
-    authority: Optional[str] = Field(None)
-    major: Optional[str] = Field(None, max_length=255)
+    name: str | None = Field(None, max_length=150)
+    email: EmailStr | None
+    password: str | None = Field(None, min_length=8, max_length=12)
+    authority: str | None = Field(None)
+    major: str | None = Field(None, max_length=255)
 
     @field_validator('authority')
     def validate_authority(cls, value):

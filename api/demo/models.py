@@ -1,18 +1,19 @@
-from sqlmodel import SQLModel, Field, Relationship, Column
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
+
 from pydantic import EmailStr, field_validator
 from sqlalchemy import Unicode
+from sqlmodel import Column, Field, Relationship, SQLModel
 
 
 class User_Demo(SQLModel, table=True):
-    id: Optional[int] = Field(
+    id: int | None = Field(
         None,
         primary_key=True,
         title="ユーザーID",
         description="ユーザーを一意に識別するためのID",
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default="名無し",
         sa_column=Column(Unicode(150)),
         title="名前",
@@ -31,23 +32,23 @@ class User_Demo(SQLModel, table=True):
         title="パスワード",
         description="ユーザのパスワード",
     )
-    authority: Optional[str] = Field(
+    authority: str | None = Field(
         default="student",
         sa_column=Column(Unicode(30)),
         title="権限",
         description="ユーザの権限",
     )
-    major: Optional[str] = Field(
+    major: str | None = Field(
         default="fugafuga専攻",
         sa_column=Column(Unicode(255)),
         title="専攻",
         description="ユーザの専攻",
     )
-    pub_data: Optional[datetime] = Field(
+    pub_data: datetime | None = Field(
         None, title="公開日時", description="メッセージの公開日時", index=True
     )
 
-    sessions: List["Session_Demo"] = Relationship(
+    sessions: list["Session_Demo"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
@@ -73,7 +74,7 @@ class User_Demo(SQLModel, table=True):
 
 
 class Session_Demo(SQLModel, table=True):
-    id: Optional[int] = Field(
+    id: int | None = Field(
         None,
         primary_key=True,
         title="セッションID",
@@ -85,7 +86,7 @@ class Session_Demo(SQLModel, table=True):
         title="名前",
         description="セッション名",
     )
-    pub_data: Optional[datetime] = Field(
+    pub_data: datetime | None = Field(
         None, title="公開日時", description="セッションの公開日時"
     )
     user_id: str = Field(
@@ -96,11 +97,11 @@ class Session_Demo(SQLModel, table=True):
         description="関連するユーザのID",
     )
 
-    chat_logs: List["ChatLog_Demo"] = Relationship(
+    chat_logs: list["ChatLog_Demo"] = Relationship(
         back_populates="session",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
-    user: Optional[User_Demo] = Relationship(back_populates="sessions")
+    user: User_Demo | None = Relationship(back_populates="sessions")
 
     class Config:
         schema_extra = {
@@ -114,7 +115,7 @@ class Session_Demo(SQLModel, table=True):
 
 
 class ChatLog_Demo(SQLModel, table=True):
-    id: Optional[int] = Field(
+    id: int | None = Field(
         None,
         primary_key=True,
         title="チャットID",
@@ -126,19 +127,19 @@ class ChatLog_Demo(SQLModel, table=True):
         title="メッセージ",
         description="チャットメッセージの内容",
     )
-    bot_reply: Optional[str] = Field(
+    bot_reply: str | None = Field(
         None,
         sa_column=Column(Unicode(255)),
         title="ボットの返信",
         description="ボットの返信内容",
     )
-    pub_data: Optional[datetime] = Field(
+    pub_data: datetime | None = Field(
         None,
         title="公開日時",
         description="メッセージの公開日時",
         index=True,  # ここでインデックスを追加する場合、Fieldの引数としてindex=Trueを指定
     )
-    session_id: Optional[int] = Field(
+    session_id: int | None = Field(
         None,
         foreign_key="session.id",
         title="セッションID",

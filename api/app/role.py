@@ -1,7 +1,9 @@
-from api.app.models import User
-from functools import wraps
-from fastapi import HTTPException, status
 from enum import Enum
+from functools import wraps
+
+from fastapi import HTTPException, status
+
+from api.app.models import User
 from api.logger import getLogger
 
 logger = getLogger(__name__)

@@ -1,26 +1,26 @@
-from fastapi import APIRouter, HTTPException, Depends, Response
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlmodel import Session, select
+
+from api.app.database.database import (
+    add_db_record,
+    delete_record,
+    select_table,
+    update_record,
+)
+from api.app.database.engine import get_engine
 from api.app.dtos.user_dtos import (
     UserCreateDTO,
     UserDTO,
+    UserOrderBy,
     UserSearchDTO,
     UserUpdateDTO,
-    UserOrderBy,
 )
 from api.app.models import User
 from api.app.role import Role, role_required
 from api.app.security.jwt_token import get_current_user, get_password_hash
-from api.app.database.database import (
-    add_db_record,
-    select_table,
-    update_record,
-    delete_record,
-)
-from api.app.database.engine import get_engine
-from datetime import datetime
-from sqlmodel import Session, select
-from typing import Optional
 from api.logger import getLogger
-
 
 router = APIRouter()
 logger = getLogger("user_router")
@@ -111,9 +111,9 @@ async def get_me(current_user: User = Depends(get_current_user)):
 @role_required(Role.ADMIN)
 async def view_user(
     search_params: UserSearchDTO = Depends(),
-    order_by: Optional[UserOrderBy] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    order_by: UserOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user),
 ):
@@ -229,7 +229,7 @@ async def delete_user(
     if current_user.id == user_id:
         response.delete_cookie("access_token")
         logger.info(
-            f"ユーザー自身が削除されました。Cookieを削除し、ログアウト処理を実行します。"
+            "ユーザー自身が削除されました。Cookieを削除し、ログアウト処理を実行します。"
         )
         return {"message": "User deleted and logged out successfully."}
 

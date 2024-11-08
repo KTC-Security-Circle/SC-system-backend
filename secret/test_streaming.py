@@ -1,6 +1,6 @@
-import httpx
 import asyncio
 
+import httpx
 
 # エンドポイントURLの定義
 base_url = "http://localhost:7071"

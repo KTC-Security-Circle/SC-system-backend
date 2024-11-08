@@ -1,25 +1,25 @@
-from fastapi import APIRouter, HTTPException, Depends
-from api.demo.dtos.user_dtos import (
-    UserCreateDTO,
-    UserDTO,
-    UserSearchDTO,
-    UserUpdateDTO,
-    UserOrderBy,
-)
-from api.demo.models import User_Demo
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
+
 # from api.app.security.jwt_token import get_current_user, get_password_hash
 from api.demo.database.database import (
     add_db_record,
+    delete_record,
     select_table,
     update_record,
-    delete_record,
 )
 from api.demo.database.engine import get_engine
-from datetime import datetime
-from sqlmodel import Session, select
-from typing import Optional
+from api.demo.dtos.user_dtos import (
+    UserCreateDTO,
+    UserDTO,
+    UserOrderBy,
+    UserSearchDTO,
+    UserUpdateDTO,
+)
+from api.demo.models import User_Demo
 from api.logger import getLogger
-
 
 router = APIRouter()
 logger = getLogger("user_router")
@@ -84,7 +84,7 @@ async def create_user(
 @router.get("/user/me", response_model=UserDTO, tags=["user_get"])
 async def get_me():
     try:
-        logger.info(f"現在のユーザー情報を取得:")
+        logger.info("現在のユーザー情報を取得:")
 
         me_dto = UserDTO(
             id=1,
@@ -106,9 +106,9 @@ async def get_me():
 @router.get("/view/user/", response_model=list[UserDTO], tags=["user_get"])
 async def view_user(
     search_params: UserSearchDTO = Depends(),
-    order_by: Optional[UserOrderBy] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    order_by: UserOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
     engine=Depends(get_engine),
 ):
     logger.info(

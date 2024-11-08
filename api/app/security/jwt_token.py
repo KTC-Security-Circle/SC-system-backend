@@ -1,13 +1,14 @@
-from sqlmodel import Session, select
-from api.app.models import User
-from api.app.database.engine import get_engine
-from typing import Optional
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from fastapi import HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 import os
+from datetime import datetime, timedelta
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from sqlmodel import Session, select
+
+from api.app.database.engine import get_engine
+from api.app.models import User
 from api.logger import getLogger
 
 logger = getLogger(__name__)
@@ -32,7 +33,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     """
     アクセストークンを作成する関数。
     デフォルトの有効期限は環境変数で設定されるが、明示的な期限を渡すこともできる。

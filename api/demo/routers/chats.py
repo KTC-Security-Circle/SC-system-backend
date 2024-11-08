@@ -1,27 +1,30 @@
+import logging
+from datetime import datetime
+
+# from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
-from api.demo.dtos.chatlog_dtos import (
-    ChatCreateDTO,
-    ChatLogDTO,
-    ChatSearchDTO,
-    ChatUpdateDTO,
-    ChatOrderBy,
-)
-from api.demo.models import User_Demo, ChatLog_Demo
+
 # from api.app.role import Role, role_required
 # from api.app.security.jwt_token import get_current_user
 from api.demo.database.database import (
     add_db_record,
+    delete_record,
     select_table,
     update_record,
-    delete_record,
 )
 from api.demo.database.engine import get_engine
-from datetime import datetime
-# from sqlmodel import select
-from typing import Optional
+from api.demo.dtos.chatlog_dtos import (
+    ChatCreateDTO,
+    ChatLogDTO,
+    ChatOrderBy,
+    ChatSearchDTO,
+    ChatUpdateDTO,
+)
+from api.demo.models import ChatLog_Demo
+
 # from sc_system_ai import main as SC_AI
 from api.logger import getLogger
-import logging
+
 # import asyncio
 # from fastapi.responses import StreamingResponse
 
@@ -153,7 +156,7 @@ async def create_chatlog(
     engine=Depends(get_engine),
 ):
     logger.info(
-        f"チャット作成リクエストを受け付けました。ユーザーID:"
+        "チャット作成リクエストを受け付けました。ユーザーID:"
     )
 
     try:
@@ -187,9 +190,9 @@ async def create_chatlog(
 @router.get("/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
 async def view_chatlog(
     search_params: ChatSearchDTO = Depends(),
-    order_by: Optional[ChatOrderBy] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    order_by: ChatOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
     engine=Depends(get_engine),
 ):
     logger.info(

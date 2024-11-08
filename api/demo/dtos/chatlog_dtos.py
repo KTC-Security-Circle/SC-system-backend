@@ -1,15 +1,14 @@
-from sqlmodel import SQLModel
 from datetime import datetime
-from typing import Optional
 from enum import Enum
-from pydantic import Field
+
+from sqlmodel import SQLModel
 
 
 class ChatLogDTO(SQLModel):
-    id: Optional[int]
+    id: int | None
     message: str
-    bot_reply: Optional[str] = None
-    pub_data: Optional[datetime] = None
+    bot_reply: str | None = None
+    pub_data: datetime | None = None
     session_id: int
 
     class Config:
@@ -26,9 +25,9 @@ class ChatLogDTO(SQLModel):
 
 class ChatCreateDTO(SQLModel):
     message: str  # メッセージは必須
-    bot_reply: Optional[str] = None  # ボットの返信はオプショナル
-    pub_data: Optional[datetime] = None  # 公開日時はオプショナル
-    session_id: Optional[int] = None  # セッションIDもオプショナル
+    bot_reply: str | None = None  # ボットの返信はオプショナル
+    pub_data: datetime | None = None  # 公開日時はオプショナル
+    session_id: int | None = None  # セッションIDもオプショナル
 
 
 class ChatOrderBy(str, Enum):
@@ -39,12 +38,12 @@ class ChatOrderBy(str, Enum):
 
 
 class ChatSearchDTO(SQLModel):
-    session_id: Optional[int] = None
-    message_like: Optional[str] = None
+    session_id: int | None = None
+    message_like: str | None = None
 
 
 class ChatUpdateDTO(SQLModel):
-    message: Optional[str] = None
-    bot_reply: Optional[str] = None
-    pub_data: Optional[datetime] = None
-    session_id: Optional[int] = None
+    message: str | None = None
+    bot_reply: str | None = None
+    pub_data: datetime | None = None
+    session_id: int | None = None

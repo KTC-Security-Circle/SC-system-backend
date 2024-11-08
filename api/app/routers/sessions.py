@@ -1,23 +1,24 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
+
+from api.app.database.database import (
+    add_db_record,
+    delete_record,
+    select_table,
+    update_record,
+)
+from api.app.database.engine import get_engine
 from api.app.dtos.session_dtos import (
     SessionCreateDTO,
     SessionDTO,
+    SessionOrderBy,
     SessionSearchDTO,
     SessionUpdateDTO,
-    SessionOrderBy,
 )
-from api.app.models import User, Session
+from api.app.models import Session, User
 from api.app.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
-from api.app.database.database import (
-    add_db_record,
-    select_table,
-    update_record,
-    delete_record,
-)
-from api.app.database.engine import get_engine
-from datetime import datetime
-from typing import Optional
 from api.logger import getLogger
 
 router = APIRouter()
@@ -61,9 +62,9 @@ async def create_session(
 @role_required(Role.STUDENT)
 async def view_session(
     search_params: SessionSearchDTO = Depends(),
-    order_by: Optional[SessionOrderBy] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    order_by: SessionOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
     engine=Depends(get_engine),
     current_user: User = Depends(get_current_user),
 ):

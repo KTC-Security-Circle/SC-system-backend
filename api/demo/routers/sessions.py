@@ -1,21 +1,22 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
+
+from api.demo.database.database import (
+    add_db_record,
+    delete_record,
+    select_table,
+    update_record,
+)
+from api.demo.database.engine import get_engine
 from api.demo.dtos.session_dtos import (
     SessionCreateDTO,
     SessionDTO,
+    SessionOrderBy,
     SessionSearchDTO,
     SessionUpdateDTO,
-    SessionOrderBy,
 )
 from api.demo.models import Session_Demo
-from api.demo.database.database import (
-    add_db_record,
-    select_table,
-    update_record,
-    delete_record,
-)
-from api.demo.database.engine import get_engine
-from datetime import datetime
-from typing import Optional
 from api.logger import getLogger
 
 router = APIRouter()
@@ -56,9 +57,9 @@ async def create_session(
 @router.get("/view/session/", response_model=list[SessionDTO], tags=["session_get"])
 async def view_session(
     search_params: SessionSearchDTO = Depends(),
-    order_by: Optional[SessionOrderBy] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = 0,
+    order_by: SessionOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
     engine=Depends(get_engine),
 ):
     logger.info(f"セッション取得リクエストを受け付けました。検索条件: {search_params}")

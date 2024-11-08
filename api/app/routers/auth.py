@@ -1,15 +1,17 @@
-from fastapi import APIRouter, HTTPException, Depends, Response
-from api.app.dtos.user_dtos import UserCreateDTO, UserDTO
-from api.app.dtos.auth_dtos import LoginData
-from api.app.models import User
+from datetime import timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlmodel import Session, select
+
 from api.app.database.engine import get_engine
+from api.app.dtos.auth_dtos import LoginData
+from api.app.dtos.user_dtos import UserCreateDTO, UserDTO
+from api.app.models import User
 from api.app.security.jwt_token import (
     create_access_token,
     get_password_hash,
     verify_password,
 )
-from datetime import timedelta
-from sqlmodel import Session, select
 from api.logger import getLogger
 
 router = APIRouter()

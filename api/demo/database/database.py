@@ -1,10 +1,10 @@
 # api/app/database/database.py
 import logging
+from functools import wraps
+
+from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from sqlmodel.sql.expression import Select
-from fastapi import HTTPException, status, Query
-from functools import wraps
-from typing import Optional
 
 logger = logging.getLogger("database")
 
@@ -43,11 +43,11 @@ async def add_db_record(engine, data):
 async def select_table(
     engine,
     model,
-    conditions: Optional[dict] = None,
-    like_conditions: Optional[dict] = None,  # LIKE条件を追加
-    limit: Optional[int] = None,  # Queryを外して直接Optional[int]
-    offset: Optional[int] = 0,
-    order_by: Optional[str] = None,  # ORDER BY をサポート
+    conditions: dict | None = None,
+    like_conditions: dict | None = None,  # LIKE条件を追加
+    limit: int | None = None,  # Queryを外して直接Optional[int]
+    offset: int | None = 0,
+    order_by: str | None = None,  # ORDER BY をサポート
 ):
     with Session(engine) as session:
         stmt = select(model)
