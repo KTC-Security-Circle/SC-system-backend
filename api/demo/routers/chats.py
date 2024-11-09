@@ -20,7 +20,7 @@ from api.demo.dtos.chatlog_dtos import (
     ChatSearchDTO,
     ChatUpdateDTO,
 )
-from api.demo.models import ChatLog_Demo
+from api.demo.models import ChatLogDemo
 
 # from sc_system_ai import main as SC_AI
 from api.logger import getLogger
@@ -160,7 +160,7 @@ async def create_chatlog(
     )
 
     try:
-        chat_log_data = ChatLog_Demo(
+        chat_log_data = ChatLogDemo(
             message=chatlog.message,
             bot_reply="これはテストリプライです。",
             pub_data=chatlog.pub_data or datetime.now(),
@@ -210,7 +210,7 @@ async def view_chatlog(
 
     chatlog = await select_table(
         engine,
-        ChatLog_Demo,
+        ChatLogDemo,
         conditions_dict,
         like_conditions=like_conditions,
         offset=offset,
@@ -244,7 +244,7 @@ async def update_chatlog(
 
     conditions = {"id": chat_id}
     updates_dict = updates.model_dump(exclude_unset=True)
-    updated_record = await update_record(engine, ChatLog_Demo, conditions, updates_dict)
+    updated_record = await update_record(engine, ChatLogDemo, conditions, updates_dict)
 
     logger.info(
         f"チャットログを更新しました。チャットID: {updated_record.id}, 更新内容: {updates_dict}"
@@ -269,7 +269,7 @@ async def delete_chatlog(
     logger.info(f"チャットログ削除リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
-    result = await delete_record(engine, ChatLog_Demo, conditions)
+    result = await delete_record(engine, ChatLogDemo, conditions)
 
     logger.info(f"チャットログを削除しました。チャットID: {chat_id}")
 

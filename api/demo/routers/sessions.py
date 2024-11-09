@@ -16,7 +16,7 @@ from api.demo.dtos.session_dtos import (
     SessionSearchDTO,
     SessionUpdateDTO,
 )
-from api.demo.models import Session_Demo
+from api.demo.models import SessionDemo
 from api.logger import getLogger
 
 router = APIRouter()
@@ -31,7 +31,7 @@ async def create_session(
     logger.info(
         f"セッション作成リクエストを受け付けました。ユーザーID: {session.user_id}"
     )
-    session_data = Session_Demo(
+    session_data = SessionDemo(
         session_name=session.session_name,
         pub_data=datetime.now(),
         user_id=1,
@@ -77,7 +77,7 @@ async def view_session(
 
     sessions = await select_table(
         engine,
-        Session_Demo,
+        SessionDemo,
         conditions,
         like_conditions=like_conditions,
         offset=offset,
@@ -113,7 +113,7 @@ async def update_session(
     updates_dict = updates.model_dump(
         exclude_unset=True
     )  # 送信されていないフィールドは無視
-    updated_record = await update_record(engine, Session_Demo, conditions, updates_dict)
+    updated_record = await update_record(engine, SessionDemo, conditions, updates_dict)
 
     logger.info(
         f"セッションを更新しました。セッションID: {updated_record.id}, 更新内容: {updates_dict}"
@@ -139,7 +139,7 @@ async def delete_session(
     logger.info(f"セッション削除リクエストを受け付けました。セッションID: {session_id}")
     conditions = {"id": session_id}
 
-    result = await delete_record(engine, Session_Demo, conditions)
+    result = await delete_record(engine, SessionDemo, conditions)
     logger.info(f"セッションを削除しました。セッションID: {session_id}")
 
     return result

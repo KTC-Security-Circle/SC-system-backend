@@ -18,7 +18,7 @@ from api.demo.dtos.user_dtos import (
     UserSearchDTO,
     UserUpdateDTO,
 )
-from api.demo.models import User_Demo
+from api.demo.models import UserDemo
 from api.logger import getLogger
 
 router = APIRouter()
@@ -36,7 +36,7 @@ async def create_user(
     session = Session(engine)
 
     # 既存のメールアドレスのチェック
-    existing_user = session.exec(select(User_Demo.where(User_Demo.email == user.email)).first())
+    existing_user = session.exec(select(UserDemo.where(UserDemo.email == user.email)).first())
 
     if existing_user:
         session.close()
@@ -49,7 +49,7 @@ async def create_user(
     # hashed_password = get_password_hash(user.password)
 
     # 新しいユーザーオブジェクトを作成
-    user_data = User_Demo(
+    user_data = UserDemo(
         name=user.name,
         email=user.email,
         password=user.password,  # ハッシュ化されたパスワードを保存
@@ -135,7 +135,7 @@ async def view_user(
 
     users = await select_table(
         engine,
-        User_Demo,
+        UserDemo,
         conditions,
         like_conditions=like_conditions,
         offset=offset,
@@ -173,7 +173,7 @@ async def update_user(
     # 既存のメールアドレスのチェック
     if "email" in updates_dict:
         existing_user = session.exec(
-            select(User_Demo).where(User_Demo.email == updates_dict["email"])
+            select(UserDemo).where(UserDemo.email == updates_dict["email"])
         ).first()
 
         if existing_user:
@@ -189,7 +189,7 @@ async def update_user(
 
     # 更新内容を辞書形式でupdate_record関数に渡す
     conditions = {"id": user_id}
-    updated_record = await update_record(engine, User_Demo, conditions, updates_dict)
+    updated_record = await update_record(engine, UserDemo, conditions, updates_dict)
     logger.info(f"ユーザー情報を更新しました。ユーザーID: {updated_record.id}")
     updated_user_dto = UserDTO(
         id=updated_record.id,
@@ -211,7 +211,7 @@ async def delete_user(
     )
 
     conditions = {"id": user_id}
-    result = await delete_record(engine, User_Demo, conditions)
+    result = await delete_record(engine, UserDemo, conditions)
     logger.info(f"ユーザーを削除しました。ユーザーID: {user_id}")
 
     # 自分自身のアカウントを削除した場合はログアウト処理を行う

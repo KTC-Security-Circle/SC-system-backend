@@ -6,7 +6,7 @@ from sqlalchemy import Unicode
 from sqlmodel import Column, Field, Relationship, SQLModel
 
 
-class User_Demo(SQLModel, table=True):
+class UserDemo(SQLModel, table=True):
     id: int | None = Field(
         None,
         primary_key=True,
@@ -48,8 +48,8 @@ class User_Demo(SQLModel, table=True):
         None, title="公開日時", description="メッセージの公開日時", index=True
     )
 
-    sessions: list["Session_Demo"] = Relationship(
-        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    sessions: list["SessionDemo"] = Relationship(
+        back_populates="user_demo", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
     @field_validator("authority")
@@ -73,7 +73,7 @@ class User_Demo(SQLModel, table=True):
         }
 
 
-class Session_Demo(SQLModel, table=True):
+class SessionDemo(SQLModel, table=True):
     id: int | None = Field(
         None,
         primary_key=True,
@@ -92,16 +92,16 @@ class Session_Demo(SQLModel, table=True):
     user_id: str = Field(
         ...,
         max_length=255,
-        foreign_key="user.id",
+        foreign_key="userdemo.id",
         title="ユーザID",
         description="関連するユーザのID",
     )
 
-    chat_logs: list["ChatLog_Demo"] = Relationship(
-        back_populates="session",
+    chat_logs: list["ChatLogDemo"] = Relationship(
+        back_populates="session_demo",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
-    user: User_Demo | None = Relationship(back_populates="sessions")
+    user: UserDemo | None = Relationship(back_populates="sessions")
 
     class Config:
         schema_extra = {
@@ -114,7 +114,7 @@ class Session_Demo(SQLModel, table=True):
         }
 
 
-class ChatLog_Demo(SQLModel, table=True):
+class ChatLogDemo(SQLModel, table=True):
     id: int | None = Field(
         None,
         primary_key=True,
@@ -141,12 +141,12 @@ class ChatLog_Demo(SQLModel, table=True):
     )
     session_id: int | None = Field(
         None,
-        foreign_key="session.id",
+        foreign_key="sessiondemo.id",
         title="セッションID",
         description="関連するセッションのID",
     )
 
-    session: Optional["Session_Demo"] = Relationship(back_populates="chat_logs")
+    session: Optional["SessionDemo"] = Relationship(back_populates="chat_logs")
 
     class Config:
         schema_extra = {
