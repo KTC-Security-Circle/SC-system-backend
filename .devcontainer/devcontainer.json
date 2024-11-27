@@ -30,7 +30,8 @@
         "GitHub.copilot",
         "charliermarsh.ruff",
         "esbenp.prettier-vscode",
-        "ms-python.mypy-type-checker"
+        "ms-python.mypy-type-checker",
+        "ms-azuretools.vscode-azurefunctions"
       ]
     }
   },
