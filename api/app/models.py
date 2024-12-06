@@ -1,63 +1,94 @@
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Type
+
 from pydantic import EmailStr, field_validator
 from sqlalchemy import Unicode, UnicodeText
 from sqlmodel import Column, Field, Relationship, SQLModel
 
+from api.app.security.role import Role
 
+
+# ユーザ情報を定義するモデル
 class User(SQLModel, table=True):
+    """
+    ユーザモデル: アプリケーションのユーザを表現するデータモデル。
+    """
+
     id: str | None = Field(
         default_factory=lambda: str(uuid.uuid4()),
         max_length=255,
-        primary_key=True
+        primary_key=True,  # 主キー
+        title="ID",
+        description="ユーザを一意に識別するためのID",
     )
     name: str | None = Field(
         default="名無し",
-        sa_column=Column(Unicode(150)),
+        sa_column=Column(Unicode(150)),  # 最大150文字の文字列カラム
         title="名前",
         description="ユーザの名前",
     )
     email: EmailStr = Field(
         ...,
-        sa_column=Column(Unicode(255)),
+        sa_column=Column(Unicode(255)),  # 有効なメールアドレスを必須入力
         title="メールアドレス",
         description="ユーザのメールアドレス",
     )
     password: str = Field(
         ...,
-        min_length=8,
+        min_length=8,  # パスワードは最低8文字
         sa_column=Column(Unicode(255)),
         title="パスワード",
         description="ユーザのパスワード",
     )
-    authority: str | None = Field(
-        default="student",
+    authority: Role = Field(
+        default=Role.STUDENT,  # デフォルト値を列挙型で指定
         sa_column=Column(Unicode(30)),
         title="権限",
         description="ユーザの権限",
     )
     major: str | None = Field(
         default="fugafuga専攻",
-        sa_column=Column(Unicode(255)),
+        sa_column=Column(Unicode(255)),  # 専攻の情報を保持
         title="専攻",
-        description="ユーザの専攻",
+        description="ユーザの専攻分野",
     )
     pub_data: datetime | None = Field(
-        None, title="公開日時", description="メッセージの公開日時", index=True
+        None,
+        title="公開日時",
+        description="ユーザデータの公開日時",
+        index=True,  # インデックスを追加
     )
 
+    # ユーザとセッションのリレーション (1対多)
     sessions: list["Session"] = Relationship(
-        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},  # 子オブジェクトのカスケード削除
     )
 
-    @field_validator("authority")
-    def validate_authority(cls, value):
-        valid_roles = ["admin", "staff", "student"]
-        if value not in valid_roles:
-            raise ValueError("Invalid role specified")
-        return value
+    # 権限のバリデーション
+    @field_validator("authority", mode="before")
+    def validate_authority(cls: Type["User"], value: str | Role) -> Role:
+        """
+        権限 (authority) フィールドの値を検証します。
 
+        Args:
+            cls (Type["User"]): クラス自身。
+            value (str | Role): バリデーション対象の値。
+
+        Returns:
+            Role: 検証を通過した列挙型の値。
+
+        Raises:
+            ValueError: 権限が無効な場合に発生。
+        """
+        try:
+            # 入力値が列挙型でなければ変換を試みる
+            return Role(value)
+        except ValueError:
+            raise ValueError(f"Invalid role specified: {value}. Valid roles are: {list(Role)}")
+
+    # APIドキュメントに表示される例
     class Config:
         schema_extra = {
             "example": {
@@ -72,7 +103,12 @@ class User(SQLModel, table=True):
         }
 
 
+# セッション情報を定義するモデル
 class Session(SQLModel, table=True):
+    """
+    セッションモデル: 各ユーザが作成するセッションを表現。
+    """
+
     id: int | None = Field(
         None,
         primary_key=True,
@@ -81,27 +117,32 @@ class Session(SQLModel, table=True):
     )
     session_name: str = Field(
         "NewSession",
-        sa_column=Column(Unicode(255)),
+        sa_column=Column(Unicode(255)),  # 最大255文字のセッション名
         title="名前",
         description="セッション名",
     )
     pub_data: datetime | None = Field(
-        None, title="公開日時", description="セッションの公開日時"
+        None,
+        title="公開日時",
+        description="セッションの公開日時",
     )
     user_id: str = Field(
         ...,
         max_length=255,
-        foreign_key="user.id",
+        foreign_key="user.id",  # ユーザモデルへの外部キー
         title="ユーザID",
         description="関連するユーザのID",
     )
 
+    # セッションとチャットログのリレーション (1対多)
     chat_logs: list["ChatLog"] = Relationship(
         back_populates="session",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
+    # セッションとユーザのリレーション (多対1)
     user: User | None = Relationship(back_populates="sessions")
 
+    # APIドキュメントに表示される例
     class Config:
         schema_extra = {
             "example": {
@@ -113,7 +154,12 @@ class Session(SQLModel, table=True):
         }
 
 
+# チャットログ情報を定義するモデル
 class ChatLog(SQLModel, table=True):
+    """
+    チャットログモデル: セッション内でのチャット内容を保存。
+    """
+
     id: int | None = Field(
         None,
         primary_key=True,
@@ -122,7 +168,7 @@ class ChatLog(SQLModel, table=True):
     )
     message: str = Field(
         ...,
-        sa_column=Column(Unicode(255), index=True),
+        sa_column=Column(Unicode(255), index=True),  # インデックスを追加
         title="メッセージ",
         description="チャットメッセージの内容",
     )
@@ -136,17 +182,19 @@ class ChatLog(SQLModel, table=True):
         None,
         title="公開日時",
         description="メッセージの公開日時",
-        index=True,  # ここでインデックスを追加する場合、Fieldの引数としてindex=Trueを指定
+        index=True,
     )
     session_id: int | None = Field(
         None,
-        foreign_key="session.id",
+        foreign_key="session.id",  # セッションモデルへの外部キー
         title="セッションID",
         description="関連するセッションのID",
     )
 
+    # チャットログとセッションのリレーション (多対1)
     session: Optional["Session"] = Relationship(back_populates="chat_logs")
 
+    # APIドキュメントに表示される例
     class Config:
         schema_extra = {
             "example": {
@@ -157,6 +205,7 @@ class ChatLog(SQLModel, table=True):
                 "session_id": 1,
             }
         }
+
 
 class SchoolInfo(SQLModel, table=True):
     id: int | None = Field(
