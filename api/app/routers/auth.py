@@ -1,6 +1,8 @@
 from datetime import timedelta
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import Engine
 from sqlmodel import Session, select
 
 from api.app.database.engine import get_engine
@@ -21,11 +23,9 @@ logger = getLogger("auth_router")
 
 
 @router.post("/signup/", response_model=UserDTO, tags=["signup"])
-async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
+async def signup(user: UserCreateDTO, engine: Annotated[Engine, Depends(get_engine)]) -> UserDTO:
     with Session(engine) as session:
-        existing_user = session.exec(
-            select(User).where(User.email == user.email)
-        ).first()
+        existing_user = session.exec(select(User).where(User.email == user.email)).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -55,7 +55,7 @@ async def signup(user: UserCreateDTO, engine=Depends(get_engine)):
 
 # ログインエンドポイント
 @router.post("/login/", response_model=dict, tags=["login"])
-async def login(user: LoginData, response: Response, engine=Depends(get_engine)):
+async def login(user: LoginData, response: Response, engine: Annotated[Engine, Depends(get_engine)]) -> dict:
     with Session(engine) as session:
         db_user = session.exec(select(User).where(User.email == user.email)).first()
         if not db_user or not verify_password(user.password, db_user.password):
@@ -74,7 +74,7 @@ async def login(user: LoginData, response: Response, engine=Depends(get_engine))
             max_age=1800,
             expires=1800,
             secure=False,
-            samesite="Lax",
+            samesite="lax",
         )
         return {
             "access_token": access_token,
