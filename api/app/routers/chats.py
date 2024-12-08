@@ -1,10 +1,13 @@
 import asyncio
 import logging
+from collections.abc import AsyncGenerator, Generator
 from datetime import datetime
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sc_system_ai import main as SC_AI
+from sqlalchemy import Engine
 
 from api.app.database.database import (
     add_db_record,
@@ -31,14 +34,16 @@ logger.setLevel(logging.DEBUG)
 
 
 # テキストストリーム用の非同期ジェネレータラッパー
-async def async_wrap(generator):
+async def async_wrap(generator: Generator[str, None, None]) -> AsyncGenerator[str, None]:
     for item in generator:
         yield item
         await asyncio.sleep(0)
 
 
 # StreamingResponseでのリアルタイムレスポンス
-async def text_stream(bot_reply_generator, chatlog, engine, current_user):
+async def text_stream(
+    bot_reply_generator: AsyncGenerator[Any, None], chatlog: ChatCreateDTO, engine: Engine, current_user: User
+) -> AsyncGenerator[str, None]:
     bot_reply = ""
     async for chunk in bot_reply_generator:
         bot_reply += chunk
@@ -68,18 +73,17 @@ async def text_stream(bot_reply_generator, chatlog, engine, current_user):
 @role_required(Role.STUDENT)
 async def create_chatlog(
     chatlog: ChatCreateDTO,
-    engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user),
-):
-    logger.info(
-        f"チャット作成リクエストを受け付けました。ユーザーID: {current_user.id}"
-    )
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> StreamingResponse:
+    logger.info(f"チャット作成リクエストを受け付けました。ユーザーID: {current_user.id}")
 
     try:
+        # chatlog.session_idがNoneであれば、エラーを吐いて終了する
+        if chatlog.session_id is None:
+            raise ValueError("Session id does not specified or it is null.")
         # `get_tagged_conversations`を使用して過去の会話履歴を取得
-        tagged_conversations = await get_tagged_conversations(
-            chatlog.session_id, engine
-        )
+        tagged_conversations = await get_tagged_conversations(chatlog.session_id, engine)
         logger.info(f"取得した会話履歴 (tagged_conversations): {tagged_conversations}")
 
         # AI応答を生成するChatインスタンスを作成
@@ -88,7 +92,7 @@ async def create_chatlog(
             user_major=current_user.major,
             conversation=tagged_conversations,
             is_streaming=True,
-            return_length=5
+            return_length=5,
         )
 
         # メッセージに対するAI応答を生成し、非同期で取得
@@ -105,32 +109,22 @@ async def create_chatlog(
         raise HTTPException(
             status_code=500,
             detail=f"チャットログの作成中にエラーが発生しました。{str(e)}",
-        )
+        ) from e
 
 
-async def get_tagged_conversations(session_id: int, engine) -> list[tuple[str, str]]:
+async def get_tagged_conversations(session_id: int, engine: Engine) -> list[tuple[str, str]]:
     tagged_conversations = []
 
     try:
-        condition = {"session_id":session_id}
+        condition = {"session_id": session_id}
         # select_tableを利用して、会話履歴を取得
-        past_chats = await select_table(
-            engine=engine,
-            model=ChatLog,
-            conditions=condition,
-            order_by="pub_data"
-        )
+        past_chats = await select_table(engine=engine, model=ChatLog, conditions=condition, order_by="pub_data")
 
         logger.info(f"取得した会話履歴: {past_chats}")
 
         if not past_chats:
-            logger.info(
-                f"セッションID {session_id} に関連するチャットログが見つかりませんでした。"
-            )
-            return [
-                ("human", "こんにちは!"),
-                ("ai", "本日はどのようなご用件でしょうか？")
-                ]
+            logger.info(f"セッションID {session_id} に関連するチャットログが見つかりませんでした。")
+            return [("human", "こんにちは!"), ("ai", "本日はどのようなご用件でしょうか？")]
 
         # チャットログにタグを付けてリストを作成
         for chat in past_chats:
@@ -152,16 +146,14 @@ async def get_tagged_conversations(session_id: int, engine) -> list[tuple[str, s
 @router.get("/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.STUDENT)
 async def view_chatlog(
-    search_params: ChatSearchDTO = Depends(),
+    search_params: Annotated[ChatSearchDTO, Depends()],
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
     order_by: ChatOrderBy | None = None,
     limit: int | None = None,
     offset: int | None = 0,
-    engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user),
-):
-    logger.info(
-        f"チャットログ取得リクエストを受け付けました。検索条件: {search_params}"
-    )
+) -> list[ChatLogDTO]:
+    logger.info(f"チャットログ取得リクエストを受け付けました。検索条件: {search_params}")
 
     conditions_dict = {}
     like_conditions = {}
@@ -203,18 +195,16 @@ async def view_chatlog(
 async def update_chatlog(
     chat_id: int,
     updates: ChatUpdateDTO,
-    engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user),
-):
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> ChatLogDTO:
     logger.info(f"チャットログ更新リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
     updates_dict = updates.model_dump(exclude_unset=True)
     updated_record = await update_record(engine, ChatLog, conditions, updates_dict)
 
-    logger.info(
-        f"チャットログを更新しました。チャットID: {updated_record.id}, 更新内容: {updates_dict}"
-    )
+    logger.info(f"チャットログを更新しました。チャットID: {updated_record.id}, 更新内容: {updates_dict}")
 
     updated_chatlog_dto = ChatLogDTO(
         id=updated_record.id,
@@ -231,13 +221,13 @@ async def update_chatlog(
 @role_required(Role.STUDENT)
 async def delete_chatlog(
     chat_id: int,
-    engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user),
-):
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> dict:
     logger.info(f"チャットログ削除リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
-    result = await delete_record(engine, ChatLog, conditions)
+    await delete_record(engine, ChatLog, conditions)
 
     logger.info(f"チャットログを削除しました。チャットID: {chat_id}")
 
