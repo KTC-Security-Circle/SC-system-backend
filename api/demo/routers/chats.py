@@ -1,8 +1,10 @@
 import logging
 from datetime import datetime
+from typing import Annotated
 
 # from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import Engine
 
 # from api.app.role import Role, role_required
 # from api.app.security.jwt_token import get_current_user
@@ -153,11 +155,9 @@ logger.setLevel(logging.DEBUG)
 @router.post("/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
 async def create_chatlog(
     chatlog: ChatCreateDTO,
-    engine=Depends(get_engine),
-):
-    logger.info(
-        "チャット作成リクエストを受け付けました。ユーザーID:"
-    )
+    engine: Annotated[Engine, Depends(get_engine)],
+) -> ChatLogDTO:
+    logger.info("チャット作成リクエストを受け付けました。ユーザーID:")
 
     try:
         chat_log_data = ChatLogDemo(
@@ -184,20 +184,18 @@ async def create_chatlog(
         raise HTTPException(
             status_code=500,
             detail=f"チャットログの作成中にエラーが発生しました。{str(e)}",
-        )
+        ) from e
 
 
 @router.get("/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
 async def view_chatlog(
-    search_params: ChatSearchDTO = Depends(),
+    search_params: Annotated[ChatSearchDTO, Depends()],
+    engine: Annotated[Engine, Depends(get_engine)],
     order_by: ChatOrderBy | None = None,
     limit: int | None = None,
     offset: int | None = 0,
-    engine=Depends(get_engine),
-):
-    logger.info(
-        f"チャットログ取得リクエストを受け付けました。検索条件: {search_params}"
-    )
+) -> list[ChatLogDTO]:
+    logger.info(f"チャットログ取得リクエストを受け付けました。検索条件: {search_params}")
 
     conditions_dict = {}
     like_conditions = {}
@@ -238,17 +236,15 @@ async def view_chatlog(
 async def update_chatlog(
     chat_id: int,
     updates: ChatUpdateDTO,
-    engine=Depends(get_engine),
-):
+    engine: Annotated[Engine, Depends(get_engine)],
+) -> ChatLogDTO:
     logger.info(f"チャットログ更新リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
     updates_dict = updates.model_dump(exclude_unset=True)
     updated_record = await update_record(engine, ChatLogDemo, conditions, updates_dict)
 
-    logger.info(
-        f"チャットログを更新しました。チャットID: {updated_record.id}, 更新内容: {updates_dict}"
-    )
+    logger.info(f"チャットログを更新しました。チャットID: {updated_record.id}, 更新内容: {updates_dict}")
 
     updated_chatlog_dto = ChatLogDTO(
         id=updated_record.id,
@@ -264,12 +260,12 @@ async def update_chatlog(
 @router.delete("/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
 async def delete_chatlog(
     chat_id: int,
-    engine=Depends(get_engine),
-):
+    engine: Annotated[Engine, Depends(get_engine)],
+) -> dict[str, str]:
     logger.info(f"チャットログ削除リクエストを受け付けました。チャットID: {chat_id}")
 
     conditions = {"id": chat_id}
-    result = await delete_record(engine, ChatLogDemo, conditions)
+    await delete_record(engine, ChatLogDemo, conditions)
 
     logger.info(f"チャットログを削除しました。チャットID: {chat_id}")
 
