@@ -18,7 +18,7 @@ from api.app.dtos.user_dtos import (
     UserUpdateDTO,
 )
 from api.app.models import User
-from api.app.role import Role, role_required
+from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user, get_password_hash
 from api.logger import getLogger
 

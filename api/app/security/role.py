@@ -3,7 +3,6 @@ from functools import wraps
 
 from fastapi import HTTPException, status
 
-from api.app.models import User
 from api.logger import getLogger
 
 logger = getLogger(__name__)
@@ -22,6 +21,7 @@ ROLE_HIERARCHY = {
 
 
 def role_required(min_role: Role):
+    from api.app.models import User
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, current_user: User = None, **kwargs):
