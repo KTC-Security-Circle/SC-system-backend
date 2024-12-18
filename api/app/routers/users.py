@@ -87,7 +87,7 @@ async def create_user(
 
 @router.get("/user/me", response_model=UserDTO, tags=["user_get"])
 @role_required(Role.ADMIN)
-async def get_me(current_user: Annotated[User, Depends(get_current_user())]) -> UserDTO:
+async def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> UserDTO:
     try:
         logger.info(f"現在のユーザー情報を取得: {current_user.email}")
 
