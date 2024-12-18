@@ -8,9 +8,7 @@ from sqlmodel import Column, Field, Relationship, SQLModel
 
 
 class User(SQLModel, table=True):
-    id: str | None = Field(
-        default_factory=lambda: str(uuid.uuid4()), max_length=255, primary_key=True
-    )
+    id: str | None = Field(default_factory=lambda: str(uuid.uuid4()), max_length=255, primary_key=True)
     name: str | None = Field(
         default="名無し",
         sa_column=Column(Unicode(150)),
@@ -42,16 +40,15 @@ class User(SQLModel, table=True):
         title="専攻",
         description="ユーザの専攻",
     )
-    pub_data: datetime | None = Field(
-        None, title="公開日時", description="メッセージの公開日時", index=True
-    )
+    pub_data: datetime | None = Field(None, title="公開日時", description="メッセージの公開日時", index=True)
 
     sessions: list["Session"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
     @field_validator("authority")
-    def validate_authority(cls, value):
+    @classmethod
+    def validate_authority(cls, value: str) -> str:
         valid_roles = ["admin", "staff", "student"]
         if value not in valid_roles:
             raise ValueError("Invalid role specified")
@@ -84,9 +81,7 @@ class Session(SQLModel, table=True):
         title="名前",
         description="セッション名",
     )
-    pub_data: datetime | None = Field(
-        None, title="公開日時", description="セッションの公開日時"
-    )
+    pub_data: datetime | None = Field(None, title="公開日時", description="セッションの公開日時")
     user_id: str = Field(
         ...,
         max_length=255,
