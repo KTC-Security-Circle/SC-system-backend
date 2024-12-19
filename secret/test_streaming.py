@@ -2,6 +2,8 @@ import asyncio
 
 import httpx
 
+HTTP_STATUS_OK = 200
+
 # エンドポイントURLの定義
 base_url = "http://localhost:7071"
 
@@ -19,12 +21,12 @@ login_url = f"{base_url}/auth/login/"
 login_data = {"email": "test@example.jp.com", "password": "12345678"}
 
 
-async def main():
+async def main() -> None:
     async with httpx.AsyncClient(timeout=30.0) as session:
         # ログインしてトークンをCookieに保存
         response = await session.post(login_url, json=login_data)
 
-        if response.status_code == 200:
+        if response.status_code == HTTP_STATUS_OK:
             print("Login succeeded")
 
             # Cookieから`access_token`を取得
@@ -56,20 +58,15 @@ async def main():
 
     # Streaming response for async output
     async with httpx.AsyncClient() as client:
-        async with client.stream(
-            "POST", url, json=payload, headers=headers
-        ) as response:
-
+        async with client.stream("POST", url, json=payload, headers=headers) as response:
             # Check the status code
             print("Status Code:", response.status_code)
 
-            if response.status_code == 200:
+            if response.status_code == HTTP_STATUS_OK:
                 print("Streaming Response:")
                 try:
                     async for chunk in response.aiter_bytes():
-                        print(
-                            chunk.decode("utf-8"), end=""
-                        )  # Decode and print each chunk
+                        print(chunk.decode("utf-8"), end="")  # Decode and print each chunk
                 except httpx.RequestError as e:
                     print(f"Request error: {e}")
             else:
