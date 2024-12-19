@@ -44,16 +44,15 @@ class UserDemo(SQLModel, table=True):
         title="専攻",
         description="ユーザの専攻",
     )
-    pub_data: datetime | None = Field(
-        None, title="公開日時", description="メッセージの公開日時", index=True
-    )
+    pub_data: datetime | None = Field(None, title="公開日時", description="メッセージの公開日時", index=True)
 
     sessions: list["SessionDemo"] = Relationship(
         back_populates="user_demo", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
     @field_validator("authority")
-    def validate_authority(cls, value):
+    @classmethod
+    def validate_authority(cls, value: str) -> str:
         valid_roles = ["admin", "staff", "student"]
         if value not in valid_roles:
             raise ValueError("Invalid role specified")
@@ -86,9 +85,7 @@ class SessionDemo(SQLModel, table=True):
         title="名前",
         description="セッション名",
     )
-    pub_data: datetime | None = Field(
-        None, title="公開日時", description="セッションの公開日時"
-    )
+    pub_data: datetime | None = Field(None, title="公開日時", description="セッションの公開日時")
     user_id: str = Field(
         ...,
         max_length=255,
