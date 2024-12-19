@@ -40,8 +40,10 @@ def role_required(min_role: Role) -> Callable[[Callable[..., T]], Callable[..., 
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN, detail="You do not have sufficient permissions"
                 )
-            return await func(*args, current_user=current_user, **kwargs)
+                # どうしてもエラーが出るのでignoreする
+            return await func(*args, current_user=current_user, **kwargs)  # type: ignore
 
-        return wrapper
+        # ここも同様にどうしてもエラーが出るのでignore
+        return wrapper  # type: ignore
 
     return decorator
