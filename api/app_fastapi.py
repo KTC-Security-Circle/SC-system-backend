@@ -1,4 +1,5 @@
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -13,8 +14,9 @@ from api.logger import getLogger
 logger = getLogger("azure_functions.fastapi")
 logger.setLevel(logging.DEBUG)
 
+
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     engine = get_engine()
 
     # # 既存のテーブルを削除してから再作成する(sqliteでテストする用)
@@ -25,6 +27,7 @@ async def lifespan(app: FastAPI):
     yield
     engine.dispose()
     logger.info("Database connection closed.")
+
 
 app = FastAPI(lifespan=lifespan)
 
