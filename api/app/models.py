@@ -182,7 +182,6 @@ class SchoolInfo(SQLModel, table=True):
     )
 
     creator: Optional["User"] = Relationship(back_populates="school_infos")
-    groups_allowed: list["SchoolInfoGroup"] = Relationship(back_populates="schoolinfo")
 
     class Config:
         schema_extra = {
