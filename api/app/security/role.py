@@ -5,7 +5,6 @@ from typing import Any, TypeVar
 
 from fastapi import HTTPException, status
 
-from api.app.models import User
 from api.logger import getLogger
 
 logger = getLogger(__name__)
@@ -24,6 +23,7 @@ T = TypeVar("T")
 
 
 def role_required(min_role: Role) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    from api.app.models import User
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         async def wrapper(*args: Any, current_user: User | None = None, **kwargs: Any) -> T:
