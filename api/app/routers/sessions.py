@@ -12,34 +12,39 @@ from api.app.database.database import (
 )
 from api.app.database.engine import get_engine
 from api.app.dtos.session_dtos import (
-    SessionCreateDTO,
     SessionDTO,
     SessionOrderBy,
     SessionSearchDTO,
     SessionUpdateDTO,
 )
 from api.app.models import Session, User
-from api.app.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
+from api.app.security.role import Role, role_required
 from api.logger import getLogger
 
 router = APIRouter()
 logger = getLogger("session_router")
 
 
-@router.post("/input/session/", response_model=SessionDTO, tags=["session_post"])
+@router.get("/create_session", response_model=SessionDTO)
 @role_required(Role.STUDENT)
 async def create_session(
-    session: SessionCreateDTO,
     engine: Annotated[Engine, Depends(get_engine)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> SessionDTO:
+    """
+    デフォルトのセッションを作成する GET メソッド。
+    """
     logger.info(f"セッション作成リクエストを受け付けました。ユーザーID: {current_user.id}")
+
+    # デフォルト値を設定してセッションを作成
     session_data = Session(
-        session_name=session.session_name,
+        session_name="Default Session",  # デフォルト値
         pub_data=datetime.now(),
         user_id=current_user.id,
     )
+
+    # データベースにレコードを登録
     await add_db_record(engine, session_data)
 
     logger.info("新しいセッションを登録しました。")
@@ -48,13 +53,13 @@ async def create_session(
     logger.info(f"投稿日時:{session_data.pub_data}")
     logger.info(f"ユーザーID:{session_data.user_id}")
 
+    # DTO に変換して返却
     session_dto = SessionDTO(
         id=session_data.id,
         session_name=session_data.session_name,
         pub_data=session_data.pub_data,
         user_id=session_data.user_id,
     )
-
     return session_dto
 
 

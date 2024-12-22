@@ -79,5 +79,6 @@ async def login(user: LoginData, response: Response, engine: Annotated[Engine, D
         return {
             "access_token": access_token,
             "token_type": "bearer",
+            "role": db_user.authority,
             "message": "Login successful",
         }
