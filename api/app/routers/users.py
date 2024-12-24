@@ -28,7 +28,7 @@ router = APIRouter()
 logger = getLogger("user_router")
 
 
-@router.post("/input/user/", response_model=UserDTO, tags=["user_post"])
+@router.post("/input/user", response_model=UserDTO, tags=["user_post"])
 @role_required(Role.ADMIN)
 async def create_user(
     user: UserCreateDTO,
@@ -108,7 +108,7 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> Us
         ) from e
 
 
-@router.get("/view/user/", response_model=list[UserDTO], tags=["user_get"])
+@router.get("/view/user", response_model=list[UserDTO], tags=["user_get"])
 @role_required(Role.ADMIN)
 async def view_user(
     search_params: Annotated[UserSearchDTO, Depends()],
@@ -164,7 +164,7 @@ async def view_user(
     return user_dto_list
 
 
-@router.put("/update/user/{user_id}/", response_model=UserDTO, tags=["user_put"])
+@router.put("/update/user/{user_id}", response_model=UserDTO, tags=["user_put"])
 @role_required(Role.ADMIN)
 async def update_user(
     user_id: str,
@@ -206,7 +206,7 @@ async def update_user(
     return updated_user_dto
 
 
-@router.delete("/delete/user/{user_id}/", response_model=dict, tags=["user_delete"])
+@router.delete("/delete/user/{user_id}", response_model=dict, tags=["user_delete"])
 @role_required(Role.ADMIN)
 async def delete_user(
     user_id: str,

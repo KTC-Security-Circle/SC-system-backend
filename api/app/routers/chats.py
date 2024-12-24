@@ -69,7 +69,7 @@ async def text_stream(
     yield f"\n\n{dto.model_dump_json()}"  # DTOをJSONとして出力
 
 
-@router.post("/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
+@router.post("/input/chat", response_model=ChatLogDTO, tags=["chat_post"])
 @role_required(Role.STUDENT)
 async def create_chatlog(
     chatlog: ChatCreateDTO,
@@ -143,7 +143,7 @@ async def get_tagged_conversations(session_id: int, engine: Engine) -> list[tupl
     return tagged_conversations
 
 
-@router.get("/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
+@router.get("/view/chat", response_model=list[ChatLogDTO], tags=["chat_get"])
 @role_required(Role.STUDENT)
 async def view_chatlog(
     search_params: Annotated[ChatSearchDTO, Depends()],
@@ -190,7 +190,7 @@ async def view_chatlog(
     return chatlog_dto_list
 
 
-@router.put("/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
+@router.put("/update/chat/{chat_id}", response_model=ChatLogDTO, tags=["chat_put"])
 @role_required(Role.STUDENT)
 async def update_chatlog(
     chat_id: int,
@@ -217,7 +217,7 @@ async def update_chatlog(
     return updated_chatlog_dto
 
 
-@router.delete("/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
+@router.delete("/delete/chat/{chat_id}", response_model=dict, tags=["chat_delete"])
 @role_required(Role.STUDENT)
 async def delete_chatlog(
     chat_id: int,

@@ -22,7 +22,7 @@ logger = getLogger("auth_router")
 # サインアップエンドポイント
 
 
-@router.post("/signup/", response_model=UserDTO, tags=["signup"])
+@router.post("/signup", response_model=UserDTO, tags=["signup"])
 async def signup(user: UserCreateDTO, engine: Annotated[Engine, Depends(get_engine)]) -> UserDTO:
     with Session(engine) as session:
         existing_user = session.exec(select(User).where(User.email == user.email)).first()
@@ -54,7 +54,7 @@ async def signup(user: UserCreateDTO, engine: Annotated[Engine, Depends(get_engi
 
 
 # ログインエンドポイント
-@router.post("/login/", response_model=dict, tags=["login"])
+@router.post("/login", response_model=dict, tags=["login"])
 async def login(user: LoginData, response: Response, engine: Annotated[Engine, Depends(get_engine)]) -> dict:
     with Session(engine) as session:
         db_user = session.exec(select(User).where(User.email == user.email)).first()
