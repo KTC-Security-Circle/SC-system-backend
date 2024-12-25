@@ -5,7 +5,6 @@ from typing import TypeVar
 
 from fastapi import HTTPException, status
 
-from api.app.models import User
 from api.logger import getLogger
 
 # ロガーの設定
@@ -55,6 +54,8 @@ def role_required(min_role: Role) -> Callable[[T], T]:
     """
 
     def decorator(func: T) -> T:
+        from api.app.models import User
+
         @wraps(func)
         async def wrapper(*args, current_user: User = None, **kwargs) -> Awaitable:  # type: ignore
             """
