@@ -56,7 +56,7 @@ def role_required(min_role: Role) -> Callable[[T], T]:
 
     def decorator(func: T) -> T:
         @wraps(func)
-        async def wrapper(*args, current_user: User = None, **kwargs) -> Awaitable:
+        async def wrapper(*args, current_user: User = None, **kwargs) -> Awaitable:  # type: ignore
             """
             関数をラップして、権限チェックを行う。
 
@@ -78,6 +78,9 @@ def role_required(min_role: Role) -> Callable[[T], T]:
             user_role_level = ROLE_HIERARCHY.get(user_role)
             required_role_level = ROLE_HIERARCHY.get(min_role)
 
+            if user_role_level is None or required_role_level is None:
+                logger.error(f"Invalid role: {user_role}")
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid role")
             # 権限が不足している場合は 403 エラーを返す
             if user_role_level is None or user_role_level < required_role_level:
                 logger.warning(
@@ -88,8 +91,9 @@ def role_required(min_role: Role) -> Callable[[T], T]:
                 )
 
             # 権限チェックを通過した場合、元の関数を実行
-            return await func(*args, current_user=current_user, **kwargs)
+            return await func(*args, current_user=current_user, **kwargs)  # type: ignore
 
-        return wrapper  # ラッパー関数をデコレータとして返す
+        # ラッパー関数をデコレータとして返す
+        return wrapper  # type: ignore
 
     return decorator  # デコレータを返す
