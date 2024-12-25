@@ -27,7 +27,7 @@ router = APIRouter()
 logger = getLogger("user_router")
 
 
-@router.post("/input/user/", response_model=UserDTO, tags=["user_post"])
+@router.post("/input/user", response_model=UserDTO, tags=["user_post"])
 async def create_user(
     user: UserCreateDTO,
     engine: Annotated[Engine, Depends(get_engine)],
@@ -105,7 +105,7 @@ async def get_me() -> UserDTO:
         ) from e
 
 
-@router.get("/view/user/", response_model=list[UserDTO], tags=["user_get"])
+@router.get("/view/user", response_model=list[UserDTO], tags=["user_get"])
 async def view_user(
     search_params: Annotated[UserSearchDTO, Depends()],
     engine: Annotated[Engine, Depends(get_engine)],
@@ -159,7 +159,7 @@ async def view_user(
     return user_dto_list
 
 
-@router.put("/update/user/{user_id}/", response_model=UserDTO, tags=["user_put"])
+@router.put("/update/user/{user_id}", response_model=UserDTO, tags=["user_put"])
 async def update_user(
     user_id: str,
     updates: UserUpdateDTO,
@@ -199,7 +199,7 @@ async def update_user(
     return updated_user_dto
 
 
-@router.delete("/delete/user/{user_id}/", response_model=dict, tags=["user_delete"])
+@router.delete("/delete/user/{user_id}", response_model=dict, tags=["user_delete"])
 async def delete_user(
     user_id: str,
     engine: Annotated[Engine, Depends(get_engine)],

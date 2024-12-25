@@ -25,7 +25,7 @@ router = APIRouter()
 logger = getLogger("session_router")
 
 
-@router.post("/input/session/", response_model=SessionDTO, tags=["session_post"])
+@router.post("/input/session", response_model=SessionDTO, tags=["session_post"])
 async def create_session(
     session: SessionCreateDTO,
     engine: Annotated[Engine, Depends(get_engine)],
@@ -54,7 +54,7 @@ async def create_session(
     return session_dto
 
 
-@router.get("/view/session/", response_model=list[SessionDTO], tags=["session_get"])
+@router.get("/view/session", response_model=list[SessionDTO], tags=["session_get"])
 async def view_session(
     search_params: Annotated[SessionSearchDTO, Depends()],
     engine: Annotated[Engine, Depends(get_engine)],
@@ -100,7 +100,7 @@ async def view_session(
     return session_dto_list
 
 
-@router.put("/update/session/{session_id}/", response_model=SessionDTO, tags=["session_put"])
+@router.put("/update/session/{session_id}", response_model=SessionDTO, tags=["session_put"])
 async def update_session(
     session_id: int,
     updates: SessionUpdateDTO,
@@ -123,7 +123,7 @@ async def update_session(
     return updated_session_dto
 
 
-@router.delete("/delete/session/{session_id}/", response_model=dict, tags=["session_delete"])
+@router.delete("/delete/session/{session_id}", response_model=dict, tags=["session_delete"])
 async def delete_session(
     session_id: int,
     engine: Annotated[Engine, Depends(get_engine)],

@@ -27,7 +27,7 @@ logger = getLogger("chatlog_router")
 logger.setLevel(logging.DEBUG)
 
 
-@router.post("/input/chat/", response_model=ChatLogDTO, tags=["chat_post"])
+@router.post("/input/chat", response_model=ChatLogDTO, tags=["chat_post"])
 async def create_chatlog(
     chatlog: ChatCreateDTO,
     engine: Annotated[Engine, Depends(get_engine)],
@@ -62,7 +62,7 @@ async def create_chatlog(
         ) from e
 
 
-@router.get("/view/chat/", response_model=list[ChatLogDTO], tags=["chat_get"])
+@router.get("/view/chat", response_model=list[ChatLogDTO], tags=["chat_get"])
 async def view_chatlog(
     search_params: Annotated[ChatSearchDTO, Depends()],
     engine: Annotated[Engine, Depends(get_engine)],
@@ -107,7 +107,7 @@ async def view_chatlog(
     return chatlog_dto_list
 
 
-@router.put("/update/chat/{chat_id}/", response_model=ChatLogDTO, tags=["chat_put"])
+@router.put("/update/chat/{chat_id}", response_model=ChatLogDTO, tags=["chat_put"])
 async def update_chatlog(
     chat_id: int,
     updates: ChatUpdateDTO,
@@ -132,7 +132,7 @@ async def update_chatlog(
     return updated_chatlog_dto
 
 
-@router.delete("/delete/chat/{chat_id}/", response_model=dict, tags=["chat_delete"])
+@router.delete("/delete/chat/{chat_id}", response_model=dict, tags=["chat_delete"])
 async def delete_chatlog(
     chat_id: int,
     engine: Annotated[Engine, Depends(get_engine)],
