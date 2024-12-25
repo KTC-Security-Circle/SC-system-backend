@@ -19,8 +19,8 @@ from api.app.dtos.session_dtos import (
     SessionUpdateDTO,
 )
 from api.app.models import Session, User
-from api.app.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
+from api.app.security.role import Role, role_required
 from api.logger import getLogger
 
 router = APIRouter()

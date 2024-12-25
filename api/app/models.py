@@ -3,8 +3,10 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import EmailStr, field_validator
-from sqlalchemy import Unicode
+from sqlalchemy import Unicode, UnicodeText
 from sqlmodel import Column, Field, Relationship, SQLModel
+
+from api.app.security.role import Role
 
 
 class User(SQLModel, table=True):
@@ -28,8 +30,8 @@ class User(SQLModel, table=True):
         title="パスワード",
         description="ユーザのパスワード",
     )
-    authority: str | None = Field(
-        default="student",
+    authority: Role = Field(
+        default=Role.STUDENT,
         sa_column=Column(Unicode(30)),
         title="権限",
         description="ユーザの権限",
@@ -38,7 +40,7 @@ class User(SQLModel, table=True):
         default="fugafuga専攻",
         sa_column=Column(Unicode(255)),
         title="専攻",
-        description="ユーザの専攻",
+        description="ユーザの専攻分野",
     )
     pub_data: datetime | None = Field(None, title="公開日時", description="メッセージの公開日時", index=True)
 
@@ -48,11 +50,12 @@ class User(SQLModel, table=True):
 
     @field_validator("authority")
     @classmethod
-    def validate_authority(cls, value: str) -> str:
-        valid_roles = ["admin", "staff", "student"]
-        if value not in valid_roles:
-            raise ValueError("Invalid role specified")
-        return value
+    def validate_authority(cls, value: str | Role) -> Role:
+        try:
+            # 入力値が列挙型でなければ変換を試みる
+            return Role(value)
+        except ValueError as e:
+            raise ValueError(f"Invalid role specified: {value}. Valid roles are: {list(Role)}") from e
 
     class Config:
         schema_extra = {
@@ -149,5 +152,131 @@ class ChatLog(SQLModel, table=True):
                 "bot_reply": "こんにちは！何かお手伝いできますか？",
                 "pub_data": "2024-06-29T12:34:56",
                 "session_id": 1,
+            }
+        }
+
+
+class SchoolInfo(SQLModel, table=True):
+    id: int | None = Field(
+        None,
+        primary_key=True,
+        title="ID",
+        description="情報を一意に識別するためのID",
+    )
+    contents: str = Field(
+        ...,
+        sa_column=Column(UnicodeText),
+        title="内容",
+        description="学校に関する情報の内容",
+    )
+    pub_date: datetime | None = Field(None, title="公開日時", description="情報の公開日時", index=True)
+    updated_at: datetime | None = Field(None, title="更新日時", description="情報の最終更新日時", index=True)
+    created_by: str = Field(
+        ...,
+        foreign_key="user.id",
+        title="作成者ID",
+        description="情報の作成者のユーザID",
+    )
+
+    creator: Optional["User"] = Relationship(back_populates="school_infos")
+    groups_allowed: list["SchoolInfoGroup"] = Relationship(back_populates="schoolinfo")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "contents": "本校は2024年に設立されました。",
+                "pub_date": "2024-06-29T12:34:56",
+                "updated_at": "2024-07-01T09:30:00",
+                "created_by": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
+            }
+        }
+
+
+class Group(SQLModel, table=True):
+    id: int | None = Field(
+        None,
+        primary_key=True,
+        title="ID",
+        description="グループを一意に識別するためのID",
+    )
+    name: str = Field(
+        ...,
+        sa_column=Column(Unicode(100)),
+        title="グループ名",
+        description="グループの名前",
+    )
+    description: str | None = Field(
+        None,
+        sa_column=Column(Unicode(255)),
+        title="説明",
+        description="グループの説明",
+    )
+
+    members: list["UserGroup"] = Relationship(back_populates="group")
+    schoolinfos: list["SchoolInfoGroup"] = Relationship(back_populates="group")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "id": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
+                "name": "Development Team",
+                "description": "開発チーム",
+            }
+        }
+
+
+class UserGroup(SQLModel, table=True):
+    user_id: str = Field(
+        ...,
+        foreign_key="user.id",
+        primary_key=True,
+        title="ユーザID",
+        description="関連するユーザのID",
+    )
+    group_id: int = Field(
+        ...,
+        foreign_key="group.id",
+        primary_key=True,
+        title="グループID",
+        description="関連するグループのID",
+    )
+
+    user: Optional["User"] = Relationship(back_populates="user_groups")
+    group: Optional["Group"] = Relationship(back_populates="members")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "user_id": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
+                "group_id": 1,
+            }
+        }
+
+
+class SchoolInfoGroup(SQLModel, table=True):
+    schoolinfo_id: int = Field(
+        ...,
+        foreign_key="schoolinfo.id",
+        primary_key=True,
+        title="学校情報ID",
+        description="関連する学校情報のID",
+    )
+    group_id: int = Field(
+        ...,
+        foreign_key="group.id",
+        primary_key=True,
+        title="グループID",
+        description="編集権限のあるグループのID",
+    )
+
+    schoolinfo: Optional["SchoolInfo"] = Relationship(back_populates="groups_allowed")
+    group: Optional["Group"] = Relationship(back_populates="schoolinfos")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "schoolinfo_id": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
+                "group_id": 1,
             }
         }
