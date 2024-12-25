@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime
@@ -47,7 +48,8 @@ async def text_stream(
     bot_reply = ""
     async for chunk in bot_reply_generator:
         bot_reply += chunk
-        yield chunk  # 各チャンクをリアルタイムに返す
+        yield json.dumps({"chunk": chunk}) + "\n"  # JSONに統一
+        await asyncio.sleep(0)
 
     # ストリームが終了したら、チャットログをデータベースに保存
     chat_log_data = ChatLog(
@@ -109,7 +111,7 @@ async def create_chatlog(
         # StreamingResponseでリアルタイムにAI応答を返却し、最後にDTOを返す
         return StreamingResponse(
             text_stream(bot_reply_generator, chatlog, engine, current_user),
-            media_type="text/plain",
+            media_type="application/json",
         )
 
     except Exception as e:
