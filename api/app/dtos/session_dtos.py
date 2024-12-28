@@ -22,11 +22,6 @@ class SessionDTO(SQLModel):
         }
 
 
-class SessionCreateDTO(SQLModel):
-    session_name: str | None = Field(default="New Session", max_length=100)
-    pub_data: datetime | None = None
-
-
 class SessionOrderBy(str, Enum):
     session_name = "session_name"
     pub_data = "pub_data"

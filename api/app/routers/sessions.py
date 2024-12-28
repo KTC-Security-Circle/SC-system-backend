@@ -12,7 +12,6 @@ from api.app.database.database import (
 )
 from api.app.database.engine import get_engine
 from api.app.dtos.session_dtos import (
-    SessionCreateDTO,
     SessionDTO,
     SessionOrderBy,
     SessionSearchDTO,
@@ -36,11 +35,15 @@ async def create_session(
 ) -> SessionDTO:
     logger.info(f"セッション作成リクエストを受け付けました。ユーザーID: {current_user.id}")
     session_data = Session(
-        session_name=session.session_name,
+        session_name="Default Session",  # デフォルト値
         pub_data=datetime.now(),
         user_id=current_user.id,
     )
-    await add_db_record(engine, session_data)
+    # データベースにレコードを登録
+    async with DBSession(engine) as db:
+        db.add(session_data)
+        await db.commit()
+        await db.refresh(session_data)
 
     logger.info("新しいセッションを登録しました。")
     logger.info(f"セッションID:{session_data.id}")
@@ -48,13 +51,13 @@ async def create_session(
     logger.info(f"投稿日時:{session_data.pub_data}")
     logger.info(f"ユーザーID:{session_data.user_id}")
 
+    # DTO に変換して返却
     session_dto = SessionDTO(
         id=session_data.id,
         session_name=session_data.session_name,
         pub_data=session_data.pub_data,
         user_id=session_data.user_id,
     )
-
     return session_dto
 
 
