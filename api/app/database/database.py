@@ -1,20 +1,28 @@
 # api/app/database/database.py
 import logging
+from collections.abc import Callable, Sequence
 from functools import wraps
+from typing import Any, TypeVar
 
 from fastapi import HTTPException, status
-from sqlmodel import Session, select
-from sqlmodel.sql.expression import Select
+from sqlalchemy import Engine
+from sqlmodel import Session, SQLModel, select
 
 logger = logging.getLogger("database")
 
 # デコレーターによるエラーハンドリング
 
 
-def db_error_handling(default_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
-    def decorator(func):
+T = TypeVar("T")
+M = TypeVar("M", bound=SQLModel)
+
+
+def db_error_handling(
+    default_status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> T:
             try:
                 return func(*args, **kwargs)
             except HTTPException as e:
@@ -23,7 +31,7 @@ def db_error_handling(default_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 raise HTTPException(
                     status_code=default_status_code,
                     detail=f"エラーが発生しました: {str(e)}",
-                )
+                ) from e
 
         return wrapper
 
@@ -31,7 +39,7 @@ def db_error_handling(default_status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @db_error_handling(default_status_code=470)
-async def add_db_record(engine, data):
+async def add_db_record(engine: Engine, data: SQLModel) -> None:
     with Session(engine) as session_db:
         session_db.add(data)
         session_db.commit()
@@ -41,14 +49,14 @@ async def add_db_record(engine, data):
 
 @db_error_handling(default_status_code=570)
 async def select_table(
-    engine,
-    model,
+    engine: Engine,
+    model: type[M],
     conditions: dict | None = None,
     like_conditions: dict | None = None,  # LIKE条件を追加
     limit: int | None = None,  # Queryを外して直接Optional[int]
     offset: int | None = 0,
     order_by: str | None = None,  # ORDER BY をサポート
-):
+) -> Sequence[M]:
     with Session(engine) as session:
         stmt = select(model)
 
@@ -77,11 +85,11 @@ async def select_table(
 
 
 @db_error_handling(default_status_code=471)
-async def update_record(engine, model, conditions: dict, updates: dict):
+async def update_record(engine: Engine, model: type[M], conditions: dict, updates: dict) -> M:
     try:
         with Session(engine) as session_db:
             # 条件に一致するレコードの検索
-            stmt: Select = select(model)
+            stmt = select(model)
             for field, value in conditions.items():
                 stmt = stmt.where(getattr(model, field) == value)
             result = session_db.exec(stmt).one_or_none()
@@ -109,11 +117,11 @@ async def update_record(engine, model, conditions: dict, updates: dict):
         # ロールバックを行い、500エラーを返す
         session_db.rollback()
         logger.error(f"予期しないエラーが発生しました: {e}")
-        raise HTTPException(status_code=500, detail="予期しないエラーが発生しました。")
+        raise HTTPException(status_code=500, detail="予期しないエラーが発生しました。") from e
 
 
 @db_error_handling(default_status_code=472)
-async def delete_record(engine, model, conditions: dict):
+async def delete_record(engine: Engine, model: type[M], conditions: dict) -> dict[str, str]:
     with Session(engine) as session_db:
         stmt = select(model)
         for field, value in conditions.items():

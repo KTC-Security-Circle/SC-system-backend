@@ -10,6 +10,4 @@ logger = getLogger("azure_functions.fastapi")
 logger.setLevel(logging.DEBUG)
 
 # FastAPIアプリをAzure FunctionsのASGIアプリケーションとして設定
-function_app = func.AsgiFunctionApp(
-    app=app, http_auth_level=func.AuthLevel.ANONYMOUS
-)
+function_app = func.AsgiFunctionApp(app=app, http_auth_level=func.AuthLevel.ANONYMOUS)

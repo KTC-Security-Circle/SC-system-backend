@@ -18,7 +18,7 @@ class UserDTO(SQLModel):
                 "name": "Taro Yamada",
                 "email": "taro.yamada@example.com",
                 "authority": "admin",
-                "major": "fugafuga専攻"
+                "major": "fugafuga専攻",
             }
         }
 
@@ -46,11 +46,12 @@ class UserSearchDTO(SQLModel):
     authority: str | None = None
     major_like: str | None = None  # 部分一致フィルタ
 
-    @field_validator('authority')
-    def validate_authority(cls, value):
+    @field_validator("authority")
+    @classmethod
+    def validate_authority(cls, value: str) -> str:
         valid_roles = ["admin", "staff", "student"]
         if value and value not in valid_roles:
-            raise ValueError('Invalid role specified')
+            raise ValueError("Invalid role specified")
         return value
 
 
@@ -61,9 +62,10 @@ class UserUpdateDTO(SQLModel):
     authority: str | None = Field(None)
     major: str | None = Field(None, max_length=255)
 
-    @field_validator('authority')
-    def validate_authority(cls, value):
+    @field_validator("authority")
+    @classmethod
+    def validate_authority(cls, value: str) -> str:
         valid_roles = ["admin", "staff", "student"]
         if value and value not in valid_roles:
-            raise ValueError('Invalid role specified')
+            raise ValueError("Invalid role specified")
         return value

@@ -1,6 +1,8 @@
 from datetime import datetime
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import Engine
 from sqlmodel import Session, select
 
 # from api.app.security.jwt_token import get_current_user, get_password_hash
@@ -25,18 +27,18 @@ router = APIRouter()
 logger = getLogger("user_router")
 
 
-@router.post("/input/user/", response_model=UserDTO, tags=["user_post"])
+@router.post("/input/user", response_model=UserDTO, tags=["user_post"])
 async def create_user(
     user: UserCreateDTO,
-    engine=Depends(get_engine),
-):
-
+    engine: Annotated[Engine, Depends(get_engine)],
+) -> UserDTO:
     logger.info("ユーザー作成リクエストを受け付けました。")
 
     session = Session(engine)
 
+    stmt = select(UserDemo).where(UserDemo.email == user.email)
     # 既存のメールアドレスのチェック
-    existing_user = session.exec(select(UserDemo.where(UserDemo.email == user.email)).first())
+    existing_user = session.exec(stmt).first()
 
     if existing_user:
         session.close()
@@ -82,7 +84,7 @@ async def create_user(
 
 
 @router.get("/user/me", response_model=UserDTO, tags=["user_get"])
-async def get_me():
+async def get_me() -> UserDTO:
     try:
         logger.info("現在のユーザー情報を取得:")
 
@@ -100,20 +102,18 @@ async def get_me():
         raise HTTPException(
             status_code=500,
             detail=f"ユーザー情報の取得中にエラーが発生しました。{str(e)}",
-        )
+        ) from e
 
 
-@router.get("/view/user/", response_model=list[UserDTO], tags=["user_get"])
+@router.get("/view/user", response_model=list[UserDTO], tags=["user_get"])
 async def view_user(
-    search_params: UserSearchDTO = Depends(),
+    search_params: Annotated[UserSearchDTO, Depends()],
+    engine: Annotated[Engine, Depends(get_engine)],
     order_by: UserOrderBy | None = None,
     limit: int | None = None,
     offset: int | None = 0,
-    engine=Depends(get_engine),
-):
-    logger.info(
-        f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}"
-    )
+) -> list[UserDTO]:
+    logger.info(f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}")
     conditions = {}
     like_conditions = {}
 
@@ -159,12 +159,12 @@ async def view_user(
     return user_dto_list
 
 
-@router.put("/update/user/{user_id}/", response_model=UserDTO, tags=["user_put"])
+@router.put("/update/user/{user_id}", response_model=UserDTO, tags=["user_put"])
 async def update_user(
     user_id: str,
     updates: UserUpdateDTO,
-    engine=Depends(get_engine),
-):
+    engine: Annotated[Engine, Depends(get_engine)],
+) -> UserDTO:
     logger.info(f"ユーザー更新リクエストを受け付けました。ユーザーID: {user_id}")
     updates_dict = updates.model_dump(exclude_unset=True)
 
@@ -172,9 +172,7 @@ async def update_user(
 
     # 既存のメールアドレスのチェック
     if "email" in updates_dict:
-        existing_user = session.exec(
-            select(UserDemo).where(UserDemo.email == updates_dict["email"])
-        ).first()
+        existing_user = session.exec(select(UserDemo).where(UserDemo.email == updates_dict["email"])).first()
 
         if existing_user:
             session.close()
@@ -201,17 +199,15 @@ async def update_user(
     return updated_user_dto
 
 
-@router.delete("/delete/user/{user_id}/", response_model=dict, tags=["user_delete"])
+@router.delete("/delete/user/{user_id}", response_model=dict, tags=["user_delete"])
 async def delete_user(
     user_id: str,
-    engine=Depends(get_engine),
-):
-    logger.info(
-        f"ユーザー削除リクエストを受け付けました。削除対象: {user_id}, ログイン中のユーザー: "
-    )
+    engine: Annotated[Engine, Depends(get_engine)],
+) -> dict:
+    logger.info(f"ユーザー削除リクエストを受け付けました。削除対象: {user_id}, ログイン中のユーザー: ")
 
     conditions = {"id": user_id}
-    result = await delete_record(engine, UserDemo, conditions)
+    await delete_record(engine, UserDemo, conditions)
     logger.info(f"ユーザーを削除しました。ユーザーID: {user_id}")
 
     # 自分自身のアカウントを削除した場合はログアウト処理を行う

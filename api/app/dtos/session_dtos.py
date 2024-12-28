@@ -17,7 +17,7 @@ class SessionDTO(SQLModel):
                 "id": 1,
                 "session_name": "新しいセッション",
                 "pub_data": "2024-06-29T12:35:00",
-                "user_id": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx"
+                "user_id": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
             }
         }
 

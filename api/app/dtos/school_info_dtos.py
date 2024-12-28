@@ -1,14 +1,14 @@
+from datetime import datetime
+
 from pydantic import Field
 from sqlmodel import SQLModel
-from datetime import datetime
-from typing import Optional
 
 
 class SchoolInfoDTO(SQLModel):
     id: int
     contents: str
-    pub_date: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    pub_date: datetime | None = None
+    updated_at: datetime | None = None
     created_by: str
 
     class Config:
@@ -26,8 +26,8 @@ class SchoolInfoDTO(SQLModel):
 
 class SchoolInfoCreateDTO(SQLModel):
     contents: str = Field(..., max_length=1000, title="内容", description="学校情報の内容")
-    pub_date: Optional[datetime] = Field(None, title="公開日時", description="学校情報の公開日時")
-    updated_at: Optional[datetime] = Field(None, title="更新日時", description="学校情報の最終更新日時")
+    pub_date: datetime | None = Field(None, title="公開日時", description="学校情報の公開日時")
+    updated_at: datetime | None = Field(None, title="更新日時", description="学校情報の最終更新日時")
 
     class Config:
         schema_extra = {
@@ -40,9 +40,9 @@ class SchoolInfoCreateDTO(SQLModel):
 
 
 class SchoolInfoUpdateDTO(SQLModel):
-    contents: Optional[str] = Field(None, max_length=1000, title="内容", description="学校情報の内容")
-    pub_date: Optional[datetime] = Field(None, title="公開日時", description="学校情報の公開日時")
-    updated_at: Optional[datetime] = Field(None, title="更新日時", description="学校情報の最終更新日時")
+    contents: str | None = Field(None, max_length=1000, title="内容", description="学校情報の内容")
+    pub_date: datetime | None = Field(None, title="公開日時", description="学校情報の公開日時")
+    updated_at: datetime | None = Field(None, title="更新日時", description="学校情報の最終更新日時")
 
     class Config:
         schema_extra = {
@@ -55,8 +55,8 @@ class SchoolInfoUpdateDTO(SQLModel):
 
 
 class SchoolInfoSearchDTO(SQLModel):
-    contents_like: Optional[str] = Field(None, title="内容の部分一致", description="内容で部分一致検索")
-    created_by: Optional[str] = Field(None, title="作成者ID", description="作成者IDで検索")
+    contents_like: str | None = Field(None, title="内容の部分一致", description="内容で部分一致検索")
+    created_by: str | None = Field(None, title="作成者ID", description="作成者IDで検索")
 
     class Config:
         schema_extra = {
