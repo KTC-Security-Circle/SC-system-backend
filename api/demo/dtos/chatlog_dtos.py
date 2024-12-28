@@ -18,7 +18,7 @@ class ChatLogDTO(SQLModel):
                 "message": "こんにちは！",
                 "bot_reply": "こんにちは！何かお手伝いできますか？",
                 "pub_data": "2024-06-29T12:34:56",
-                "session_id": 1
+                "session_id": 1,
             }
         }
 

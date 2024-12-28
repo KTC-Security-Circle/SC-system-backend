@@ -22,9 +22,25 @@ ROLE_HIERARCHY = {Role.ADMIN: 3, Role.STAFF: 2, Role.STUDENT: 1}
 T = TypeVar("T")
 
 
-def role_required(min_role: Role) -> Callable[[Callable[..., T]], Callable[..., T]]:
-    from api.app.models import User
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+def role_required(min_role: Role) -> Callable[[T], T]:
+    """
+    指定された最小限の権限を要求するデコレータ。
+
+    Args:
+        min_role (Role): この権限以上が必要。
+
+    Returns:
+        Callable[[T], T]: 関数をラップしたデコレータ。
+
+    Raises:
+        HTTPException:
+            - ユーザが認証されていない場合 (401 Unauthorized)。
+            - 必要な権限を満たしていない場合 (403 Forbidden)。
+    """
+
+    def decorator(func: T) -> T:
+        from api.app.models import User
+
         @wraps(func)
         async def wrapper(*args: Any, current_user: User | None = None, **kwargs: Any) -> T:
             if current_user is None:
