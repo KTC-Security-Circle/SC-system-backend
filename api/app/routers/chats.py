@@ -43,32 +43,37 @@ async def async_wrap(generator: Generator[str, None, None]) -> AsyncGenerator[st
 
 # StreamingResponseでのリアルタイムレスポンス
 async def text_stream(
-    bot_reply_generator: AsyncGenerator[Any, None], chatlog: ChatCreateDTO, engine: Engine, current_user: User
-) -> AsyncGenerator[str, None]:
+    bot_reply_generator: AsyncGenerator[str, None],
+    chatlog: ChatCreateDTO,
+    engine: Engine,
+    current_user: User,
+) -> StreamingResponse:
     bot_reply = ""
-    async for chunk in bot_reply_generator:
-        bot_reply += chunk
-        yield json.dumps({"chunk": chunk}) + "\n"  # JSONに統一
-        await asyncio.sleep(0)
 
-    # ストリームが終了したら、チャットログをデータベースに保存
-    chat_log_data = ChatLog(
-        message=chatlog.message,
-        bot_reply=bot_reply,
-        pub_data=chatlog.pub_data or datetime.now(),
-        session_id=chatlog.session_id,
-    )
-    await add_db_record(engine, chat_log_data)
+    async def stream():
+        async for i, chunk in enumerate(bot_reply_generator):
+            bot_reply += chunk
+            yield json.dumps({"index": i, "message": chunk}) + "\n\n"
+            await asyncio.sleep(0)
 
-    # 最後にDTOをJSON形式で返す
-    dto = ChatLogDTO(
-        id=chat_log_data.id,
-        message=chat_log_data.message,
-        bot_reply=chat_log_data.bot_reply,
-        pub_data=chat_log_data.pub_data,
-        session_id=chat_log_data.session_id,
-    )
-    yield f"\n\n{dto.model_dump_json()}"  # DTOをJSONとして出力
+        # ストリームが終了したら、チャットログをデータベースに保存
+        chat_log_data = ChatLog(
+            message=chatlog.message,
+            bot_reply=bot_reply,
+            pub_data=chatlog.pub_data or datetime.now(),
+            session_id=chatlog.session_id,
+        )
+        await add_db_record(engine, chat_log_data)
+
+        # 最後にDTOをJSON形式で返す
+        dto = ChatLogDTO(
+            id=chat_log_data.id,
+            message=chat_log_data.message,
+            bot_reply=chat_log_data.bot_reply,
+            pub_data=chat_log_data.pub_data,
+            session_id=chat_log_data.session_id,
+        )
+        yield json.dumps(dto.model_dump()) + "\n"
 
 
 @router.post("/input/chat", response_model=ChatLogDTO, tags=["chat_post"])

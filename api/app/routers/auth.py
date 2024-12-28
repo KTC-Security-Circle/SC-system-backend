@@ -79,18 +79,18 @@ async def login(user: LoginData, response: Response, session: Annotated[Session,
         expires_delta=timedelta(minutes=30),
     )
 
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=False,
-            max_age=1800,
-            expires=1800,
-            secure=False,
-            samesite="lax",
-        )
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "role": db_user.authority,
-            "message": "Login successful",
-        }
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=False,
+        max_age=1800,
+        expires=1800,
+        secure=False,
+        samesite="lax",
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": db_user.authority,
+        "message": "Login successful",
+    }
