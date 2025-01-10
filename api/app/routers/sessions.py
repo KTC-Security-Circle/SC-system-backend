@@ -47,9 +47,11 @@ async def create_session(
         pub_data=datetime.now(),
         user_id=current_user.id,
     )
-
     # データベースにレコードを登録
-    await add_db_record(engine, session_data)
+    async with DBSession(engine) as db:
+        db.add(session_data)
+        await db.commit()
+        await db.refresh(session_data)
 
     logger.info("新しいセッションを登録しました。")
     logger.info(f"セッションID:{session_data.id}")

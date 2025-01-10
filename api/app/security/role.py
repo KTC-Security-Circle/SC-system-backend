@@ -62,4 +62,4 @@ def role_required(min_role: Role) -> Callable[[T], T]:
         # ここも同様にどうしてもエラーが出るのでignore
         return wrapper  # type: ignore
 
-    return decorator
+    return decorator  # デコレータを返す

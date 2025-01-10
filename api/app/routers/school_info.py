@@ -207,6 +207,7 @@ router = APIRouter()
 logger = getLogger("schoolinfo_router", logging.DEBUG)
 
 
+
 @router.post("/input/schoolinfo/", response_model=SchoolInfoDTO, tags=["schoolinfo_post"])
 @role_required(Role.STAFF)
 async def create_school_info(

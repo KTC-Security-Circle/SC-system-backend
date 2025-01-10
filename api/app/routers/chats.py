@@ -24,7 +24,8 @@ from api.app.dtos.chatlog_dtos import (
     ChatSearchDTO,
     ChatUpdateDTO,
 )
-from api.app.models import ChatLog, Session, User
+from api.app.models import ChatLog, User
+from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
 from api.app.security.role import Role, role_required
 from api.logger import getLogger
