@@ -177,6 +177,7 @@ class SchoolInfo(SQLModel, table=True):
         title="作成者ID",
         description="情報の作成者のユーザID",
     )
+    title: str | None = Field(None, sa_column=Column(UnicodeText), title="タイトル", description="学校情報のタイトル")
 
     creator: Optional["User"] = Relationship(back_populates="school_infos")
     groups_allowed: list["SchoolInfoGroup"] = Relationship(back_populates="schoolinfo")
@@ -189,6 +190,7 @@ class SchoolInfo(SQLModel, table=True):
                 "pub_date": "2024-06-29T12:34:56",
                 "updated_at": "2024-07-01T09:30:00",
                 "created_by": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
+                "title": "学校の設立年",
             }
         }
 
