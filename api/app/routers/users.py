@@ -22,6 +22,7 @@ from api.app.dtos.user_dtos import (
 from api.app.models import User
 from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user, get_password_hash
+from api.app.security.role import Role, role_required
 from api.logger import getLogger
 
 router = APIRouter()

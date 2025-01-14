@@ -1,40 +1,25 @@
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from enum import Enum
 from functools import wraps
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from fastapi import HTTPException, status
 
 from api.logger import getLogger
 
-# ロガーの設定
 logger = getLogger(__name__)
 
 
-# ユーザの権限を定義する列挙型
 class Role(str, Enum):
-    """
-    ユーザの権限を表す列挙型。
-
-    - ADMIN: 管理者
-    - STAFF: スタッフ
-    - STUDENT: 学生
-    """
-
     ADMIN = "admin"
     STAFF = "staff"
     STUDENT = "student"
 
 
-# 権限の優劣を定義する辞書
-ROLE_HIERARCHY = {
-    Role.ADMIN: 3,  # 管理者 (最も高い権限)
-    Role.STAFF: 2,  # スタッフ
-    Role.STUDENT: 1,  # 学生 (最も低い権限)
-}
+# 権限の優劣を定義
+ROLE_HIERARCHY = {Role.ADMIN: 3, Role.STAFF: 2, Role.STUDENT: 1}
 
-# ジェネリックな型変数
-T = TypeVar("T", bound=Callable[..., Awaitable])
+T = TypeVar("T")
 
 
 def role_required(min_role: Role) -> Callable[[T], T]:
@@ -57,44 +42,24 @@ def role_required(min_role: Role) -> Callable[[T], T]:
         from api.app.models import User
 
         @wraps(func)
-        async def wrapper(*args, current_user: User = None, **kwargs) -> Awaitable:  # type: ignore
-            """
-            関数をラップして、権限チェックを行う。
-
-            Args:
-                current_user (User, optional): 現在の認証されたユーザ。
-
-            Raises:
-                HTTPException:
-                    - 401 Unauthorized: 認証情報が提供されていない場合。
-                    - 403 Forbidden: 必要な権限を満たしていない場合。
-            """
-            # ユーザが認証されていない場合は 401 エラーを返す
+        async def wrapper(*args: Any, current_user: User | None = None, **kwargs: Any) -> T:
             if current_user is None:
-                logger.warning("Unauthorized access attempt detected.")
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
-            # 現在のユーザの権限を取得し、権限レベルを確認
             user_role = Role(current_user.authority)
             user_role_level = ROLE_HIERARCHY.get(user_role)
             required_role_level = ROLE_HIERARCHY.get(min_role)
 
-            if user_role_level is None or required_role_level is None:
-                logger.error(f"Invalid role: {user_role}")
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid role")
-            # 権限が不足している場合は 403 エラーを返す
+            if required_role_level is None:
+                raise ValueError(f"Role {min_role} is not defined in the ROLE_HIERARCHY")
             if user_role_level is None or user_role_level < required_role_level:
-                logger.warning(
-                    f"Permission denied for user {current_user.id}: " f"required={min_role}, actual={user_role}"
-                )
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN, detail="You do not have sufficient permissions"
                 )
-
-            # 権限チェックを通過した場合、元の関数を実行
+                # どうしてもエラーが出るのでignoreする
             return await func(*args, current_user=current_user, **kwargs)  # type: ignore
 
-        # ラッパー関数をデコレータとして返す
+        # ここも同様にどうしてもエラーが出るのでignore
         return wrapper  # type: ignore
 
     return decorator  # デコレータを返す
