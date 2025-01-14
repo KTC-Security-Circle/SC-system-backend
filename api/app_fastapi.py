@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         engine = get_engine()
 
         # 既存のテーブルを削除して再作成する処理 (必要に応じてコメント解除)
-        # SQLModel.metadata.drop_all(engine)
+        SQLModel.metadata.drop_all(engine)
 
         # データベーステーブルの作成
         SQLModel.metadata.create_all(engine)

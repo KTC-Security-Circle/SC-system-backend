@@ -56,6 +56,15 @@ class User(SQLModel, table=True):
         },  # 子オブジェクトのカスケード削除
     )
 
+    school_infos: list["SchoolInfo"] = Relationship(
+        back_populates="creator",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+
+    user_groups: list["UserGroup"] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+
     # 権限のバリデーション
     @field_validator("authority", mode="before")
     @classmethod
@@ -182,6 +191,7 @@ class SchoolInfo(SQLModel, table=True):
     updated_at: datetime | None = Field(None, title="更新日時", description="情報の最終更新日時", index=True)
     created_by: str = Field(
         ...,
+        max_length=255,
         foreign_key="user.id",
         title="作成者ID",
         description="情報の作成者のユーザID",
@@ -238,6 +248,7 @@ class Group(SQLModel, table=True):
 class UserGroup(SQLModel, table=True):
     user_id: str = Field(
         ...,
+        max_length=255,
         foreign_key="user.id",
         primary_key=True,
         title="ユーザID",

@@ -1,5 +1,6 @@
+import requests
 # エンドポイントURLの定義
-base_url = "http://localhost:7071"
+base_url = "https://sc-system-backend.azurewebsites.net"
 
 # # サインアップ情報
 # signup_url = f"{base_url}/auth/signup/"
@@ -10,12 +11,12 @@ base_url = "http://localhost:7071"
 #     "authority": "admin"
 # }
 
-# # ログイン情報
-# login_url = f"{base_url}/auth/login/"
-# login_data = {
-#     "email": "test@example.jp.com",
-#     "password": "12345678"
-# }
+# ログイン情報
+login_url = f"{base_url}/auth/login/"
+login_data = {
+    "email": "test@example.jp.com",
+    "password": "12345678"
+}
 
 # # サインアップしてユーザーを登録
 # response = requests.post(signup_url, json=signup_data)
