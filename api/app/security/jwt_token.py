@@ -92,32 +92,37 @@ async def authenticate_user(db: Session, email: str, password: str) -> User | No
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], engine: Annotated[Engine, Depends(get_engine)]
 ) -> User:
-    logger.debug(f"Received token: {token}")
+    # トークンを受け取ったログ
+    logger.debug(f"受け取ったトークン: {token}")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="資格情報を検証できませんでした",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # トークンをデコードしてユーザー情報を取得
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         user_id: str = payload.get("user_id")
-        logger.debug(f"Decoded token: email={email}, user_id={user_id}")
+        logger.debug(f"デコードされたトークン: email={email}, user_id={user_id}")
         if email is None or user_id is None:
-            logger.error("Email or user_id is None")
+            logger.error("メールアドレスまたはユーザーIDが存在しません")
             raise credentials_exception
     except JWTError as e:
-        logger.error(f"JWT decoding error: {str(e)}")
+        # トークンのデコードエラー
+        logger.error(f"JWTデコードエラー: {str(e)}")
         raise credentials_exception from e
 
     try:
+        # データベースからユーザー情報を取得
         with Session(engine) as db:
             user = db.exec(select(User).where(User.id == user_id, User.email == email)).first()
-            logger.debug(f"Retrieved user: {user}")
+            logger.debug(f"取得したユーザー情報: {user}")
             if user is None:
-                logger.error("User not found")
+                logger.error("ユーザーが見つかりません")
                 raise credentials_exception
             return user
     except Exception as e:
-        logger.error(f"Error retrieving user: {str(e)}")
+        # データベース操作エラー
+        logger.error(f"ユーザー取得エラー: {str(e)}")
         raise credentials_exception from e

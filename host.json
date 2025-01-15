@@ -1,14 +1,15 @@
 {
   "version": "2.0",
-  "logging": 
-  {
-    "applicationInsights": 
-    {
-      "samplingSettings": 
-      {
-        "isEnabled": true,
-        "excludedTypes": "Request"
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true
       }
+    },
+    "logLevel": {
+      "Function": "Information",
+      "Host": "Debug",
+      "Worker": "Debug"
     }
   },
   "extensionBundle": 

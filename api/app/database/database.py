@@ -24,13 +24,23 @@ def db_error_handling(
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
             try:
+                logger.debug(
+                    "DB function called: %s, args: %s, kwargs: %s",
+                    func.__name__,
+                    args,
+                    kwargs,
+                )
                 return func(*args, **kwargs)
             except HTTPException as e:
-                raise e
+                logger.error("HTTP exception in DB function: %s", str(e), exc_info=True)
+                raise
             except Exception as e:
+                logger.error(
+                    "Unhandled exception in DB function: %s", str(e), exc_info=True
+                )
                 raise HTTPException(
                     status_code=default_status_code,
-                    detail=f"エラーが発生しました: {str(e)}",
+                    detail=f"Database error occurred: {str(e)}",
                 ) from e
 
         return wrapper

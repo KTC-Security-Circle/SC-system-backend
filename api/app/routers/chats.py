@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime
@@ -26,6 +27,7 @@ from api.app.dtos.chatlog_dtos import (
 from api.app.models import ChatLog, User
 from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
+from api.app.security.role import Role, role_required
 from api.logger import getLogger
 
 router = APIRouter()
@@ -42,31 +44,37 @@ async def async_wrap(generator: Generator[str, None, None]) -> AsyncGenerator[st
 
 # StreamingResponseでのリアルタイムレスポンス
 async def text_stream(
-    bot_reply_generator: AsyncGenerator[Any, None], chatlog: ChatCreateDTO, engine: Engine, current_user: User
-) -> AsyncGenerator[str, None]:
+    bot_reply_generator: AsyncGenerator[str, None],
+    chatlog: ChatCreateDTO,
+    engine: Engine,
+    current_user: User,
+) -> StreamingResponse:
     bot_reply = ""
-    async for chunk in bot_reply_generator:
-        bot_reply += chunk
-        yield chunk  # 各チャンクをリアルタイムに返す
 
-    # ストリームが終了したら、チャットログをデータベースに保存
-    chat_log_data = ChatLog(
-        message=chatlog.message,
-        bot_reply=bot_reply,
-        pub_data=chatlog.pub_data or datetime.now(),
-        session_id=chatlog.session_id,
-    )
-    await add_db_record(engine, chat_log_data)
+    async def stream():
+        async for i, chunk in enumerate(bot_reply_generator):
+            bot_reply += chunk
+            yield json.dumps({"index": i, "message": chunk}) + "\n\n"
+            await asyncio.sleep(0)
 
-    # 最後にDTOをJSON形式で返す
-    dto = ChatLogDTO(
-        id=chat_log_data.id,
-        message=chat_log_data.message,
-        bot_reply=chat_log_data.bot_reply,
-        pub_data=chat_log_data.pub_data,
-        session_id=chat_log_data.session_id,
-    )
-    yield f"\n\n{dto.model_dump_json()}"  # DTOをJSONとして出力
+        # ストリームが終了したら、チャットログをデータベースに保存
+        chat_log_data = ChatLog(
+            message=chatlog.message,
+            bot_reply=bot_reply,
+            pub_data=chatlog.pub_data or datetime.now(),
+            session_id=chatlog.session_id,
+        )
+        await add_db_record(engine, chat_log_data)
+
+        # 最後にDTOをJSON形式で返す
+        dto = ChatLogDTO(
+            id=chat_log_data.id,
+            message=chat_log_data.message,
+            bot_reply=chat_log_data.bot_reply,
+            pub_data=chat_log_data.pub_data,
+            session_id=chat_log_data.session_id,
+        )
+        yield json.dumps(dto.model_dump()) + "\n"
 
 
 @router.post("/input/chat", response_model=ChatLogDTO, tags=["chat_post"])
@@ -79,9 +87,17 @@ async def create_chatlog(
     logger.info(f"チャット作成リクエストを受け付けました。ユーザーID: {current_user.id}")
 
     try:
-        # chatlog.session_idがNoneであれば、エラーを吐いて終了する
-        if chatlog.session_id is None:
-            raise ValueError("Session id does not specified or it is null.")
+        # セッションIDがない場合、新しいセッションを作成
+        if not chatlog.session_id:
+            new_session = Session(
+                session_name="Default Session",
+                pub_data=datetime.now(),
+                user_id=current_user.id,
+            )
+            await add_db_record(engine, new_session)
+            chatlog.session_id = new_session.id
+            logger.info(f"新しいセッションを作成しました。セッションID: {chatlog.session_id}")
+
         # `get_tagged_conversations`を使用して過去の会話履歴を取得
         tagged_conversations = await get_tagged_conversations(chatlog.session_id, engine)
         logger.info(f"取得した会話履歴 (tagged_conversations): {tagged_conversations}")
@@ -101,7 +117,7 @@ async def create_chatlog(
         # StreamingResponseでリアルタイムにAI応答を返却し、最後にDTOを返す
         return StreamingResponse(
             text_stream(bot_reply_generator, chatlog, engine, current_user),
-            media_type="text/plain",
+            media_type="application/json",
         )
 
     except Exception as e:

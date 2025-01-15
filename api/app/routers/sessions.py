@@ -17,7 +17,11 @@ from api.app.dtos.session_dtos import (
     SessionSearchDTO,
     SessionUpdateDTO,
 )
-from api.app.models import Session, User
+from api.app.dtos.chatlog_dtos import (
+    ChatLogDTO,
+    ChatOrderBy,
+)
+from api.app.models import Session, User, ChatLog
 from api.app.security.jwt_token import get_current_user
 from api.app.security.role import Role, role_required
 from api.logger import getLogger
@@ -29,11 +33,15 @@ logger = getLogger("session_router")
 @router.post("/input/session", response_model=SessionDTO, tags=["session_post"])
 @role_required(Role.STUDENT)
 async def create_session(
-    session: SessionCreateDTO,
     engine: Annotated[Engine, Depends(get_engine)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> SessionDTO:
+    """
+    デフォルトのセッションを作成する GET メソッド。
+    """
     logger.info(f"セッション作成リクエストを受け付けました。ユーザーID: {current_user.id}")
+
+    # デフォルト値を設定してセッションを作成
     session_data = Session(
         session_name="Default Session",  # デフォルト値
         pub_data=datetime.now(),
@@ -83,6 +91,8 @@ async def view_session(
 
     if search_params.user_id:
         conditions["user_id"] = search_params.user_id
+    else:
+        conditions["user_id"] = current_user.id
 
     sessions = await select_table(
         engine,
@@ -107,6 +117,52 @@ async def view_session(
     ]
 
     return session_dto_list
+
+
+@router.get(
+    "/view/session/{session_id}", response_model=list[ChatLogDTO], tags=["chatlog_get"]
+)
+@role_required(Role.STUDENT)
+async def view_chatlog_by_session(
+    session_id: int,
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    order_by: ChatOrderBy | None = None,
+    limit: int | None = None,
+    offset: int | None = 0,
+) -> list[ChatLogDTO]:
+    logger.info(
+        f"セッションID {session_id} のチャットログ取得リクエストを受け付けました。"
+    )
+
+    # 検索条件を設定
+    conditions_dict = {"session_id": session_id}
+
+    # データベースからチャットログを取得
+    chatlog = await select_table(
+        engine,
+        ChatLog,
+        conditions_dict,
+        offset=offset,
+        limit=limit,
+        order_by=order_by,
+    )
+
+    logger.info(f"チャットログ取得完了: {len(chatlog)}件")
+
+    # DTOリストを作成して返す
+    chatlog_dto_list = [
+        ChatLogDTO(
+            id=log.id,
+            message=log.message,
+            bot_reply=log.bot_reply,
+            pub_data=log.pub_data,
+            session_id=log.session_id,
+        )
+        for log in chatlog
+    ]
+
+    return chatlog_dto_list
 
 
 @router.put("/update/session/{session_id}", response_model=SessionDTO, tags=["session_put"])

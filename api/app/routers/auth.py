@@ -34,36 +34,52 @@ def get_session() -> Generator[Session, None, None]:
 
 
 # サインアップエンドポイント
-
-
 @router.post("/signup", response_model=UserDTO, tags=["signup"])
-async def signup(user: UserCreateDTO, session: Annotated[Session, Depends(get_session)]) -> UserDTO:
-    existing_user = session.exec(select(User).where(User.email == user.email)).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+async def signup(
+    user: UserCreateDTO, session: Annotated[Session, Depends(get_session)]
+) -> UserDTO:
+    logger.debug("Signup API called with user data: %s", user.dict())
+    try:
+        # ユーザーの存在確認
+        existing_user = session.exec(
+            select(User).where(User.email == user.email)
+        ).first()
+        logger.debug("Existing user query result: %s", existing_user)
 
-    # パスワードをハッシュ化して保存
-    hashed_password = get_password_hash(user.password)
-    new_user = User(
-        name=user.name,
-        email=user.email,
-        password=hashed_password,
-        authority=user.authority,
-        major=user.major,  # 専攻を追加
-    )
-    session.add(new_user)
-    session.commit()
-    session.refresh(new_user)
+        if existing_user:
+            logger.warning("Attempted to register with existing email: %s", user.email)
+            raise HTTPException(status_code=400, detail="Email already registered")
 
-    # ユーザー情報をDTO形式で返す
-    signup_dto = UserDTO(
-        id=new_user.id,
-        name=new_user.name,
-        email=new_user.email,
-        authority=new_user.authority,
-        major=new_user.major,  # 専攻を追加
-    )
-    return signup_dto
+        # パスワードをハッシュ化して保存
+        hashed_password = get_password_hash(user.password)
+        logger.debug("Hashed password: %s", hashed_password)
+
+        new_user = User(
+            name=user.name,
+            email=user.email,
+            password=hashed_password,
+            authority=user.authority,
+            major=user.major,
+        )
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+
+        logger.info("New user created: %s", new_user.dict())
+
+        # ユーザー情報をDTO形式で返す
+        signup_dto = UserDTO(
+            id=new_user.id,
+            name=new_user.name,
+            email=new_user.email,
+            authority=new_user.authority,
+            major=new_user.major,
+        )
+        logger.debug("Signup DTO: %s", signup_dto.dict())
+        return signup_dto
+    except Exception as e:
+        logger.error("Error in signup endpoint: %s", str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred during signup")
 
 
 # ログインエンドポイント
@@ -91,5 +107,6 @@ async def login(user: LoginData, response: Response, session: Annotated[Session,
     return {
         "access_token": access_token,
         "token_type": "bearer",
+        "role": db_user.authority,
         "message": "Login successful",
     }
