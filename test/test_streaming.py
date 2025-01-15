@@ -53,7 +53,7 @@ async def main() -> None:
 
     payload = {
         "message": "これはテストメッセージです",
-        "session_id": 2,  # Replace with the actual session ID
+        # "session_id": 2,  # Replace with the actual session ID
     }
 
     # Streaming response for async output

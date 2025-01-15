@@ -3,6 +3,8 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+import asyncio
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 
@@ -47,6 +49,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 # FastAPI アプリケーションの作成
 # lifespan を登録してアプリケーションのリソースを管理
 app = FastAPI(lifespan=lifespan)
+
+@app.get("/test-streaming")
+async def test_streaming():
+    """
+    StreamingResponseが動作するかをテストする関数
+    """
+
+    async def generator():
+        for i in range(10):  # 10個のメッセージを送信
+            yield f"data: Message {i}\n\n"
+            await asyncio.sleep(1)  # 1秒間隔でメッセージを送信
+
+    # StreamingResponseを返す
+    return StreamingResponse(generator(), media_type="text/event-stream")
 
 # CORS 設定
 # 特定のオリジンからのリクエストを許可する
