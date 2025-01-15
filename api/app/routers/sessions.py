@@ -15,10 +15,16 @@ from api.app.dtos.session_dtos import (
     SessionSearchDTO,
     SessionUpdateDTO,
 )
-from api.app.models import Session, User
+from api.app.dtos.chatlog_dtos import (
+    ChatLogDTO,
+    ChatOrderBy,
+)
+from typing import Annotated
+from api.app.models import Session, User,ChatLog
 from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
 from api.logger import getLogger
+from sqlalchemy import Engine
 
 router = APIRouter()
 logger = getLogger("session_router")
@@ -63,52 +69,48 @@ async def create_session(
     return session_dto
 
 
-@router.get("/view/session/", response_model=list[SessionDTO], tags=["session_get"])
+@router.get("/view/session/{session_id}", response_model=list[ChatLogDTO], tags=["chatlog_get"])
 @role_required(Role.STUDENT)
-async def view_session(
-    search_params: SessionSearchDTO = Depends(),
-    order_by: SessionOrderBy | None = None,
+async def view_chatlog_by_session(
+    session_id: int,
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    order_by: ChatOrderBy | None = None,
     limit: int | None = None,
     offset: int | None = 0,
-    engine=Depends(get_engine),
-    current_user: User = Depends(get_current_user),
-):
-    logger.info(f"セッション取得リクエストを受け付けました。検索条件: {search_params}")
-    conditions = {}
-    like_conditions = {}
+) -> list[ChatLogDTO]:
+    logger.info(
+        f"セッションID {session_id} のチャットログ取得リクエストを受け付けました。"
+    )
 
-    if search_params.session_name:
-        conditions["session_name"] = search_params.session_name
+    # 検索条件を設定
+    conditions_dict = {"session_id": session_id}
 
-    if search_params.session_name_like:
-        like_conditions["session_name"] = search_params.session_name_like
-
-    if search_params.user_id:
-        conditions["user_id"] = search_params.user_id
-
-    sessions = await select_table(
+    # データベースからチャットログを取得
+    chatlog = await select_table(
         engine,
-        Session,
-        conditions,
-        like_conditions=like_conditions,
+        ChatLog,
+        conditions_dict,
         offset=offset,
         limit=limit,
         order_by=order_by,
     )
 
-    logger.info(f"セッション取得完了: {len(sessions)}件")
+    logger.info(f"チャットログ取得完了: {len(chatlog)}件")
 
-    session_dto_list = [
-        SessionDTO(
-            id=session.id,
-            session_name=session.session_name,
-            pub_data=session.pub_data,
-            user_id=session.user_id,
+    # DTOリストを作成して返す
+    chatlog_dto_list = [
+        ChatLogDTO(
+            id=log.id,
+            message=log.message,
+            bot_reply=log.bot_reply,
+            pub_data=log.pub_data,
+            session_id=log.session_id,
         )
-        for session in sessions
+        for log in chatlog
     ]
 
-    return session_dto_list
+    return chatlog_dto_list
 
 
 @router.put(

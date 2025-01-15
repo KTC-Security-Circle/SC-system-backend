@@ -24,8 +24,8 @@ logger.setLevel(logging.DEBUG)
 async def lifespan(app: FastAPI):
     engine = get_engine()
 
-    # # 既存のテーブルを削除してから再作成する(sqliteでテストする用)
-    # SQLModel.metadata.drop_all(engine)
+    # 既存のテーブルを削除してから再作成する(sqliteでテストする用)
+    SQLModel.metadata.drop_all(engine)
 
     SQLModel.metadata.create_all(engine)
     logger.info("Database connected and tables created.")

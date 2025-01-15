@@ -78,6 +78,7 @@ async def login(user: LoginData, response: Response, engine=Depends(get_engine))
         )
         return {
             "access_token": access_token,
+             "role":db_user.authority,
             "token_type": "bearer",
             "message": "Login successful",
         }

@@ -20,10 +20,13 @@ from api.app.dtos.chatlog_dtos import (
     ChatSearchDTO,
     ChatUpdateDTO,
 )
-from api.app.models import ChatLog, User
+from api.app.models import ChatLog, User,Session
 from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
 from api.logger import getLogger
+import json
+# from collections.abc import AsyncGenerator, Generator
+# from sqlalchemy import Engine
 
 router = APIRouter()
 logger = getLogger("chatlog_router")
@@ -42,7 +45,8 @@ async def text_stream(bot_reply_generator, chatlog, engine, current_user):
     bot_reply = ""
     async for chunk in bot_reply_generator:
         bot_reply += chunk
-        yield chunk  # 各チャンクをリアルタイムに返す
+        # yield json.dumps({"chunk": chunk}) + "\n"  # JSONに統一
+        # await asyncio.sleep(0)
 
     # ストリームが終了したら、チャットログをデータベースに保存
     chat_log_data = ChatLog(
@@ -76,7 +80,16 @@ async def create_chatlog(
     )
 
     try:
-        # `get_tagged_conversations`を使用して過去の会話履歴を取得
+        if not chatlog.session_id:
+            new_session = Session(
+                session_name="Default Session",
+                pub_data=datetime.now(),
+                user_id=current_user.id,
+            )
+            await add_db_record(engine, new_session)
+            chatlog.session_id = new_session.id
+            logger.info(f"新しいセッションを作成しました。セッションID: {chatlog.session_id}")
+            # `get_tagged_conversations`を使用して過去の会話履歴を取得
         tagged_conversations = await get_tagged_conversations(
             chatlog.session_id, engine
         )
@@ -97,7 +110,7 @@ async def create_chatlog(
         # StreamingResponseでリアルタイムにAI応答を返却し、最後にDTOを返す
         return StreamingResponse(
             text_stream(bot_reply_generator, chatlog, engine, current_user),
-            media_type="text/plain",
+            media_type="application/json",
         )
 
     except Exception as e:

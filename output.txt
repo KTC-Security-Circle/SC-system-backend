@@ -1,0 +1,464 @@
+Found Python version 3.10.12 (python3).
+
+Azure Functions Core Tools
+Core Tools Version:       4.0.6280 Commit hash: N/A +421f0144b42047aa289ce691dc6db4fc8b6143e6 (64-bit)
+Function Runtime Version: 4.834.3.22875
+
+[2024-12-28T11:46:51.776Z] /mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/pydantic/_internal/_config.py:341: UserWarning: Valid config keys have changed in V2:
+[2024-12-28T11:46:51.777Z] * 'schema_extra' has been renamed to 'json_schema_extra'
+[2024-12-28T11:46:51.778Z]   warnings.warn(message, UserWarning)
+[2024-12-28T11:46:51.779Z] /mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/pydantic/_internal/_config.py:341: UserWarning: Valid config keys have changed in V2:
+[2024-12-28T11:46:51.781Z] * 'schema_extra' has been renamed to 'json_schema_extra'
+[2024-12-28T11:46:51.782Z]   warnings.warn(message, UserWarning)
+[2024-12-28T11:46:51.783Z] /mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/pydantic/_internal/_config.py:341: UserWarning: Valid config keys have changed in V2:
+[2024-12-28T11:46:51.784Z] * 'orm_mode' has been renamed to 'from_attributes'
+[2024-12-28T11:46:51.784Z] * 'schema_extra' has been renamed to 'json_schema_extra'
+[2024-12-28T11:46:51.785Z]   warnings.warn(message, UserWarning)
+[2024-12-28T11:46:51.860Z] Worker process started and initialized.
+
+Functions:
+
+	http_app_func: [GET,POST,DELETE,HEAD,PATCH,PUT,OPTIONS] http://localhost:7071//{*route}
+
+For detailed output, run func with --verbose flag.
+[2024-12-28T11:46:56.794Z] Host lock lease acquired by instance ID '0000000000000000000000003587048C'.
+[2024-12-28T11:47:19.404Z] Executing 'Functions.http_app_func' (Reason='This function was programmatically called via the host APIs.', Id=6f748de8-eca2-4279-a88d-b4c578d0b042)
+[2024-12-28T11:47:19.576Z] 2024-12-28 20:47:19,575 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:19.578Z] 2024-12-28 20:47:19,575 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("user")
+[2024-12-28T11:47:19.581Z] 2024-12-28 20:47:19,575 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.582Z] BEGIN (implicit)
+[2024-12-28T11:47:19.582Z] PRAGMA main.table_info("user")
+[2024-12-28T11:47:19.586Z] PRAGMA main.table_info("session")
+[2024-12-28T11:47:19.586Z] [raw sql] ()
+[2024-12-28T11:47:19.586Z] 2024-12-28 20:47:19,585 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("session")
+[2024-12-28T11:47:19.588Z] [raw sql] ()
+[2024-12-28T11:47:19.588Z] PRAGMA main.table_info("chatlog")
+[2024-12-28T11:47:19.582Z] [raw sql] ()
+[2024-12-28T11:47:19.591Z] [raw sql] ()
+[2024-12-28T11:47:19.591Z] PRAGMA main.table_info("schoolinfo")
+[2024-12-28T11:47:19.593Z] [no key 0.00014s] ()
+[2024-12-28T11:47:19.593Z] 
+[2024-12-28T11:47:19.590Z] 2024-12-28 20:47:19,585 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.597Z] DROP TABLE chatlog
+[2024-12-28T11:47:19.597Z] 2024-12-28 20:47:19,587 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("chatlog")
+[2024-12-28T11:47:19.599Z] 2024-12-28 20:47:19,587 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.599Z] 2024-12-28 20:47:19,590 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("schoolinfo")
+[2024-12-28T11:47:19.600Z] 2024-12-28 20:47:19,590 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.600Z] 2024-12-28 20:47:19,592 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.602Z] DROP TABLE chatlog
+[2024-12-28T11:47:19.603Z] 2024-12-28 20:47:19,592 INFO sqlalchemy.engine.Engine [no key 0.00014s] ()
+[2024-12-28T11:47:19.611Z] 2024-12-28 20:47:19,611 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.612Z] [no key 0.00020s] ()
+[2024-12-28T11:47:19.612Z] DROP TABLE schoolinfo
+[2024-12-28T11:47:19.611Z] 
+[2024-12-28T11:47:19.615Z] 2024-12-28 20:47:19,611 INFO sqlalchemy.engine.Engine [no key 0.00020s] ()
+[2024-12-28T11:47:19.616Z] DROP TABLE schoolinfo
+[2024-12-28T11:47:19.628Z] 2024-12-28 20:47:19,628 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.629Z] [no key 0.00019s] ()
+[2024-12-28T11:47:19.629Z] DROP TABLE session
+[2024-12-28T11:47:19.628Z] 
+[2024-12-28T11:47:19.633Z] 2024-12-28 20:47:19,628 INFO sqlalchemy.engine.Engine [no key 0.00019s] ()
+[2024-12-28T11:47:19.633Z] DROP TABLE session
+[2024-12-28T11:47:19.643Z] 2024-12-28 20:47:19,642 INFO sqlalchemy.engine.Engine [2024-12-28T11:47:19.643Z] 
+[2024-12-28T11:47:19.643Z] [no key 0.00019s] ()
+[2024-12-28T11:47:19.645Z] DROP TABLE user
+
+[2024-12-28T11:47:19.647Z] DROP TABLE user
+[2024-12-28T11:47:19.648Z] 2024-12-28 20:47:19,643 INFO sqlalchemy.engine.Engine [no key 0.00019s] ()
+[2024-12-28T11:47:19.660Z] 2024-12-28 20:47:19,659 INFO sqlalchemy.engine.Engine COMMIT
+[2024-12-28T11:47:19.660Z] COMMIT
+[2024-12-28T11:47:19.660Z] PRAGMA main.table_info("user")
+[2024-12-28T11:47:19.661Z] [raw sql] ()
+[2024-12-28T11:47:19.660Z] 2024-12-28 20:47:19,659 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:19.660Z] BEGIN (implicit)
+[2024-12-28T11:47:19.664Z] PRAGMA main.table_info("session")
+[2024-12-28T11:47:19.663Z] PRAGMA temp.table_info("user")
+[2024-12-28T11:47:19.664Z] [raw sql] ()
+[2024-12-28T11:47:19.664Z] [raw sql] ()
+[2024-12-28T11:47:19.666Z] PRAGMA main.table_info("chatlog")
+[2024-12-28T11:47:19.665Z] 2024-12-28 20:47:19,660 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("user")
+[2024-12-28T11:47:19.666Z] [raw sql] ()
+[2024-12-28T11:47:19.669Z] [raw sql] ()[2024-12-28T11:47:19.672Z] [raw sql] ()
+[2024-12-28T11:47:19.666Z] [raw sql] ()
+[2024-12-28T11:47:19.671Z] 2024-12-28 20:47:19,660 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.671Z] PRAGMA temp.table_info("schoolinfo")
+[2024-12-28T11:47:19.670Z] PRAGMA main.table_info("schoolinfo")
+[2024-12-28T11:47:19.672Z] [no key 0.00015s] ()
+[2024-12-28T11:47:19.665Z] PRAGMA temp.table_info("session")
+[2024-12-28T11:47:19.675Z] 2024-12-28 20:47:19,663 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("user")
+[2024-12-28T11:47:19.672Z] 
+[2024-12-28T11:47:19.679Z] CREATE TABLE user (
+[2024-12-28T11:47:19.681Z] 	id VARCHAR(255) NOT NULL, 
+[2024-12-28T11:47:19.682Z] 	name VARCHAR(150), 
+[2024-12-28T11:47:19.683Z] 	email VARCHAR(255), 
+[2024-12-28T11:47:19.684Z] 	password VARCHAR(255), 
+[2024-12-28T11:47:19.679Z] 2024-12-28 20:47:19,663 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.669Z] PRAGMA temp.table_info("chatlog")
+[2024-12-28T11:47:19.685Z] 	authority VARCHAR(30), [2024-12-28T11:47:19.688Z] CREATE INDEX ix_user_pub_data ON user (pub_data)
+
+
+[2024-12-28T11:47:19.670Z] [raw sql] ()
+[2024-12-28T11:47:19.686Z] 2024-12-28 20:47:19,663 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("session")
+[2024-12-28T11:47:19.689Z] [no key 0.00018s] ()
+[2024-12-28T11:47:19.694Z] 2024-12-28 20:47:19,663 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.691Z] 	major VARCHAR(255), 
+[2024-12-28T11:47:19.695Z] 2024-12-28 20:47:19,665 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("session")
+[2024-12-28T11:47:19.696Z] 	pub_data DATETIME, 
+[2024-12-28T11:47:19.696Z] 2024-12-28 20:47:19,665 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.697Z] 	PRIMARY KEY (id)
+[2024-12-28T11:47:19.698Z] 2024-12-28 20:47:19,666 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("chatlog")
+[2024-12-28T11:47:19.699Z] )
+[2024-12-28T11:47:19.699Z] 2024-12-28 20:47:19,666 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.700Z] 
+[2024-12-28T11:47:19.701Z] 2024-12-28 20:47:19,669 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("chatlog")
+[2024-12-28T11:47:19.701Z] 
+[2024-12-28T11:47:19.702Z] 2024-12-28 20:47:19,669 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.703Z] [no key 0.00019s] ()
+[2024-12-28T11:47:19.703Z] 2024-12-28 20:47:19,669 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("schoolinfo")
+[2024-12-28T11:47:19.703Z] 
+[2024-12-28T11:47:19.706Z] 2024-12-28 20:47:19,669 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.706Z] CREATE TABLE session (
+[2024-12-28T11:47:19.708Z] 2024-12-28 20:47:19,671 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("schoolinfo")
+[2024-12-28T11:47:19.708Z] 	id INTEGER NOT NULL, 
+[2024-12-28T11:47:19.709Z] 2024-12-28 20:47:19,671 INFO sqlalchemy.engine.Engine [raw sql] ()
+[2024-12-28T11:47:19.711Z] 	session_name VARCHAR(255), 
+[2024-12-28T11:47:19.711Z] 2024-12-28 20:47:19,671 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.712Z] 	pub_data DATETIME, 
+[2024-12-28T11:47:19.713Z] CREATE TABLE user (
+[2024-12-28T11:47:19.714Z] 	user_id VARCHAR(255) NOT NULL, 
+[2024-12-28T11:47:19.715Z] 	PRIMARY KEY (id), 
+[2024-12-28T11:47:19.716Z] 	FOREIGN KEY(user_id) REFERENCES user (id)
+[2024-12-28T11:47:19.714Z] 	id VARCHAR(255) NOT NULL, 
+[2024-12-28T11:47:19.717Z] )
+[2024-12-28T11:47:19.717Z] 
+[2024-12-28T11:47:19.717Z] [no key 0.00019s] ()
+[2024-12-28T11:47:19.718Z] 	name VARCHAR(150), 
+[2024-12-28T11:47:19.718Z] 
+[2024-12-28T11:47:19.721Z] 	email VARCHAR(255), 
+[2024-12-28T11:47:19.722Z] 
+[2024-12-28T11:47:19.723Z] 	password VARCHAR(255), 
+[2024-12-28T11:47:19.719Z] CREATE TABLE schoolinfo (
+[2024-12-28T11:47:19.725Z] 	authority VARCHAR(30), 
+[2024-12-28T11:47:19.726Z] 	id INTEGER NOT NULL, 
+[2024-12-28T11:47:19.728Z] 	contents TEXT, 
+[2024-12-28T11:47:19.727Z] 	major VARCHAR(255), 
+[2024-12-28T11:47:19.729Z] 	pub_data DATETIME, 
+[2024-12-28T11:47:19.728Z] 	pub_date DATETIME, 
+[2024-12-28T11:47:19.730Z] 	PRIMARY KEY (id)
+[2024-12-28T11:47:19.734Z] CREATE INDEX ix_schoolinfo_pub_date ON schoolinfo (pub_date)
+[2024-12-28T11:47:19.734Z] 	updated_at DATETIME, 
+[2024-12-28T11:47:19.734Z] [no key 0.00019s] ()
+[2024-12-28T11:47:19.737Z] 	created_by VARCHAR NOT NULL, 
+[2024-12-28T11:47:19.739Z] 	PRIMARY KEY (id), 
+[2024-12-28T11:47:19.735Z] )
+[2024-12-28T11:47:19.741Z] 	FOREIGN KEY(created_by) REFERENCES user (id)
+[2024-12-28T11:47:19.742Z] 2024-12-28 20:47:19,672 INFO sqlalchemy.engine.Engine [no key 0.00015s] ()
+[2024-12-28T11:47:19.743Z] )
+[2024-12-28T11:47:19.744Z] 
+[2024-12-28T11:47:19.743Z] 2024-12-28 20:47:19,688 INFO sqlalchemy.engine.Engine CREATE INDEX ix_user_pub_data ON user (pub_data)
+[2024-12-28T11:47:19.744Z] 
+[2024-12-28T11:47:19.745Z] 2024-12-28 20:47:19,688 INFO sqlalchemy.engine.Engine [no key 0.00018s] ()
+[2024-12-28T11:47:19.746Z] 2024-12-28 20:47:19,702 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.747Z] CREATE TABLE session (
+[2024-12-28T11:47:19.748Z] 	id INTEGER NOT NULL, 
+[2024-12-28T11:47:19.749Z] 	session_name VARCHAR(255), 
+[2024-12-28T11:47:19.750Z] [no key 0.00018s] ()
+[2024-12-28T11:47:19.750Z] 	pub_data DATETIME, 
+[2024-12-28T11:47:19.749Z] CREATE INDEX ix_schoolinfo_updated_at ON schoolinfo (updated_at)
+[2024-12-28T11:47:19.751Z] 	user_id VARCHAR(255) NOT NULL, 
+[2024-12-28T11:47:19.753Z] 	PRIMARY KEY (id), 
+[2024-12-28T11:47:19.754Z] 	FOREIGN KEY(user_id) REFERENCES user (id)
+[2024-12-28T11:47:19.755Z] )
+[2024-12-28T11:47:19.756Z] 2024-12-28 20:47:19,702 INFO sqlalchemy.engine.Engine [no key 0.00019s] ()
+[2024-12-28T11:47:19.756Z] 2024-12-28 20:47:19,717 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.757Z] CREATE TABLE schoolinfo (
+[2024-12-28T11:47:19.758Z] 	id INTEGER NOT NULL, 
+[2024-12-28T11:47:19.758Z] 	contents TEXT, 
+[2024-12-28T11:47:19.759Z] 	pub_date DATETIME, 
+[2024-12-28T11:47:19.760Z] 	updated_at DATETIME, 
+[2024-12-28T11:47:19.761Z] 	created_by VARCHAR NOT NULL, 
+[2024-12-28T11:47:19.761Z] 	PRIMARY KEY (id), 
+[2024-12-28T11:47:19.762Z] 	FOREIGN KEY(created_by) REFERENCES user (id)
+[2024-12-28T11:47:19.763Z] )
+[2024-12-28T11:47:19.763Z] [no key 0.00019s] ()
+[2024-12-28T11:47:19.763Z] 2024-12-28 20:47:19,717 INFO sqlalchemy.engine.Engine [no key 0.00019s] ()
+[2024-12-28T11:47:19.763Z] 
+[2024-12-28T11:47:19.766Z] 2024-12-28 20:47:19,733 INFO sqlalchemy.engine.Engine CREATE INDEX ix_schoolinfo_pub_date ON schoolinfo (pub_date)
+[2024-12-28T11:47:19.766Z] CREATE TABLE chatlog (
+[2024-12-28T11:47:19.767Z] 2024-12-28 20:47:19,733 INFO sqlalchemy.engine.Engine [no key 0.00019s] ()
+[2024-12-28T11:47:19.768Z] 	id INTEGER NOT NULL, 
+[2024-12-28T11:47:19.768Z] 2024-12-28 20:47:19,749 INFO sqlalchemy.engine.Engine CREATE INDEX ix_schoolinfo_updated_at ON schoolinfo (updated_at)
+[2024-12-28T11:47:19.769Z] 	message VARCHAR(255), 
+[2024-12-28T11:47:19.770Z] 2024-12-28 20:47:19,749 INFO sqlalchemy.engine.Engine [no key 0.00018s] ()
+[2024-12-28T11:47:19.770Z] 	bot_reply VARCHAR(255), 
+[2024-12-28T11:47:19.772Z] 2024-12-28 20:47:19,762 INFO sqlalchemy.engine.Engine 
+[2024-12-28T11:47:19.772Z] 	pub_data DATETIME, 
+[2024-12-28T11:47:19.773Z] CREATE TABLE chatlog (
+[2024-12-28T11:47:19.774Z] 	session_id INTEGER, 
+[2024-12-28T11:47:19.775Z] 	id INTEGER NOT NULL, 
+[2024-12-28T11:47:19.775Z] 	PRIMARY KEY (id), 
+[2024-12-28T11:47:19.777Z] CREATE INDEX ix_chatlog_message ON chatlog (message)
+[2024-12-28T11:47:19.776Z] 	message VARCHAR(255), 
+[2024-12-28T11:47:19.777Z] [no key 0.00018s] ()
+[2024-12-28T11:47:19.780Z] 	bot_reply VARCHAR(255), 
+[2024-12-28T11:47:19.778Z] 	FOREIGN KEY(session_id) REFERENCES session (id)
+[2024-12-28T11:47:19.781Z] 	pub_data DATETIME, 
+[2024-12-28T11:47:19.782Z] )
+[2024-12-28T11:47:19.785Z] 
+[2024-12-28T11:47:19.784Z] 	session_id INTEGER, 
+[2024-12-28T11:47:19.785Z] 
+[2024-12-28T11:47:19.786Z] 	PRIMARY KEY (id), 
+[2024-12-28T11:47:19.788Z] 	FOREIGN KEY(session_id) REFERENCES session (id)
+[2024-12-28T11:47:19.790Z] )
+[2024-12-28T11:47:19.790Z] 2024-12-28 20:47:19,762 INFO sqlalchemy.engine.Engine [no key 0.00019s] ()
+[2024-12-28T11:47:19.791Z] 2024-12-28 20:47:19,776 INFO sqlalchemy.engine.Engine CREATE INDEX ix_chatlog_message ON chatlog (message)
+[2024-12-28T11:47:19.792Z] 2024-12-28 20:47:19,776 INFO sqlalchemy.engine.Engine [no key 0.00018s] ()
+[2024-12-28T11:47:19.793Z] CREATE INDEX ix_chatlog_pub_data ON chatlog (pub_data)
+[2024-12-28T11:47:19.793Z] 2024-12-28 20:47:19,792 INFO sqlalchemy.engine.Engine CREATE INDEX ix_chatlog_pub_data ON chatlog (pub_data)
+[2024-12-28T11:47:19.793Z] [no key 0.00018s] ()
+[2024-12-28T11:47:19.795Z] 2024-12-28 20:47:19,792 INFO sqlalchemy.engine.Engine [no key 0.00018s] ()
+[2024-12-28T11:47:19.806Z] 2024-12-28 20:47:19,805 INFO sqlalchemy.engine.Engine COMMIT
+[2024-12-28T11:47:19.806Z] COMMIT
+[2024-12-28T11:47:19.807Z] 2024-12-28 20:47:19,805 - azure_functions.fastapi - INFO - Database connected and tables created.
+[2024-12-28T11:47:19.807Z] Database connected and tables created.
+[2024-12-28T11:47:19.892Z] 2024-12-28 20:47:19,892 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:19.897Z] 2024-12-28 20:47:19,897 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:19.898Z] SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:19.901Z] FROM user 
+[2024-12-28T11:47:19.902Z] WHERE user.email = ?
+[2024-12-28T11:47:19.899Z] FROM user 
+[2024-12-28T11:47:19.897Z] BEGIN (implicit)
+[2024-12-28T11:47:19.903Z] WHERE user.email = ?
+[2024-12-28T11:47:19.898Z] [generated in 0.00025s] ('nanashi@gmail.com',)
+[2024-12-28T11:47:19.906Z] 2024-12-28 20:47:19,897 INFO sqlalchemy.engine.Engine [generated in 0.00025s] ('nanashi@gmail.com',)
+[2024-12-28T11:47:20.105Z] 2024-12-28 20:47:20,105 INFO sqlalchemy.engine.Engine INSERT INTO user (id, name, email, password, authority, major, pub_data) VALUES (?, ?, ?, ?, ?, ?, ?)
+[2024-12-28T11:47:20.106Z] [generated in 0.00031s] ('df936f6e-e771-493b-83e7-10d67414228f', 'nanashi', 'nanashi@gmail.com', '$2b$12$C..mhy2ysSGbMoLFLxY9Auij1FNNBBvBqJuCj9AChPxBQfTt5mpiu', 'student', 'IT専攻', None)
+[2024-12-28T11:47:20.107Z] 2024-12-28 20:47:20,105 INFO sqlalchemy.engine.Engine [generated in 0.00031s] ('df936f6e-e771-493b-83e7-10d67414228f', 'nanashi', 'nanashi@gmail.com', '$2b$12$C..mhy2ysSGbMoLFLxY9Auij1FNNBBvBqJuCj9AChPxBQfTt5mpiu', 'student', 'IT専攻', None)
+[2024-12-28T11:47:20.105Z] INSERT INTO user (id, name, email, password, authority, major, pub_data) VALUES (?, ?, ?, ?, ?, ?, ?)
+[2024-12-28T11:47:20.116Z] 2024-12-28 20:47:20,115 INFO sqlalchemy.engine.Engine COMMIT
+[2024-12-28T11:47:20.116Z] COMMIT
+[2024-12-28T11:47:20.124Z] 2024-12-28 20:47:20,124 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:20.126Z] 2024-12-28 20:47:20,125 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:20.126Z] SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:20.126Z] BEGIN (implicit)
+[2024-12-28T11:47:20.126Z] [generated in 0.00024s] ('df936f6e-e771-493b-83e7-10d67414228f',)
+[2024-12-28T11:47:20.127Z] FROM user 
+[2024-12-28T11:47:20.128Z] FROM user 
+[2024-12-28T11:47:20.132Z] WHERE user.id = ?
+[2024-12-28T11:47:20.132Z] WHERE user.id = ?
+[2024-12-28T11:47:20.133Z] 2024-12-28 20:47:20,126 INFO sqlalchemy.engine.Engine [generated in 0.00024s] ('df936f6e-e771-493b-83e7-10d67414228f',)
+[2024-12-28T11:47:20.130Z] ROLLBACK
+[2024-12-28T11:47:20.135Z] 2024-12-28 20:47:20,129 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:20.171Z] Executed 'Functions.http_app_func' (Succeeded, Id=6f748de8-eca2-4279-a88d-b4c578d0b042, Duration=783ms)
+[2024-12-28T11:47:23.316Z] Executing 'Functions.http_app_func' (Reason='This function was programmatically called via the host APIs.', Id=c3ccf978-6dc8-44fb-8612-2e56d535df8b)
+[2024-12-28T11:47:23.329Z] 2024-12-28 20:47:23,329 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:23.330Z] BEGIN (implicit)
+[2024-12-28T11:47:23.331Z] 2024-12-28 20:47:23,330 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:23.331Z] SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:23.334Z] FROM user 
+[2024-12-28T11:47:23.335Z] WHERE user.email = ?
+[2024-12-28T11:47:23.333Z] FROM user 
+[2024-12-28T11:47:23.331Z] [generated in 0.00030s] ('nanashi@gmail.com',)
+[2024-12-28T11:47:23.336Z] WHERE user.email = ?
+[2024-12-28T11:47:23.338Z] 2024-12-28 20:47:23,330 INFO sqlalchemy.engine.Engine [generated in 0.00030s] ('nanashi@gmail.com',)
+[2024-12-28T11:47:23.514Z] 2024-12-28 20:47:23,514 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:23.517Z] ROLLBACK
+[2024-12-28T11:47:23.536Z] Executed 'Functions.http_app_func' (Succeeded, Id=c3ccf978-6dc8-44fb-8612-2e56d535df8b, Duration=220ms)
+[2024-12-28T11:47:26.334Z] Executing 'Functions.http_app_func' (Reason='This function was programmatically called via the host APIs.', Id=07eb7fce-2283-4adc-b7be-77f53387200c)
+[2024-12-28T11:47:26.343Z] 2024-12-28 20:47:26,342 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:26.344Z] 2024-12-28 20:47:26,343 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:26.345Z] FROM user 
+[2024-12-28T11:47:26.346Z] WHERE user.id = ? AND user.email = ?
+[2024-12-28T11:47:26.347Z] 2024-12-28 20:47:26,343 INFO sqlalchemy.engine.Engine [generated in 0.00018s] ('df936f6e-e771-493b-83e7-10d67414228f', 'nanashi@gmail.com')
+[2024-12-28T11:47:26.349Z] 2024-12-28 20:47:26,349 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:26.353Z] 2024-12-28 20:47:26,352 - chatlog_router - INFO - チャット作成リクエストを受け付けました。ユーザーID: df936f6e-e771-493b-83e7-10d67414228f
+[2024-12-28T11:47:26.354Z] チャット作成リクエストを受け付けました。ユーザーID: df936f6e-e771-493b-83e7-10d67414228f
+[2024-12-28T11:47:26.355Z] BEGIN (implicit)
+[2024-12-28T11:47:26.355Z] INSERT INTO session (session_name, pub_data, user_id) VALUES (?, ?, ?)
+[2024-12-28T11:47:26.354Z] 2024-12-28 20:47:26,353 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:26.355Z] [generated in 0.00046s] ('Default Session', '2024-12-28 20:47:26.353192', 'df936f6e-e771-493b-83e7-10d67414228f')
+[2024-12-28T11:47:26.358Z] 2024-12-28 20:47:26,354 INFO sqlalchemy.engine.Engine INSERT INTO session (session_name, pub_data, user_id) VALUES (?, ?, ?)
+[2024-12-28T11:47:26.360Z] 2024-12-28 20:47:26,355 INFO sqlalchemy.engine.Engine [generated in 0.00046s] ('Default Session', '2024-12-28 20:47:26.353192', 'df936f6e-e771-493b-83e7-10d67414228f')
+[2024-12-28T11:47:26.362Z] 2024-12-28 20:47:26,362 INFO sqlalchemy.engine.Engine COMMIT
+[2024-12-28T11:47:26.362Z] COMMIT
+[2024-12-28T11:47:26.369Z] 2024-12-28 20:47:26,369 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:26.370Z] BEGIN (implicit)
+[2024-12-28T11:47:26.370Z] SELECT session.id, session.session_name, session.pub_data, session.user_id 
+[2024-12-28T11:47:26.370Z] 2024-12-28 20:47:26,370 INFO sqlalchemy.engine.Engine SELECT session.id, session.session_name, session.pub_data, session.user_id 
+[2024-12-28T11:47:26.373Z] ROLLBACK
+[2024-12-28T11:47:26.370Z] [generated in 0.00025s] (1,)
+[2024-12-28T11:47:26.375Z] FROM session [2024-12-28T11:47:26.378Z] セッションID 1 に関連するチャットログが見つかりませんでした。
+[2024-12-28T11:47:26.375Z] [generated in 0.00022s] (1,)
+[2024-12-28T11:47:26.374Z] 新しいセッションを作成しました。セッションID: 1
+[2024-12-28T11:47:26.378Z] 取得した会話履歴: []
+[2024-12-28T11:47:26.375Z] BEGIN (implicit)
+[2024-12-28T11:47:26.375Z] SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+[2024-12-28T11:47:26.377Z] ROLLBACK
+[2024-12-28T11:47:26.379Z] 取得した会話履歴 (tagged_conversations): [('human', 'こんにちは!'), ('ai', '本日はどのようなご用件でしょうか？')]
+[2024-12-28T11:47:26.384Z] FROM chatlog 
+[2024-12-28T11:47:26.386Z] WHERE chatlog.session_id = ? ORDER BY chatlog.pub_data
+[2024-12-28T11:47:26.373Z] FROM session 
+
+[2024-12-28T11:47:26.387Z] WHERE session.id = ?
+[2024-12-28T11:47:26.388Z] WHERE session.id = ?
+[2024-12-28T11:47:26.389Z] 2024-12-28 20:47:26,370 INFO sqlalchemy.engine.Engine [generated in 0.00025s] (1,)
+[2024-12-28T11:47:26.390Z] 2024-12-28 20:47:26,373 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:26.391Z] 2024-12-28 20:47:26,373 - chatlog_router - INFO - 新しいセッションを作成しました。セッションID: 1
+[2024-12-28T11:47:26.392Z] 2024-12-28 20:47:26,373 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:26.393Z] 2024-12-28 20:47:26,374 INFO sqlalchemy.engine.Engine SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+[2024-12-28T11:47:26.393Z] FROM chatlog 
+[2024-12-28T11:47:26.394Z] WHERE chatlog.session_id = ? ORDER BY chatlog.pub_data
+[2024-12-28T11:47:26.395Z] 2024-12-28 20:47:26,374 INFO sqlalchemy.engine.Engine [generated in 0.00022s] (1,)
+[2024-12-28T11:47:26.396Z] 2024-12-28 20:47:26,377 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:26.397Z] 2024-12-28 20:47:26,377 - chatlog_router - INFO - 取得した会話履歴: []
+[2024-12-28T11:47:26.397Z] 2024-12-28 20:47:26,377 - chatlog_router - INFO - セッションID 1 に関連するチャットログが見つかりませんでした。
+[2024-12-28T11:47:26.398Z] 2024-12-28 20:47:26,377 - chatlog_router - INFO - 取得した会話履歴 (tagged_conversations): [('human', 'こんにちは!'), ('ai', '本日はどのようなご用件でしょうか？')]
+[2024-12-28T11:47:37.896Z] 2024-12-28 20:47:37,895 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:37.902Z] BEGIN (implicit)
+[2024-12-28T11:47:37.906Z] [generated in 0.00232s] ('こんにちは', 'こんにちは！ご用件はありますか？お手伝いできることがあれば教えてください。', '2024-12-28 11:47:26.329000', 1)
+[2024-12-28T11:47:37.904Z] INSERT INTO chatlog (message, bot_reply, pub_data, session_id) VALUES (?, ?, ?, ?)
+[2024-12-28T11:47:37.907Z] 2024-12-28 20:47:37,898 INFO sqlalchemy.engine.Engine INSERT INTO chatlog (message, bot_reply, pub_data, session_id) VALUES (?, ?, ?, ?)
+[2024-12-28T11:47:37.921Z] 2024-12-28 20:47:37,900 INFO sqlalchemy.engine.Engine [generated in 0.00232s] ('こんにちは', 'こんにちは！ご用件はありますか？お手伝いできることがあれば教えてください。', '2024-12-28 11:47:26.329000', 1)
+[2024-12-28T11:47:37.925Z] 2024-12-28 20:47:37,925 INFO sqlalchemy.engine.Engine COMMIT
+[2024-12-28T11:47:37.925Z] COMMIT
+[2024-12-28T11:47:37.932Z] 2024-12-28 20:47:37,932 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:37.933Z] 2024-12-28 20:47:37,933 INFO sqlalchemy.engine.Engine SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id [2024-12-28T11:47:37.933Z] SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+
+[2024-12-28T11:47:37.933Z] [generated in 0.00024s] (1,)
+[2024-12-28T11:47:37.934Z] FROM chatlog 
+[2024-12-28T11:47:37.938Z] WHERE chatlog.id = ?
+[2024-12-28T11:47:37.936Z] FROM chatlog 
+[2024-12-28T11:47:37.933Z] BEGIN (implicit)
+[2024-12-28T11:47:37.938Z] Executed 'Functions.http_app_func' (Succeeded, Id=07eb7fce-2283-4adc-b7be-77f53387200c, Duration=11605ms)
+[2024-12-28T11:47:37.937Z] ROLLBACK
+[2024-12-28T11:47:37.940Z] WHERE chatlog.id = ?
+[2024-12-28T11:47:37.943Z] 2024-12-28 20:47:37,933 INFO sqlalchemy.engine.Engine [generated in 0.00024s] (1,)
+[2024-12-28T11:47:37.944Z] 2024-12-28 20:47:37,937 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:38.328Z] Executing 'Functions.http_app_func' (Reason='This function was programmatically called via the host APIs.', Id=48fd7b31-cd98-4c75-b392-1ca69a87f874)
+[2024-12-28T11:47:38.335Z] 2024-12-28 20:47:38,335 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:38.336Z] 2024-12-28 20:47:38,336 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:38.338Z] FROM user 
+[2024-12-28T11:47:38.339Z] WHERE user.id = ? AND user.email = ?
+[2024-12-28T11:47:38.340Z] 2024-12-28 20:47:38,336 INFO sqlalchemy.engine.Engine [generated in 0.00032s] ('df936f6e-e771-493b-83e7-10d67414228f', 'nanashi@gmail.com')
+[2024-12-28T11:47:38.342Z] 2024-12-28 20:47:38,341 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:38.345Z] 2024-12-28 20:47:38,345 - session_router - INFO - セッションID 1 のチャットログ取得リクエストを受け付けました。
+[2024-12-28T11:47:38.346Z] セッションID 1 のチャットログ取得リクエストを受け付けました。
+[2024-12-28T11:47:38.346Z] 2024-12-28 20:47:38,346 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:38.347Z] SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+[2024-12-28T11:47:38.349Z] FROM chatlog 
+[2024-12-28T11:47:38.348Z] [generated in 0.00028s] (1,)
+[2024-12-28T11:47:38.348Z] 2024-12-28 20:47:38,347 INFO sqlalchemy.engine.Engine SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+[2024-12-28T11:47:38.351Z] ROLLBACK
+[2024-12-28T11:47:38.351Z] チャットログ取得完了: 1件
+[2024-12-28T11:47:38.350Z] WHERE chatlog.session_id = ?
+[2024-12-28T11:47:38.347Z] BEGIN (implicit)
+[2024-12-28T11:47:38.352Z] FROM chatlog 
+[2024-12-28T11:47:38.351Z] Executed 'Functions.http_app_func' (Succeeded, Id=48fd7b31-cd98-4c75-b392-1ca69a87f874, Duration=23ms)
+[2024-12-28T11:47:38.356Z] WHERE chatlog.session_id = ?
+[2024-12-28T11:47:38.358Z] 2024-12-28 20:47:38,347 INFO sqlalchemy.engine.Engine [generated in 0.00028s] (1,)
+[2024-12-28T11:47:38.358Z] 2024-12-28 20:47:38,350 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:38.359Z] Executing 'Functions.http_app_func' (Reason='This function was programmatically called via the host APIs.', Id=543692fe-27a5-42a6-b385-f43f640cc579)
+[2024-12-28T11:47:38.360Z] 2024-12-28 20:47:38,350 - session_router - INFO - チャットログ取得完了: 1件
+[2024-12-28T11:47:38.368Z] 2024-12-28 20:47:38,368 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:38.369Z] 2024-12-28 20:47:38,369 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:38.370Z] FROM user 
+[2024-12-28T11:47:38.371Z] WHERE user.id = ? AND user.email = ?
+[2024-12-28T11:47:38.373Z] 2024-12-28 20:47:38,369 INFO sqlalchemy.engine.Engine [generated in 0.00031s] ('df936f6e-e771-493b-83e7-10d67414228f', 'nanashi@gmail.com')
+[2024-12-28T11:47:38.375Z] 2024-12-28 20:47:38,375 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:38.376Z] 2024-12-28 20:47:38,375 - session_router - INFO - セッションID 1 のチャットログ取得リクエストを受け付けました。
+[2024-12-28T11:47:38.376Z] セッションID 1 のチャットログ取得リクエストを受け付けました。
+[2024-12-28T11:47:38.376Z] 2024-12-28 20:47:38,376 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:38.378Z] SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+[2024-12-28T11:47:38.380Z] FROM chatlog 
+[2024-12-28T11:47:38.381Z] WHERE chatlog.session_id = ?
+[2024-12-28T11:47:38.381Z] チャットログ取得完了: 1件
+[2024-12-28T11:47:38.381Z] ROLLBACK
+[2024-12-28T11:47:38.379Z] 2024-12-28 20:47:38,377 INFO sqlalchemy.engine.Engine SELECT chatlog.id, chatlog.message, chatlog.bot_reply, chatlog.pub_data, chatlog.session_id 
+[2024-12-28T11:47:38.378Z] [generated in 0.00047s] (1,)
+[2024-12-28T11:47:38.382Z] Executed 'Functions.http_app_func' (Succeeded, Id=543692fe-27a5-42a6-b385-f43f640cc579, Duration=23ms)
+[2024-12-28T11:47:38.378Z] BEGIN (implicit)
+[2024-12-28T11:47:38.384Z] FROM chatlog 
+[2024-12-28T11:47:38.387Z] WHERE chatlog.session_id = ?
+[2024-12-28T11:47:38.388Z] 2024-12-28 20:47:38,377 INFO sqlalchemy.engine.Engine [generated in 0.00047s] (1,)
+[2024-12-28T11:47:38.389Z] 2024-12-28 20:47:38,380 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:38.390Z] 2024-12-28 20:47:38,381 - session_router - INFO - チャットログ取得完了: 1件
+[2024-12-28T11:47:47.972Z] Executing 'Functions.http_app_func' (Reason='This function was programmatically called via the host APIs.', Id=9cb3cd95-f628-4a22-b4c3-e31dea581435)
+[2024-12-28T11:47:47.978Z] 2024-12-28 20:47:47,978 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+[2024-12-28T11:47:47.981Z] 2024-12-28 20:47:47,980 INFO sqlalchemy.engine.Engine SELECT user.id, user.name, user.email, user.password, user.authority, user.major, user.pub_data 
+[2024-12-28T11:47:47.982Z] FROM user 
+[2024-12-28T11:47:47.983Z] WHERE user.id = ? AND user.email = ?
+[2024-12-28T11:47:47.984Z] 2024-12-28 20:47:47,981 INFO sqlalchemy.engine.Engine [generated in 0.00035s] ('df936f6e-e771-493b-83e7-10d67414228f', 'nanashi@gmail.com')
+[2024-12-28T11:47:47.986Z] 2024-12-28 20:47:47,986 INFO sqlalchemy.engine.Engine ROLLBACK
+[2024-12-28T11:47:47.987Z] 2024-12-28 20:47:47,987 - chatlog_router - INFO - チャット作成リクエストを受け付けました。ユーザーID: df936f6e-e771-493b-83e7-10d67414228f
+[2024-12-28T11:47:47.987Z] チャット作成リクエストを受け付けました。ユーザーID: df936f6e-e771-493b-83e7-10d67414228f
+[2024-12-28T11:47:48.032Z] Executed 'Functions.http_app_func' (Failed, Id=9cb3cd95-f628-4a22-b4c3-e31dea581435, Duration=60ms)
+[2024-12-28T11:47:48.034Z] System.Private.CoreLib: Exception while executing function: Functions.http_app_func. System.Private.CoreLib: Result: Failure
+[2024-12-28T11:47:48.034Z] Exception: ResponseValidationError: 1 validation errors:
+[2024-12-28T11:47:48.035Z]   {'type': 'model_attributes_type', 'loc': ('response',), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': None}
+[2024-12-28T11:47:48.036Z] 
+[2024-12-28T11:47:48.036Z] Stack:   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure_functions_worker/dispatcher.py", line 602, in _handle__invocation_request
+[2024-12-28T11:47:48.037Z]     await self._run_async_func(fi_context, fi.func, args)
+[2024-12-28T11:47:48.038Z]   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure_functions_worker/dispatcher.py", line 939, in _run_async_func
+[2024-12-28T11:47:48.039Z]     return await ExtensionManager.get_async_invocation_wrapper(
+[2024-12-28T11:47:48.040Z]   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure_functions_worker/extension.py", line 147, in get_async_invocation_wrapper
+[2024-12-28T11:47:48.041Z]     result = await function(**args)
+[2024-12-28T11:47:48.042Z]   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure/functions/decorators/function_app.py", line 2813, in http_app_func
+[2024-12-28T11:47:48.042Z]     return await asgi_middleware.handle_async(req, context)
+[2024-12-28T11:47:48.043Z]   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure/functions/_http_asgi.py", line 206, in handle_async
+[2024-12-28T11:47:48.044Z]     return await self._handle_async(req, context)
+[2024-12-28T11:47:48.044Z]   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure/functions/_http_asgi.py", line 211, in _handle_async
+[2024-12-28T11:47:48.045Z]     asgi_response = await AsgiResponse.from_app(self._app,
+[2024-12-28T11:47:48.046Z]   File "/usr/lib/azure-functions-core-tools-4/workers/python/3.10/LINUX/X64/azure/functions/_http_asgi.py", line 84, in from_app
+[2024-12-28T11:47:48.047Z]     await app(scope, res._receive, res._send)
+[2024-12-28T11:47:48.048Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/fastapi/applications.py", line 1054, in __call__
+[2024-12-28T11:47:48.048Z]     await super().__call__(scope, receive, send)
+[2024-12-28T11:47:48.049Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/applications.py", line 113, in __call__
+[2024-12-28T11:47:48.050Z]     await self.middleware_stack(scope, receive, send)
+[2024-12-28T11:47:48.051Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 187, in __call__
+[2024-12-28T11:47:48.052Z]     raise exc
+[2024-12-28T11:47:48.053Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 165, in __call__
+[2024-12-28T11:47:48.054Z]     await self.app(scope, receive, _send)
+[2024-12-28T11:47:48.055Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/middleware/cors.py", line 93, in __call__
+[2024-12-28T11:47:48.056Z]     await self.simple_response(scope, receive, send, request_headers=headers)
+[2024-12-28T11:47:48.057Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+[2024-12-28T11:47:48.058Z]     await self.app(scope, receive, send)
+[2024-12-28T11:47:48.059Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+[2024-12-28T11:47:48.059Z]     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+[2024-12-28T11:47:48.060Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[2024-12-28T11:47:48.061Z]     raise exc
+[2024-12-28T11:47:48.061Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[2024-12-28T11:47:48.062Z]     await app(scope, receive, sender)
+[2024-12-28T11:47:48.063Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/routing.py", line 715, in __call__
+[2024-12-28T11:47:48.063Z]     await self.middleware_stack(scope, receive, send)
+[2024-12-28T11:47:48.064Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/routing.py", line 735, in app
+[2024-12-28T11:47:48.065Z]     await route.handle(scope, receive, send)
+[2024-12-28T11:47:48.066Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/routing.py", line 288, in handle
+[2024-12-28T11:47:48.067Z]     await self.app(scope, receive, send)
+[2024-12-28T11:47:48.067Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/routing.py", line 76, in app
+[2024-12-28T11:47:48.068Z]     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+[2024-12-28T11:47:48.069Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[2024-12-28T11:47:48.070Z]     raise exc
+[2024-12-28T11:47:48.071Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[2024-12-28T11:47:48.071Z]     await app(scope, receive, sender)
+[2024-12-28T11:47:48.072Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/starlette/routing.py", line 73, in app
+[2024-12-28T11:47:48.072Z]     response = await f(request)
+[2024-12-28T11:47:48.072Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 327, in app
+[2024-12-28T11:47:48.073Z]     content = await serialize_response(
+[2024-12-28T11:47:48.073Z]   File "/mnt/c/Users/yarit/Documents/GitHub/SC-system-backend/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 176, in serialize_response
+[2024-12-28T11:47:48.074Z]     raise ResponseValidationError(
+[2024-12-28T11:47:48.074Z] .
+[2024-12-28T12:01:25.182Z] Detaching gRPC logging due to exception.
+[2024-12-28T12:01:25.192Z] ERROR:azure.functions.AsgiMiddleware:Failed ASGI shutdown with message 'Traceback (most recent call last):
+[2024-12-28T12:01:25.195Z]   File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+[2024-12-28T12:01:25.196Z]     return loop.run_until_complete(main)
+[2024-12-28T12:01:25.197Z]   File "/usr/lib/python3.10/asyncio/base_events.py", line 636, in run_until_complete
+[2024-12-28T12:01:25.198Z]     self.run_forever()
+[2024-12-28T12:01:25.199Z]   File "/usr/lib/python3.10/asyncio/base_events.py", line 603, in run_forever
+[2024-12-28T12:01:25.200Z]     self._run_once()
+[2024-12-28T12:01:25.200Z]   File "/usr/lib/python3.10/asyncio/base_events.py", line 1871, in _run_once
+[2024-12-28T12:01:25.201Z]     event_list = self._selector.select(timeout)
+[2024-12-28T12:01:25.202Z]   File "/usr/lib/python3.10/selectors.py", line 469, in select
+[2024-12-28T12:01:25.202Z]     fd_event_list = self._selector.poll(timeout, max_ev)
+[2024-12-28T12:01:25.203Z] KeyboardInterrupt
+[2024-12-28T12:01:25.203Z] During handling of the above exception, another exception occurred:
+[2024-12-28T12:01:25.204Z] Traceback (most recent call last):

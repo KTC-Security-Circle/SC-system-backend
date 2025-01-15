@@ -181,7 +181,7 @@ class SchoolInfo(SQLModel, table=True):
         description="情報の作成者のユーザID",
     )
 
-    creator: Optional["User"] = Relationship(back_populates="school_infos")
+    # creator: Optional["User"] = Relationship(back_populates="school_infos")
 
     class Config:
         schema_extra = {
