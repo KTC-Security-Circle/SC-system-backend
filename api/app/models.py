@@ -178,6 +178,7 @@ class SchoolInfo(SQLModel, table=True):
         description="情報の作成者のユーザID",
     )
     title: str | None = Field(None, sa_column=Column(UnicodeText), title="タイトル", description="学校情報のタイトル")
+    # TODO: ベクターデータベースのドキュメントIDを格納するカラムを追加する
 
     creator: Optional["User"] = Relationship(back_populates="school_infos")
     groups_allowed: list["SchoolInfoGroup"] = Relationship(back_populates="schoolinfo")

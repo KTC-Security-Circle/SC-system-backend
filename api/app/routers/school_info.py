@@ -54,6 +54,7 @@ async def create_school_info(
         updated_at=school_info.updated_at or datetime.now(),
         created_by=current_user.id,
     )
+    # TODO: ベクターデータベースに情報を追加する
     await add_db_record(engine, new_school_info)
     logger.info(f"新しい学校情報が作成されました。ID: {new_school_info.id}")
 
@@ -146,6 +147,7 @@ async def update_school_info(
     updates_dict = updates.model_dump(exclude_unset=True)
 
     conditions = {"id": school_info_id}
+    # TODO: ベクターデータベースの情報を更新するか、削除してから再作成する
     updated_record = await update_record(engine, SchoolInfo, conditions, updates_dict)
 
     logger.info(f"学校情報を更新しました。ID: {updated_record.id}")
@@ -180,6 +182,7 @@ async def delete_school_info(
     logger.info(f"学校情報削除リクエスト: {school_info_id}")
 
     conditions = {"id": school_info_id}
+    # TODO: ベクターデータベースから情報を削除する
     await delete_record(engine, SchoolInfo, conditions)
 
     logger.info(f"学校情報を削除しました。ID: {school_info_id}")
