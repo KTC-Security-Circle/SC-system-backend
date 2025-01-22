@@ -51,9 +51,7 @@ class User(SQLModel, table=True):
     # ユーザとセッションのリレーション (1対多)
     sessions: list["Session"] = Relationship(
         back_populates="user",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan"
-        },  # 子オブジェクトのカスケード削除
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},  # 子オブジェクトのカスケード削除
     )
 
     school_infos: list["SchoolInfo"] = Relationship(
@@ -199,7 +197,7 @@ class SchoolInfo(SQLModel, table=True):
     title: str | None = Field(None, sa_column=Column(UnicodeText), title="タイトル", description="学校情報のタイトル")
     # TODO: ベクターデータベースのドキュメントIDを格納するカラムを追加する
 
-    creator: Optional["User"] = Relationship(back_populates="school_infos")
+    # creator: Optional["User"] = Relationship(back_populates="school_infos")
     groups_allowed: list["SchoolInfoGroup"] = Relationship(back_populates="schoolinfo")
 
     class Config:

@@ -5,23 +5,22 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import Engine
 
 from api.app.database.database import (
-    add_db_record,
     delete_record,
     select_table,
     update_record,
 )
 from api.app.database.engine import get_engine
+from api.app.dtos.chatlog_dtos import (
+    ChatLogDTO,
+    ChatOrderBy,
+)
 from api.app.dtos.session_dtos import (
     SessionDTO,
     SessionOrderBy,
     SessionSearchDTO,
     SessionUpdateDTO,
 )
-from api.app.dtos.chatlog_dtos import (
-    ChatLogDTO,
-    ChatOrderBy,
-)
-from api.app.models import Session, User, ChatLog
+from api.app.models import ChatLog, Session, User
 from api.app.security.jwt_token import get_current_user
 from api.app.security.role import Role, role_required
 from api.logger import getLogger
@@ -48,7 +47,7 @@ async def create_session(
         user_id=current_user.id,
     )
     # データベースにレコードを登録
-    async with DBSession(engine) as db:
+    async with Session(engine) as db:
         db.add(session_data)
         await db.commit()
         await db.refresh(session_data)
@@ -119,9 +118,7 @@ async def view_session(
     return session_dto_list
 
 
-@router.get(
-    "/view/session/{session_id}", response_model=list[ChatLogDTO], tags=["chatlog_get"]
-)
+@router.get("/view/session/{session_id}", response_model=list[ChatLogDTO], tags=["chatlog_get"])
 @role_required(Role.STUDENT)
 async def view_chatlog_by_session(
     session_id: int,
@@ -131,9 +128,7 @@ async def view_chatlog_by_session(
     limit: int | None = None,
     offset: int | None = 0,
 ) -> list[ChatLogDTO]:
-    logger.info(
-        f"セッションID {session_id} のチャットログ取得リクエストを受け付けました。"
-    )
+    logger.info(f"セッションID {session_id} のチャットログ取得リクエストを受け付けました。")
 
     # 検索条件を設定
     conditions_dict = {"session_id": session_id}

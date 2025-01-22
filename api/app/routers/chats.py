@@ -3,7 +3,7 @@ import json
 import logging
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -24,8 +24,7 @@ from api.app.dtos.chatlog_dtos import (
     ChatSearchDTO,
     ChatUpdateDTO,
 )
-from api.app.models import ChatLog, User
-from api.app.security.role import Role, role_required
+from api.app.models import ChatLog, Session, User
 from api.app.security.jwt_token import get_current_user
 from api.app.security.role import Role, role_required
 from api.logger import getLogger
@@ -43,6 +42,7 @@ async def async_wrap(generator: Generator[str, None, None]) -> AsyncGenerator[st
 
 
 # StreamingResponseでのリアルタイムレスポンス
+# NOTE: feature/avoid-codeの元ブランチからだいぶ変わってるので未変更
 async def text_stream(
     bot_reply_generator: AsyncGenerator[str, None],
     chatlog: ChatCreateDTO,

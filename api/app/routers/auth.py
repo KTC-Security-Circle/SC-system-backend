@@ -35,15 +35,11 @@ def get_session() -> Generator[Session, None, None]:
 
 # サインアップエンドポイント
 @router.post("/signup", response_model=UserDTO, tags=["signup"])
-async def signup(
-    user: UserCreateDTO, session: Annotated[Session, Depends(get_session)]
-) -> UserDTO:
+async def signup(user: UserCreateDTO, session: Annotated[Session, Depends(get_session)]) -> UserDTO:
     logger.debug("Signup API called with user data: %s", user.dict())
     try:
         # ユーザーの存在確認
-        existing_user = session.exec(
-            select(User).where(User.email == user.email)
-        ).first()
+        existing_user = session.exec(select(User).where(User.email == user.email)).first()
         logger.debug("Existing user query result: %s", existing_user)
 
         if existing_user:
