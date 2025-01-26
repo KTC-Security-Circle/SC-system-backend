@@ -8,6 +8,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sc_system_ai import main as SC_AI
+from sc_system_ai.template.session_naming import session_naming
 from sqlalchemy import Engine
 
 from api.app.database.database import (
@@ -243,6 +244,17 @@ async def text_stream(
 #         ) from e
 
 
+async def update_session_name(session_id: int, conversations: list, engine: Engine):
+    """セッション名を生成して更新するヘルパー関数"""
+    session_name = session_naming(conversations)
+    conditions = {"id": session_id}
+    updates = {"session_name": session_name}
+    await update_record(
+        engine=engine, model=Session, conditions=conditions, updates=updates
+    )
+    return session_name
+
+
 @router.post("/input/chat", response_model=ChatLogDTO, tags=["chat_post"])
 @role_required(Role.STUDENT)
 async def create_chatlog(
@@ -258,37 +270,64 @@ async def create_chatlog(
         # セッションIDがない場合、新しいセッションを作成
         if not chatlog.session_id:
             new_session = Session(
-                session_name="Default Session",
+                session_name="Temporary Session",
                 pub_data=datetime.now(),
                 user_id=current_user.id,
             )
             await add_db_record(engine, new_session)
             chatlog.session_id = new_session.id
             logger.info(
-                f"新しいセッションを作成しました。セッションID: {chatlog.session_id}"
+                f"新しいセッションを作成しました。セッションID: {chatlog.session_id}, \
+                一時的なセッション名: 'Temporary Session'"
             )
 
-        # get_tagged_conversationsを使用して過去の会話履歴を取得
+        # セッションIDを使用して会話履歴を取得
         tagged_conversations = await get_tagged_conversations(
             chatlog.session_id, engine
         )
         logger.info(f"取得した会話履歴 (tagged_conversations): {tagged_conversations}")
 
-        # AI応答を生成するChatインスタンスを作成
+        # AI応答を生成
         resp = SC_AI.Chat(
             user_name=current_user.name,
             user_major=current_user.major,
             conversation=tagged_conversations,
-            is_streaming=False,  # ストリーミングを無効化
+            is_streaming=False,
             return_length=5,
         )
 
-        # AIモデルからの応答を取得（同期処理）
         logger.debug(f"AIモデルに渡すデータ: {tagged_conversations}")
-        bot_reply = "".join(
-            resp.invoke(message=chatlog.message)
-        )  # 非ストリーミングモードで一括応答
-        logger.debug(f"AIモデル応答: {bot_reply}")
+        raw_response = resp.invoke(message=chatlog.message)
+        logger.debug(f"AIモデルの応答 (raw): {raw_response}")
+
+        # 応答データの整形
+        try:
+            # ジェネレーターをリストに変換
+            raw_response_list = list(raw_response)
+            logger.debug(f"ジェネレーターをリストに変換: {raw_response_list}")
+
+            # 空応答のチェック
+            if not raw_response_list:
+                logger.error("AIモデルが空の応答を返しました。")
+                raise HTTPException(
+                    status_code=500,
+                    detail="AIモデルから応答が得られませんでした。",
+                )
+
+            # リストの内容を整形
+            bot_reply = "".join(
+                item["output"]
+                for item in raw_response_list
+                if isinstance(item, dict) and "output" in item
+            )
+        except (KeyError, TypeError, ValueError) as e:
+            logger.error(f"AI応答データの処理中にエラーが発生しました: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="AIモデル応答の処理に失敗しました。",
+            )
+
+        logger.debug(f"整形済みAI応答: {bot_reply}")
 
         # チャットログを保存
         chat_log_data = ChatLog(
@@ -297,10 +336,47 @@ async def create_chatlog(
             pub_data=chatlog.pub_data or datetime.now(),
             session_id=chatlog.session_id,
         )
-        
         await add_db_record(engine, chat_log_data)
-        
+
         logger.info(f"チャットログを保存しました: {chat_log_data}")
+
+        # 実際のデータを会話履歴に追加
+        tagged_conversations.append(
+            ("human", chatlog.message)
+        )  # 新しいユーザーのメッセージ
+        tagged_conversations.append(("ai", ""))  # AI応答は後で更新
+
+        # 定数としてサンプルデータを定義
+        SAMPLE_CONVERSATIONS = [
+            ("human", "こんにちは!"),
+            ("ai", "本日はどのようなご用件でしょうか？"),
+        ]
+
+        # サンプルデータを除外してセッション名を生成・更新
+        filtered_conversations = [
+            (role, text)
+            for role, text in tagged_conversations
+            if (role, text) not in SAMPLE_CONVERSATIONS
+        ]
+        session_name = await update_session_name(chatlog.session_id, filtered_conversations, engine)
+        logger.info(f"セッション名を更新しました: {session_name}")
+
+        # セッション名を生成
+        session_name = session_naming(filtered_conversations)
+
+        # セッション名を更新
+        conditions = {"id": chatlog.session_id}  # 更新条件: セッションID
+        updates = {"session_name": session_name}  # 更新内容: セッション名
+
+        # update_record関数を利用してセッション名を更新
+        await update_record(
+            engine=engine,
+            model=Session,
+            conditions=conditions,
+            updates=updates,
+        )
+
+        logger.info(f"セッション名を更新しました: {session_name}")
 
         # DTO形式でレスポンスを返却
         return ChatLogDTO(
@@ -322,32 +398,20 @@ async def create_chatlog(
 
 async def get_tagged_conversations(session_id: int, engine: Engine) -> list[tuple[str, str]]:
     tagged_conversations = []
-
     try:
         condition = {"session_id": session_id}
-        # select_tableを利用して、会話履歴を取得
         past_chats = await select_table(engine=engine, model=ChatLog, conditions=condition, order_by="pub_data")
-
         logger.info(f"取得した会話履歴: {past_chats}")
-
         if not past_chats:
-            logger.info(f"セッションID {session_id} に関連するチャットログが見つかりませんでした。")
-            return [("human", "こんにちは!"), ("ai", "本日はどのようなご用件でしょうか？")]
-
-        # チャットログにタグを付けてリストを作成
+            return []  # サンプルデータを返さない
         for chat in past_chats:
             if chat.message:
                 tagged_conversations.append(("human", chat.message))
             if chat.bot_reply:
                 tagged_conversations.append(("ai", chat.bot_reply))
-
         logger.info(f"タグ付けした会話履歴: {tagged_conversations}")
-
     except Exception as e:
-        logger.error(f"会話履歴取得中にエラーが発生しました: {str(e)}")
-        # エラー発生時も空のリストを返す
-        return tagged_conversations
-
+        logger.error(f"会話履歴取得中にエラーが発生しました: {e}")
     return tagged_conversations
 
 
