@@ -267,10 +267,16 @@ async def create_chatlog(
     )
 
     try:
+        # 定数としてサンプルデータを定義
+        SAMPLE_CONVERSATIONS = [
+            ("human", "こんにちは!"),
+            ("ai", "本日はどのようなご用件でしょうか？"),
+        ]
+
         # セッションIDがない場合、新しいセッションを作成
         if not chatlog.session_id:
             new_session = Session(
-                session_name="Temporary Session",
+                session_name="New Session",
                 pub_data=datetime.now(),
                 user_id=current_user.id,
             )
@@ -278,7 +284,7 @@ async def create_chatlog(
             chatlog.session_id = new_session.id
             logger.info(
                 f"新しいセッションを作成しました。セッションID: {chatlog.session_id}, \
-                一時的なセッション名: 'Temporary Session'"
+                一時的なセッション名: 'New Session'"
             )
 
         # セッションIDを使用して会話履歴を取得
@@ -286,6 +292,12 @@ async def create_chatlog(
             chatlog.session_id, engine
         )
         logger.info(f"取得した会話履歴 (tagged_conversations): {tagged_conversations}")
+
+        # 会話履歴が空の場合にサンプルデータを追加
+        if not tagged_conversations:
+            logger.warning("会話履歴が空のため、サンプルデータを追加します。")
+            tagged_conversations.extend(SAMPLE_CONVERSATIONS)
+            logger.info(f"サンプルデータが追加されました: {SAMPLE_CONVERSATIONS}")
 
         # AI応答を生成
         resp = SC_AI.Chat(
@@ -300,34 +312,43 @@ async def create_chatlog(
         raw_response = resp.invoke(message=chatlog.message)
         logger.debug(f"AIモデルの応答 (raw): {raw_response}")
 
-        # 応答データの整形
         try:
-            # ジェネレーターをリストに変換
+            # ジェネレータをリスト化
             raw_response_list = list(raw_response)
-            logger.debug(f"ジェネレーターをリストに変換: {raw_response_list}")
+            logger.debug(f"ジェネレーターの中身: {raw_response_list}")
 
-            # 空応答のチェック
+            # リスト内の各要素を順にログ出力
+            for i, item in enumerate(raw_response_list):
+                logger.debug(f"リスト要素[{i}]: {item} (型: {type(item)})")
+
+            # 応答が空の場合
             if not raw_response_list:
-                logger.error("AIモデルが空の応答を返しました。")
                 raise HTTPException(
                     status_code=500,
-                    detail="AIモデルから応答が得られませんでした。",
+                    detail="AIモデルからの応答が空です。",
                 )
 
-            # リストの内容を整形
+            # `output` の有無を確認しながら整形
             bot_reply = "".join(
-                item["output"]
+                item.get("output", str(item)) if isinstance(item, dict) else str(item)
                 for item in raw_response_list
-                if isinstance(item, dict) and "output" in item
-            )
-        except (KeyError, TypeError, ValueError) as e:
-            logger.error(f"AI応答データの処理中にエラーが発生しました: {e}")
-            raise HTTPException(
-                status_code=500,
-                detail="AIモデル応答の処理に失敗しました。",
             )
 
-        logger.debug(f"整形済みAI応答: {bot_reply}")
+            logger.debug(f"整形済みAI応答: {bot_reply}")
+
+        except Exception as e:
+            # エラーが発生した場合はエラーメッセージを設定
+            bot_reply = f"An error occurred while processing the AI response: {e}"
+            logger.error(f"AI応答データの処理中にエラーが発生しました: {e}")
+
+            # エラー時でもレスポンスを返却
+            return ChatLogDTO(
+                id=None,
+                message=chatlog.message,
+                bot_reply=bot_reply,
+                pub_data=chatlog.pub_data or datetime.now(),
+                session_id=chatlog.session_id,
+            )
 
         # チャットログを保存
         chat_log_data = ChatLog(
@@ -346,36 +367,15 @@ async def create_chatlog(
         )  # 新しいユーザーのメッセージ
         tagged_conversations.append(("ai", ""))  # AI応答は後で更新
 
-        # 定数としてサンプルデータを定義
-        SAMPLE_CONVERSATIONS = [
-            ("human", "こんにちは!"),
-            ("ai", "本日はどのようなご用件でしょうか？"),
-        ]
-
         # サンプルデータを除外してセッション名を生成・更新
         filtered_conversations = [
             (role, text)
             for role, text in tagged_conversations
             if (role, text) not in SAMPLE_CONVERSATIONS
         ]
-        session_name = await update_session_name(chatlog.session_id, filtered_conversations, engine)
-        logger.info(f"セッション名を更新しました: {session_name}")
-
-        # セッション名を生成
-        session_name = session_naming(filtered_conversations)
-
-        # セッション名を更新
-        conditions = {"id": chatlog.session_id}  # 更新条件: セッションID
-        updates = {"session_name": session_name}  # 更新内容: セッション名
-
-        # update_record関数を利用してセッション名を更新
-        await update_record(
-            engine=engine,
-            model=Session,
-            conditions=conditions,
-            updates=updates,
+        session_name = await update_session_name(
+            chatlog.session_id, filtered_conversations, engine
         )
-
         logger.info(f"セッション名を更新しました: {session_name}")
 
         # DTO形式でレスポンスを返却
@@ -386,6 +386,7 @@ async def create_chatlog(
             pub_data=chat_log_data.pub_data,
             session_id=chat_log_data.session_id,
         )
+
     except Exception as e:
         logger.error(
             f"チャットログ作成中にエラーが発生しました: {str(e)}", exc_info=True
