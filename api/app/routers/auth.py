@@ -110,3 +110,26 @@ async def login(user: LoginData, response: Response, session: Annotated[Session,
         "role": db_user.authority,
         "message": "Login successful",
     }
+
+
+# ログアウトエンドポイント
+@router.post("/logout", tags=["logout"])
+async def logout(response: Response) -> dict:
+    """
+    クライアント側のトークンを無効化するログアウトエンドポイント。
+
+    Args:
+        response (Response): クッキーの削除のためのレスポンスオブジェクト。
+
+    Returns:
+        dict: ログアウトの成功メッセージ。
+    """
+    try:
+        # クッキーを削除する
+        response.delete_cookie(key="access_token", samesite="lax")
+
+        logger.info("User logged out successfully")
+        return {"message": "Logout successful"}
+    except Exception as e:
+        logger.error("Error in logout endpoint: %s", str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred during logout")

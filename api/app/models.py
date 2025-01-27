@@ -137,13 +137,13 @@ class ChatLog(SQLModel, table=True):
     )
     message: str = Field(
         ...,
-        sa_column=Column(Unicode(255), index=True),
+        sa_column=Column(UnicodeText),
         title="メッセージ",
         description="チャットメッセージの内容",
     )
     bot_reply: str | None = Field(
         None,
-        sa_column=Column(Unicode(255)),
+        sa_column=Column(UnicodeText),
         title="ボットの返信",
         description="ボットの返信内容",
     )
