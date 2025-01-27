@@ -207,7 +207,6 @@ router = APIRouter()
 logger = getLogger("schoolinfo_router", logging.DEBUG)
 
 
-
 @router.post("/input/schoolinfo/", response_model=SchoolInfoDTO, tags=["schoolinfo_post"])
 @role_required(Role.STAFF)
 async def create_school_info(
@@ -229,16 +228,19 @@ async def create_school_info(
     logger.info(f"学校情報作成リクエスト。ユーザー: {current_user.id}")
 
     new_school_info = SchoolInfo(
+        title=school_info.title,
         contents=school_info.contents,
         pub_date=school_info.pub_date or datetime.now(),
         updated_at=school_info.updated_at or datetime.now(),
         created_by=current_user.id,
     )
+    # TODO: ベクターデータベースに情報を追加する
     await add_db_record(engine, new_school_info)
     logger.info(f"新しい学校情報が作成されました。ID: {new_school_info.id}")
 
     return SchoolInfoDTO(
         id=new_school_info.id,
+        title=new_school_info.title,
         contents=new_school_info.contents,
         pub_date=new_school_info.pub_date,
         updated_at=new_school_info.updated_at,
@@ -275,6 +277,8 @@ async def view_school_info(
         like_conditions["contents"] = search_params.contents_like
     if search_params.created_by:
         conditions["created_by"] = search_params.created_by
+    if search_params.title_like:
+        like_conditions["title"] = search_params.title_like
 
     school_infos = await select_table(
         engine,
@@ -289,6 +293,7 @@ async def view_school_info(
     return [
         SchoolInfoDTO(
             id=info.id,
+            title=info.title,
             contents=info.contents,
             pub_date=info.pub_date,
             updated_at=info.updated_at,
@@ -322,11 +327,13 @@ async def update_school_info(
     updates_dict = updates.model_dump(exclude_unset=True)
 
     conditions = {"id": school_info_id}
+    # TODO: ベクターデータベースの情報を更新するか、削除してから再作成する
     updated_record = await update_record(engine, SchoolInfo, conditions, updates_dict)
 
     logger.info(f"学校情報を更新しました。ID: {updated_record.id}")
     return SchoolInfoDTO(
         id=updated_record.id,
+        title=updated_record.title,
         contents=updated_record.contents,
         pub_date=updated_record.pub_date,
         updated_at=updated_record.updated_at,
@@ -355,6 +362,7 @@ async def delete_school_info(
     logger.info(f"学校情報削除リクエスト: {school_info_id}")
 
     conditions = {"id": school_info_id}
+    # TODO: ベクターデータベースから情報を削除する
     await delete_record(engine, SchoolInfo, conditions)
 
     logger.info(f"学校情報を削除しました。ID: {school_info_id}")
