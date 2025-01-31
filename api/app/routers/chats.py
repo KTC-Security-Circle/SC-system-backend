@@ -304,43 +304,29 @@ async def create_chatlog(
             user_name=current_user.name,
             user_major=current_user.major,
             conversation=tagged_conversations,
-            is_streaming=False,
-            return_length=5,
         )
 
         logger.debug(f"AIモデルに渡すデータ: {tagged_conversations}")
-        raw_response = resp.invoke(message=chatlog.message)
-        logger.debug(f"AIモデルの応答 (raw): {raw_response}")
-
         try:
-            # ジェネレータをリスト化
-            raw_response_list = list(raw_response)
-            logger.debug(f"ジェネレーターの中身: {raw_response_list}")
-
-            # リスト内の各要素を順にログ出力
-            for i, item in enumerate(raw_response_list):
-                logger.debug(f"リスト要素[{i}]: {item} (型: {type(item)})")
-
-            # 応答が空の場合
-            if not raw_response_list:
-                raise HTTPException(
-                    status_code=500,
-                    detail="AIモデルからの応答が空です。",
-                )
-
-            # `output` の有無を確認しながら整形
-            bot_reply = "".join(
-                item.get("output", str(item)) if isinstance(item, dict) else str(item)
-                for item in raw_response_list
-            )
-
+            raw_response = resp.invoke(message=chatlog.message)
+            logger.debug(f"AIモデルの応答 (raw): {raw_response}")
+        
+            # 応答が辞書型としてそのまま渡された場合の処理
+            if isinstance(raw_response, dict) and {"output", "error", "document_id"} <= raw_response.keys():
+                logger.debug(f"受信した応答が辞書型: {raw_response}")
+                bot_reply = raw_response.get("output", "No output available.")
+            else:
+                # それ以外のケースはエラーメッセージを設定
+                logger.warning(f"予期しない応答形式: {raw_response}")
+                bot_reply = "Unexpected response format from AI."
+        
             logger.debug(f"整形済みAI応答: {bot_reply}")
-
+        
         except Exception as e:
             # エラーが発生した場合はエラーメッセージを設定
             bot_reply = f"An error occurred while processing the AI response: {e}"
             logger.error(f"AI応答データの処理中にエラーが発生しました: {e}")
-
+        
             # エラー時でもレスポンスを返却
             return ChatLogDTO(
                 id=None,
