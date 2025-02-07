@@ -141,3 +141,4 @@ database.db
 .ruff_cache/
 local.settings.json
 secret/
+UML/
