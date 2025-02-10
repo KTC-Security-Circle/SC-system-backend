@@ -135,7 +135,12 @@ class Major(SQLModel, table=True):
 
     class Config:
         schema_extra = {
-            "example": {"id": 1, "name": "コンピュータサイエンス", "pub_data": "2025-02-07T12:00:00", "world_id": 1}
+            "example": {
+                "id": 1, 
+                "name": "コンピュータサイエンス", 
+                "pub_data": "2025-02-07T12:00:00", 
+                "world_id": 1
+            }
         }
 
 
@@ -164,7 +169,13 @@ class World(SQLModel, table=True):
     )
 
     class Config:
-        schema_extra = {"example": {"id": 1, "name": "技術・科学", "pub_data": "2025-02-07T12:00:00"}}
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "name": "技術・科学", 
+                "pub_data": "2025-02-07T12:00:00"
+            }
+        }
 
 class Session(SQLModel, table=True):
     id: int | None = Field(
