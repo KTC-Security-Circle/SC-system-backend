@@ -269,6 +269,12 @@ class SchoolInfo(SQLModel, table=True):
         title="ID",
         description="情報を一意に識別するためのID",
     )
+    title: str = Field(
+        ...,
+        sa_column=Column(Unicode(255)),
+        title="タイトル",
+        description="学校に関する情報のタイトル",
+    )
     contents: str = Field(
         ...,
         sa_column=Column(UnicodeText),
@@ -292,6 +298,7 @@ class SchoolInfo(SQLModel, table=True):
         schema_extra = {
             "example": {
                 "id": 1,
+                "title": "本校設立年",
                 "contents": "本校は2024年に設立されました。",
                 "pub_date": "2024-06-29T12:34:56",
                 "updated_at": "2024-07-01T09:30:00",

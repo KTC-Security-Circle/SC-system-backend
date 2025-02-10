@@ -207,7 +207,6 @@ router = APIRouter()
 logger = getLogger("schoolinfo_router", logging.DEBUG)
 
 
-
 @router.post("/input/schoolinfo/", response_model=SchoolInfoDTO, tags=["schoolinfo_post"])
 @role_required(Role.STAFF)
 async def create_school_info(
@@ -229,6 +228,7 @@ async def create_school_info(
     logger.info(f"学校情報作成リクエスト。ユーザー: {current_user.id}")
 
     new_school_info = SchoolInfo(
+        title=school_info.title,
         contents=school_info.contents,
         pub_date=school_info.pub_date or datetime.now(),
         updated_at=school_info.updated_at or datetime.now(),
@@ -239,6 +239,7 @@ async def create_school_info(
 
     return SchoolInfoDTO(
         id=new_school_info.id,
+        title=new_school_info.title,
         contents=new_school_info.contents,
         pub_date=new_school_info.pub_date,
         updated_at=new_school_info.updated_at,
@@ -271,6 +272,8 @@ async def view_school_info(
     logger.info(f"学校情報一覧取得リクエスト: {search_params}")
     conditions, like_conditions = {}, {}
 
+    if search_params.title_like:
+        like_conditions["title"] = search_params.title_like
     if search_params.contents_like:
         like_conditions["contents"] = search_params.contents_like
     if search_params.created_by:
@@ -289,6 +292,7 @@ async def view_school_info(
     return [
         SchoolInfoDTO(
             id=info.id,
+            title=info.title,
             contents=info.contents,
             pub_date=info.pub_date,
             updated_at=info.updated_at,
@@ -327,6 +331,7 @@ async def update_school_info(
     logger.info(f"学校情報を更新しました。ID: {updated_record.id}")
     return SchoolInfoDTO(
         id=updated_record.id,
+        title=updated_record.title,
         contents=updated_record.contents,
         pub_date=updated_record.pub_date,
         updated_at=updated_record.updated_at,
