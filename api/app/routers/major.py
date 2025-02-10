@@ -28,6 +28,34 @@ router = APIRouter()
 logger = getLogger("major_router")
 
 
+@router.post("/input/major", response_model=MajorDTO, tags=["major_post"])
+@role_required(Role.ADMIN)
+async def create_major(
+    major: MajorCreateDTO,
+    engine: Annotated[Engine, Depends(get_engine)],
+    current_user: Annotated[Major, Depends(get_current_user)],
+) -> MajorDTO:
+
+    # 新しいユーザーオブジェクトを作成
+    major_data = Major(
+        name=major.name,
+        world_id=major.world_id,
+        pub_data=datetime.now(),
+    )
+
+    # データベースにレコードを追加
+    await add_db_record(engine, major_data)
+
+    # MajorDTO を作成して返す
+    major_dto = MajorDTO(
+        id=major_data.id,
+        name=major_data.name,
+        world_id=major.world_id
+    )
+
+    return major_dto
+
+
 @router.get("/view/major", response_model=list[MajorDTO], tags=["major_get"])
 @role_required(Role.ADMIN)
 async def view_major(
