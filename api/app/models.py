@@ -45,7 +45,7 @@ class User(SQLModel, table=True):
         description="ユーザの権限",
     )
     major_id: int = Field(
-        default="fugafuga専攻",
+        ...,
         foreign_key="majors.id",
         title="専攻ID",
         description="このユーザが属する専攻のID",

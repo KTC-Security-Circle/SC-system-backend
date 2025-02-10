@@ -59,7 +59,7 @@ async def create_user(
         email=user.email,
         password=hashed_password,  # ハッシュ化されたパスワードを保存
         authority=user.authority,
-        major=user.major,
+        major_id=user.major_id,
         pub_data=datetime.now(),
     )
 
@@ -72,7 +72,7 @@ async def create_user(
     logger.info(f"ユーザー名:{user_data.name}")
     logger.info(f"E-mail:{user_data.email}")
     logger.info(f"権限情報:{user_data.authority}")
-    logger.info(f"専攻情報:{user_data.major}")
+    logger.info(f"専攻情報:{user_data.major_id}")
 
     # UserDTO を作成して返す
     user_dto = UserDTO(
@@ -80,7 +80,7 @@ async def create_user(
         name=user_data.name,
         email=user_data.email,
         authority=user_data.authority,
-        major=user_data.major,
+        major_id=user_data.major_id,
     )
 
     return user_dto
@@ -97,7 +97,7 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> Us
             name=current_user.name,
             email=current_user.email,
             authority=current_user.authority,
-            major=current_user.major,
+            major_id=current_user.major_id,
         )
         return me_dto
 
@@ -110,7 +110,7 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> Us
 
 
 @router.get("/view/user", response_model=list[UserDTO], tags=["user_get"])
-@role_required(Role.ADMIN)
+@role_required(Role.STAFF)
 async def view_user(
     search_params: Annotated[UserSearchDTO, Depends()],
     engine: Annotated[Engine, Depends(get_engine)],
@@ -136,8 +136,8 @@ async def view_user(
     if search_params.authority:
         conditions["authority"] = search_params.authority
 
-    if search_params.major_like:
-        like_conditions["major"] = search_params.major_like
+    if search_params.major_id:
+        conditions["major_id"] = search_params.major_id
 
     users = await select_table(
         engine,
@@ -157,7 +157,7 @@ async def view_user(
             name=user.name,
             email=user.email,
             authority=user.authority,
-            major=user.major,
+            major_id=user.major_id,
         )
         for user in users
     ]
@@ -202,7 +202,7 @@ async def update_user(
         name=updated_record.name,
         email=updated_record.email,
         authority=updated_record.authority,
-        major=updated_record.major,
+        major_id=updated_record.major_id,
     )
     return updated_user_dto
 

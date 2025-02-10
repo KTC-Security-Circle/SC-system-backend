@@ -9,7 +9,7 @@ class UserDTO(SQLModel):
     name: str
     email: EmailStr
     authority: str
-    major: str
+    major_id: int
 
     class Config:
         schema_extra = {
@@ -28,15 +28,14 @@ class UserCreateDTO(SQLModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=12)
     authority: str | None = Field(default="student")
-    major: str | None = Field(default="fugafuga専攻", max_length=255)
-
+    major_id: int
 
 class UserOrderBy(str, Enum):
     name = "name"
     email = "email"
     authority = "authority"
     pub_data = "pub_data"
-    major = "major"
+    major_id = "major_id"
 
 
 class UserSearchDTO(SQLModel):
@@ -44,7 +43,7 @@ class UserSearchDTO(SQLModel):
     name_like: str | None = None
     email: EmailStr | None = None
     authority: str | None = None
-    major_like: str | None = None  # 部分一致フィルタ
+    major_id: int | None = None
 
     @field_validator("authority")
     @classmethod
@@ -61,7 +60,7 @@ class UserUpdateDTO(SQLModel):
     email: EmailStr | None
     password: str | None = Field(None, min_length=8, max_length=12)
     authority: str | None = Field(None)
-    major: str | None = Field(None, max_length=255)
+    major_id: int | None
 
     @field_validator("authority")
     @classmethod
