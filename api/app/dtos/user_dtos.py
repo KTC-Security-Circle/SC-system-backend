@@ -9,7 +9,7 @@ class UserDTO(SQLModel):
     name: str
     email: EmailStr
     authority: str
-    major_id: int
+    major_id: int | None
 
     class Config:
         schema_extra = {
@@ -28,7 +28,7 @@ class UserCreateDTO(SQLModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=12)
     authority: str | None = Field(default="student")
-    major_id: int
+    major_id: int | None = Field(default=None)
 
 class UserOrderBy(str, Enum):
     name = "name"

@@ -59,7 +59,7 @@ async def signup(
             email=user.email,
             password=hashed_password,
             authority=user.authority,
-            major=user.major,
+            major_id=user.major_id,
         )
         session.add(new_user)
         session.commit()
@@ -73,7 +73,7 @@ async def signup(
             name=new_user.name,
             email=new_user.email,
             authority=new_user.authority,
-            major=new_user.major,
+            major_id=new_user.major_id,
         )
         logger.debug("Signup DTO: %s", signup_dto.dict())
         return signup_dto

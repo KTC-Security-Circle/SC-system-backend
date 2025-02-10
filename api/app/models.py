@@ -9,15 +9,20 @@ from sqlmodel import Column, Field, Relationship, SQLModel
 from api.app.security.role import Role
 
 
+from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship, Column
+from pydantic import EmailStr
+from datetime import datetime
+import uuid
+
+
 class User(SQLModel, table=True):
     """
     ユーザモデル: アプリケーションのユーザを表現するデータモデル。
     """
 
     id: str | None = Field(
-        default_factory=lambda: str(uuid.uuid4()),
-        max_length=255,
-        primary_key=True
+        default_factory=lambda: str(uuid.uuid4()), max_length=255, primary_key=True
     )
     name: str | None = Field(
         default="名無し",
@@ -44,25 +49,22 @@ class User(SQLModel, table=True):
         title="権限",
         description="ユーザの権限",
     )
-    major_id: int = Field(
-        ...,
-        foreign_key="majors.id",
+    major_id: int | None = Field(
+        None,
+        foreign_key="major.id",
         title="専攻ID",
         description="このユーザが属する専攻のID",
     )
     pub_data: datetime | None = Field(
-        None,
-        title="公開日時",
-        description="メッセージの公開日時",
-        index=True
+        None, title="公開日時", description="メッセージの公開日時", index=True
     )
 
-    # ユーザとセッションのリレーション (1対多)
+    # UserとMajorのリレーション (N:1)
+    major: Optional["Major"] = Relationship(back_populates="users")
+
+    # ユーザとセッションのリレーション (1:N)
     sessions: list["Session"] = Relationship(
-        back_populates="user",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan"
-        },  # 子オブジェクトのカスケード削除
+        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
     school_infos: list["SchoolInfo"] = Relationship(
@@ -74,16 +76,6 @@ class User(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
-    # 権限のバリデーション
-    @field_validator("authority", mode="before")
-    @classmethod
-    def validate_authority(cls, value: str | Role) -> Role:
-        try:
-            # 入力値が列挙型でなければ変換を試みる
-            return Role(value)
-        except ValueError as e:
-            raise ValueError(f"Invalid role specified: {value}. Valid roles are: {list(Role)}") from e
-
     class Config:
         schema_extra = {
             "example": {
@@ -92,13 +84,11 @@ class User(SQLModel, table=True):
                 "email": "taro.yamada@example.com",
                 "password": "password123",
                 "authority": "admin",
-                "major": "fugafuga専攻",
+                "major_id": 1,
                 "pub_data": "2024-06-29T12:34:56",
             }
         }
 
-    # Majorとのリレーション (N:1)
-    major: Optional["Major"] = Relationship()
 
 class Major(SQLModel, table=True):
     """
@@ -125,21 +115,24 @@ class Major(SQLModel, table=True):
     )
     world_id: int = Field(
         ...,
-        foreign_key="worlds.id",
+        foreign_key="world.id",
         title="ワールドID",
         description="この専攻が属するワールドのID",
     )
 
-    # Worldとのリレーション (N:1)
-    world: Optional["World"] = Relationship()
+    # MajorとUserのリレーション (1:N)
+    users: list["User"] = Relationship(back_populates="major")
+
+    # MajorとWorldのリレーション (N:1)
+    world: Optional["World"] = Relationship(back_populates="majors")
 
     class Config:
         schema_extra = {
             "example": {
-                "id": 1, 
-                "name": "コンピュータサイエンス", 
-                "pub_data": "2025-02-07T12:00:00", 
-                "world_id": 1
+                "id": 1,
+                "name": "コンピュータサイエンス",
+                "pub_data": "2025-02-07T12:00:00",
+                "world_id": 1,
             }
         }
 
@@ -168,14 +161,18 @@ class World(SQLModel, table=True):
         index=True,
     )
 
+    # WorldとMajorのリレーション (1:N)
+    majors: list["Major"] = Relationship(back_populates="world")
+
     class Config:
         schema_extra = {
             "example": {
                 "id": 1,
-                "name": "技術・科学", 
-                "pub_data": "2025-02-07T12:00:00"
+                "name": "技術・科学",
+                "pub_data": "2025-02-07T12:00:00",
             }
         }
+
 
 class Session(SQLModel, table=True):
     id: int | None = Field(
