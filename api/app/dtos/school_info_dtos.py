@@ -73,3 +73,16 @@ class SchoolInfoSearchDTO(SQLModel):
                 "created_by": "xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx",
             }
         }
+
+class SchoolInfoTitleDTO(SQLModel):
+    id: int
+    title: str
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "title": "本校設立年",
+            }
+        }
