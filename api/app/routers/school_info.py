@@ -68,6 +68,7 @@ async def create_school_info(
 
     return SchoolInfoDTO(
         id=new_school_info.id,
+        title=new_school_info.title,
         contents=new_school_info.contents,
         pub_date=new_school_info.pub_date,
         updated_at=new_school_info.updated_at,

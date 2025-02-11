@@ -27,55 +27,55 @@ login_data = {
 #     print(response.text)
 #     exit()
 
-# with requests.Session() as session:
-#     # ログインしてトークンをCookieに保存
-#     response = session.post(login_url, json=login_data)
+with requests.Session() as session:
+    # ログインしてトークンをCookieに保存
+    response = session.post(login_url, json=login_data)
 
-#     if response.status_code == 200:
-#         print("Login succeeded")
+    if response.status_code == 200:
+        print("Login succeeded")
 
-#         # Cookieから`access_token`を取得
-#         cookies = session.cookies.get_dict()
-#         token = cookies.get('access_token')  # access_tokenというCookie名を指定
+        # Cookieから`access_token`を取得
+        # cookies = session.cookies.get_dict()
+        # token = cookies.get('access_token')  # access_tokenというCookie名を指定
+        token = response.json()["access_token"]
 
-#         if token:
-#             print(f"Token from cookie: {token}")
-#         else:
-#             print("Token not found in cookies")
-#             exit()
+        if token:
+            print(f"Token from cookie: {token}")
+        else:
+            print("Token not found in cookies")
+            exit()
 
-#     else:
-#         print("Login failed")
-#         print(response.text)
-#         exit()
+    else:
+        print("Login failed")
+        print(response.text)
+        exit()
 
-# headers = {
-#     "Authorization": f"Bearer {token}"
-# }
+headers = {
+    "Authorization": f"Bearer {token}"
+}
 
-# url = f"{base_url}/api/input/chat/"
+url = f"{base_url}/api/input/chat/"
 
-# payload = {
-#     "message": "これはテストメッセージです",
-#     "session_id": 2  # Replace with the actual session ID
-# }
+payload = {
+    "message": "これはテストメッセージです"
+}
 
-# response = requests.post(url, json=payload, headers=headers, stream=True)
+response = requests.post(url, json=payload, headers=headers)
 
-# # Check the status code
-# print("Status Code:", response.status_code)
+# Check the status code
+print("Status Code:", response.status_code)
 
-# # Process the streamed response
-# if response.status_code == 200:
-#     print("Streaming Response:")
-#     try:
-#         for chunk in response.iter_content(chunk_size=1024):
-#             if chunk:
-#                 print(chunk.decode('utf-8'), end="")
-#     except requests.exceptions.RequestException as e:
-#         print(f"Request error: {e}")
-# else:
-#     print("Error:", response.text)
+# Process the streamed response
+if response.status_code == 200:
+    print("Streaming Response:")
+    try:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                print(chunk.decode('utf-8'), end="")
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+else:
+    print("Error:", response.text)
 
 # #現在のユーザー情報を取得
 # response = requests.get(get_current_user_url,headers=headers)
