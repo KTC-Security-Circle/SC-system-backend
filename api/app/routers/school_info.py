@@ -57,7 +57,10 @@ async def create_school_info(
     )
     await add_db_record(engine, new_school_info)
 
-    CosmosDBManager.create_document(
+    logger.info(f"新しい学校情報が作成されました。ID: {new_school_info.id}")
+    cosmos_manager = CosmosDBManager(create_container=True)
+
+    cosmos_manager.create_document(
         text=new_school_info.contents,
         title=new_school_info.title,
         source_id=new_school_info.id,
@@ -213,8 +216,12 @@ async def update_school_info(
 
     conditions = {"id": school_info_id}
     updated_record = await update_record(engine, SchoolInfo, conditions, updates_dict)
-    CosmosDBManager.update_document(
+
+    cosmos_manager = CosmosDBManager(create_container=True)
+
+    cosmos_manager.update_document(
         text=updated_record.contents,
+        text_type='markdown',
         title=updated_record.title,
         source_id=updated_record.id,
     )

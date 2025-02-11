@@ -1,15 +1,15 @@
 import requests
 # エンドポイントURLの定義
-base_url = "https://sc-system-backend.azurewebsites.net"
+base_url = "http://localhost:7071"
 
-# # サインアップ情報
-# signup_url = f"{base_url}/auth/signup/"
-# signup_data = {
-#     "name": "Test User",
-#     "email": "test@example.jp.com",
-#     "password": "12345678",
-#     "authority": "admin"
-# }
+# サインアップ情報
+signup_url = f"{base_url}/auth/signup/"
+signup_data = {
+    "name": "Test User",
+    "email": "test@example.jp.com",
+    "password": "12345678",
+    "authority": "admin"
+}
 
 # ログイン情報
 login_url = f"{base_url}/auth/login/"
@@ -54,13 +54,17 @@ headers = {
     "Authorization": f"Bearer {token}"
 }
 
-url = f"{base_url}/api/input/chat/"
+url = f"{base_url}/api/update/schoolinfo/9"
 
 payload = {
-    "message": "これはテストメッセージです"
+    "title": "update",
+    "contents": "update"
 }
+try :
+    response = requests.put(url, json=payload, headers=headers)
+except requests.exceptions.RequestException as e:
+    print(f"{e}")
 
-response = requests.post(url, json=payload, headers=headers)
 
 # Check the status code
 print("Status Code:", response.status_code)
@@ -88,7 +92,6 @@ else:
 #     print("GetUser failed")
 #     print(response.text)
 #     exit()
-
 # # 各エンドポイントに対するデータ
 # post_endpoints = [
 #     {
