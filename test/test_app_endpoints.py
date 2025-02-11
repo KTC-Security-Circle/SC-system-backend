@@ -54,14 +54,13 @@ headers = {
     "Authorization": f"Bearer {token}"
 }
 
-url = f"{base_url}/api/update/schoolinfo/9"
+url = f"{base_url}/api/input/chat"
 
 payload = {
-    "title": "update",
-    "contents": "update"
+    "message":"学校にある専攻について教えてください",
 }
 try :
-    response = requests.put(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers)
 except requests.exceptions.RequestException as e:
     print(f"{e}")
 

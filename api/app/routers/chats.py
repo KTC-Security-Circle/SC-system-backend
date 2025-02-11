@@ -302,7 +302,7 @@ async def create_chatlog(
         # AI応答を生成
         resp = SC_AI.Chat(
             user_name=current_user.name,
-            user_major=current_user.major,
+            user_major="fugafuga専攻", # current_user.major
             conversation=tagged_conversations,
         )
 
@@ -310,7 +310,7 @@ async def create_chatlog(
         try:
             raw_response = resp.invoke(message=chatlog.message)
             logger.debug(f"AIモデルの応答 (raw): {raw_response}")
-        
+
             # 応答が辞書型としてそのまま渡された場合の処理
             if isinstance(raw_response, dict) and {"output", "error", "document_id"} <= raw_response.keys():
                 logger.debug(f"受信した応答が辞書型: {raw_response}")
@@ -319,7 +319,7 @@ async def create_chatlog(
                 # それ以外のケースはエラーメッセージを設定
                 logger.warning(f"予期しない応答形式: {raw_response}")
                 bot_reply = "Unexpected response format from AI."
-        
+
             logger.debug(f"整形済みAI応答: {bot_reply}")
         
         except Exception as e:
@@ -346,6 +346,7 @@ async def create_chatlog(
         await add_db_record(engine, chat_log_data)
 
         logger.info(f"チャットログを保存しました: {chat_log_data}")
+        logger.info(f"ドキュメントID:{raw_response['document_id']}")
 
         # 実際のデータを会話履歴に追加
         tagged_conversations.append(
