@@ -9,13 +9,6 @@ from sqlmodel import Column, Field, Relationship, SQLModel
 from api.app.security.role import Role
 
 
-from typing import Optional
-from sqlmodel import SQLModel, Field, Relationship, Column
-from pydantic import EmailStr
-from datetime import datetime
-import uuid
-
-
 class User(SQLModel, table=True):
     """
     ユーザモデル: アプリケーションのユーザを表現するデータモデル。

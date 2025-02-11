@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
+from sc_system_ai.template.azure_cosmos import CosmosDBManager
 
 from api.app.database.database import (
     add_db_record,
@@ -48,13 +49,22 @@ async def create_school_info(
     logger.info(f"学校情報作成リクエスト。ユーザー: {current_user.id}")
 
     new_school_info = SchoolInfo(
+        title=school_info.title,
         contents=school_info.contents,
         pub_date=school_info.pub_date or datetime.now(),
         updated_at=school_info.updated_at or datetime.now(),
         created_by=current_user.id,
     )
     await add_db_record(engine, new_school_info)
+
+    CosmosDBManager.create_document(
+        text=new_school_info.contents,
+        title=new_school_info.title,
+        source_id=new_school_info.id,
+    )
+
     logger.info(f"新しい学校情報が作成されました。ID: {new_school_info.id}")
+
 
     return SchoolInfoDTO(
         id=new_school_info.id,
@@ -92,6 +102,8 @@ async def view_school_info(
     logger.info(f"学校情報一覧取得リクエスト: {search_params}")
     conditions, like_conditions = {}, {}
 
+    if search_params.title_like:
+        like_conditions["title"] = search_params.title_like
     if search_params.contents_like:
         like_conditions["contents"] = search_params.contents_like
     if search_params.created_by:
@@ -110,6 +122,7 @@ async def view_school_info(
     return [
         SchoolInfoDTO(
             id=info.id,
+            title=info.title,
             contents=info.contents,
             pub_date=info.pub_date,
             updated_at=info.updated_at,
@@ -125,7 +138,7 @@ async def view_school_info(
     tags=["schoolinfo_get"],
 )
 @role_required(Role.STUDENT)
-async def view_school_info(
+async def view_school_info_title(
     engine: Annotated[Session, Depends(get_engine)],
     current_user: Annotated[User, Depends(get_current_user)],
     search_params: Annotated[SchoolInfoSearchDTO, Depends()],
@@ -199,10 +212,16 @@ async def update_school_info(
 
     conditions = {"id": school_info_id}
     updated_record = await update_record(engine, SchoolInfo, conditions, updates_dict)
+    CosmosDBManager.update_document(
+        text=updated_record.contents,
+        title=updated_record.title,
+        source_id=updated_record.id,
+    )
 
     logger.info(f"学校情報を更新しました。ID: {updated_record.id}")
     return SchoolInfoDTO(
         id=updated_record.id,
+        title=updated_record.title,
         contents=updated_record.contents,
         pub_date=updated_record.pub_date,
         updated_at=updated_record.updated_at,

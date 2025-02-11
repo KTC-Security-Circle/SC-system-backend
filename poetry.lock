@@ -2170,7 +2170,7 @@ files = [
 
 [[package]]
 name = "sc-system-ai"
-version = "0.9.0"
+version = "0.10.0"
 description = "Package for handling LLM in sc-system."
 optional = false
 python-versions = "^3.10"
@@ -2187,8 +2187,8 @@ langchain-openai = "^0.2.14"
 [package.source]
 type = "git"
 url = "https://github.com/KTC-Security-Circle/SC-system-ai.git"
-reference = "v0.9.0"
-resolved_reference = "1b2598d0c25018b1a0a529db319fd8e5eb08f613"
+reference = "v0.10.0"
+resolved_reference = "68f418fd0292b5894c259b1452764fef7b95a9cd"
 
 [[package]]
 name = "six"
@@ -2586,4 +2586,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a49cfa4ea8c8f557f61076dbe6bed76a21d1eea69de99650cf3c7f8ceafefac3"
+content-hash = "6489bb7f6238f4c94cadd2816a95f0a47f88707c92157bf3331b6b362dbfe93d"

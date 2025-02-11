@@ -15,7 +15,7 @@ azure-functions = "^1.21.1"
 sqlmodel = "^0.0.22"
 python-dotenv = "^1.0.1"
 pydantic = {extras = ["email"], version = "^2.9.2"}
-sc-system-ai = {git = "https://github.com/KTC-Security-Circle/SC-system-ai.git", rev = "v0.9.0"}
+sc-system-ai = {git = "https://github.com/KTC-Security-Circle/SC-system-ai.git", rev = "v0.10.0"}
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
 pymssql = "^2.3.2"
