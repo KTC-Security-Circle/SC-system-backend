@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 from sc_system_ai.template.azure_cosmos import CosmosDBManager
 
@@ -189,6 +189,41 @@ async def view_school_info_title(
         )
         for info in school_infos
     ]
+
+@router.get("/view/schoolinfo/{schoolinfo_id}", response_model=list[SchoolInfoDTO], tags=["user_get"])
+@role_required(Role.ADMIN)
+async def get_me(
+    schoolinfo_id: int,
+    engine: Annotated[Session, Depends(get_engine)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> list[SchoolInfoDTO]:
+    try:
+        conditions = {}
+        conditions["id"] = schoolinfo_id
+
+        school_info = await select_table(
+            engine,
+            SchoolInfo,
+            conditions,
+        )
+
+        return [
+            SchoolInfoDTO(
+                id=info.id,
+                title=info.title,
+                contents=info.contents,
+                pub_date=info.pub_date,
+                updated_at=info.updated_at,
+                created_by=info.created_by,
+            ) for info in school_info
+        ]
+
+    except Exception as e:
+        logger.error(f"学校情報取得中にエラーが発生しました: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"学校情報の取得中にエラーが発生しました。{str(e)}",
+        ) from e
 
 
 @router.put("/update/schoolinfo/{school_info_id}/", response_model=SchoolInfoDTO, tags=["schoolinfo_put"])

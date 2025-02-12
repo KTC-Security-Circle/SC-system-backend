@@ -57,10 +57,10 @@ class UserSearchDTO(SQLModel):
 
 class UserUpdateDTO(SQLModel):
     name: str | None = Field(None, max_length=150)
-    email: EmailStr | None
+    email: EmailStr | None = None
     password: str | None = Field(None, min_length=8, max_length=12)
     authority: str | None = Field(None)
-    major_id: int | None
+    major_id: int | None = None
 
     @field_validator("authority")
     @classmethod
