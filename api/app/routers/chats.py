@@ -321,12 +321,12 @@ async def create_chatlog(
                 bot_reply = "Unexpected response format from AI."
 
             logger.debug(f"整形済みAI応答: {bot_reply}")
-        
+
         except Exception as e:
             # エラーが発生した場合はエラーメッセージを設定
             bot_reply = f"An error occurred while processing the AI response: {e}"
             logger.error(f"AI応答データの処理中にエラーが発生しました: {e}")
-        
+
             # エラー時でもレスポンスを返却
             return ChatLogDTO(
                 id=None,
@@ -372,6 +372,7 @@ async def create_chatlog(
             bot_reply=chat_log_data.bot_reply,
             pub_data=chat_log_data.pub_data,
             session_id=chat_log_data.session_id,
+            documentid=raw_response["document_id"],
         )
 
     except Exception as e:

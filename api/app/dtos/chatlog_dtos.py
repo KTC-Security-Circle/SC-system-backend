@@ -28,6 +28,7 @@ class ChatCreateDTO(SQLModel):
     bot_reply: str | None = None  # ボットの返信はオプショナル
     pub_data: datetime | None = None  # 公開日時はオプショナル
     session_id: int | None = None  # セッションIDもオプショナル
+    documentid: int | None
 
 
 class ChatOrderBy(str, Enum):
