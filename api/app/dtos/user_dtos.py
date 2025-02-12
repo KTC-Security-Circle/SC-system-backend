@@ -8,7 +8,7 @@ class UserDTO(SQLModel):
     id: str
     name: str
     email: EmailStr
-    authority: str
+    authority: str | None
     major_id: int | None
 
     class Config:

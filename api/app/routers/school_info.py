@@ -227,7 +227,7 @@ async def get_me(
 
 
 @router.put("/update/schoolinfo/{school_info_id}/", response_model=SchoolInfoDTO, tags=["schoolinfo_put"])
-@role_required(Role.STAFF)
+@role_required(Role.STUDENT)
 async def update_school_info(
     school_info_id: int,
     updates: SchoolInfoUpdateDTO,

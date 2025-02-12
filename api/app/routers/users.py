@@ -40,6 +40,12 @@ async def create_user(
 
     session = Session(engine)
 
+    if user.email is None:
+        logger.error("ユーザーの email が None です。適切な値を設定してください。")
+    elif user.password is None:
+        logger.error("ユーザーの password が None です。認証に必要な値を設定してください。")
+
+
     # 既存のメールアドレスのチェック
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
 
