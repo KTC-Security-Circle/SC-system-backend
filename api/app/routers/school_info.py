@@ -191,7 +191,7 @@ async def view_school_info_title(
     ]
 
 @router.get("/view/schoolinfo/{schoolinfo_id}", response_model=list[SchoolInfoDTO], tags=["user_get"])
-@role_required(Role.ADMIN)
+@role_required(Role.STUDENT)
 async def get_me(
     schoolinfo_id: int,
     engine: Annotated[Session, Depends(get_engine)],
@@ -227,7 +227,7 @@ async def get_me(
 
 
 @router.put("/update/schoolinfo/{school_info_id}/", response_model=SchoolInfoDTO, tags=["schoolinfo_put"])
-@role_required(Role.STUDENT)
+@role_required(Role.STAFF)
 async def update_school_info(
     school_info_id: int,
     updates: SchoolInfoUpdateDTO,
