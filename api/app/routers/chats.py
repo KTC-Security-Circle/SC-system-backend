@@ -302,37 +302,23 @@ async def create_chatlog(
         # AI応答を生成
         resp = SC_AI.Chat(
             user_name=current_user.name,
-            user_major=current_user.major,
+            user_major="fugafuga専攻", # current_user.major
             conversation=tagged_conversations,
-            is_streaming=False,
-            return_length=5,
         )
 
         logger.debug(f"AIモデルに渡すデータ: {tagged_conversations}")
-        raw_response = resp.invoke(message=chatlog.message)
-        logger.debug(f"AIモデルの応答 (raw): {raw_response}")
-
         try:
-            # ジェネレータをリスト化
-            raw_response_list = list(raw_response)
-            logger.debug(f"ジェネレーターの中身: {raw_response_list}")
+            raw_response = resp.invoke(message=chatlog.message)
+            logger.debug(f"AIモデルの応答 (raw): {raw_response}")
 
-            # リスト内の各要素を順にログ出力
-            for i, item in enumerate(raw_response_list):
-                logger.debug(f"リスト要素[{i}]: {item} (型: {type(item)})")
-
-            # 応答が空の場合
-            if not raw_response_list:
-                raise HTTPException(
-                    status_code=500,
-                    detail="AIモデルからの応答が空です。",
-                )
-
-            # `output` の有無を確認しながら整形
-            bot_reply = "".join(
-                item.get("output", str(item)) if isinstance(item, dict) else str(item)
-                for item in raw_response_list
-            )
+            # 応答が辞書型としてそのまま渡された場合の処理
+            if isinstance(raw_response, dict) and {"output", "error", "document_id"} <= raw_response.keys():
+                logger.debug(f"受信した応答が辞書型: {raw_response}")
+                bot_reply = raw_response.get("output", "No output available.")
+            else:
+                # それ以外のケースはエラーメッセージを設定
+                logger.warning(f"予期しない応答形式: {raw_response}")
+                bot_reply = "Unexpected response format from AI."
 
             logger.debug(f"整形済みAI応答: {bot_reply}")
 
@@ -360,6 +346,7 @@ async def create_chatlog(
         await add_db_record(engine, chat_log_data)
 
         logger.info(f"チャットログを保存しました: {chat_log_data}")
+        logger.info(f"ドキュメントID:{raw_response['document_id']}")
 
         # 実際のデータを会話履歴に追加
         tagged_conversations.append(
@@ -385,6 +372,7 @@ async def create_chatlog(
             bot_reply=chat_log_data.bot_reply,
             pub_data=chat_log_data.pub_data,
             session_id=chat_log_data.session_id,
+            documentid=raw_response["document_id"],
         )
 
     except Exception as e:

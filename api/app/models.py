@@ -14,7 +14,9 @@ class User(SQLModel, table=True):
     ユーザモデル: アプリケーションのユーザを表現するデータモデル。
     """
 
-    id: str | None = Field(default_factory=lambda: str(uuid.uuid4()), max_length=255, primary_key=True)
+    id: str | None = Field(
+        default_factory=lambda: str(uuid.uuid4()), max_length=255, primary_key=True
+    )
     name: str | None = Field(
         default="名無し",
         sa_column=Column(Unicode(150)),
@@ -40,20 +42,22 @@ class User(SQLModel, table=True):
         title="権限",
         description="ユーザの権限",
     )
-    major: str | None = Field(
-        default="fugafuga専攻",
-        sa_column=Column(Unicode(255)),
-        title="専攻",
-        description="ユーザの専攻分野",
+    major_id: int | None = Field(
+        None,
+        foreign_key="major.id",
+        title="専攻ID",
+        description="このユーザが属する専攻のID",
     )
-    pub_data: datetime | None = Field(None, title="公開日時", description="メッセージの公開日時", index=True)
+    pub_data: datetime | None = Field(
+        None, title="公開日時", description="メッセージの公開日時", index=True
+    )
 
-    # ユーザとセッションのリレーション (1対多)
+    # UserとMajorのリレーション (N:1)
+    major: Optional["Major"] = Relationship(back_populates="users")
+
+    # ユーザとセッションのリレーション (1:N)
     sessions: list["Session"] = Relationship(
-        back_populates="user",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan"
-        },  # 子オブジェクトのカスケード削除
+        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
     school_infos: list["SchoolInfo"] = Relationship(
@@ -65,16 +69,6 @@ class User(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
-    # 権限のバリデーション
-    @field_validator("authority", mode="before")
-    @classmethod
-    def validate_authority(cls, value: str | Role) -> Role:
-        try:
-            # 入力値が列挙型でなければ変換を試みる
-            return Role(value)
-        except ValueError as e:
-            raise ValueError(f"Invalid role specified: {value}. Valid roles are: {list(Role)}") from e
-
     class Config:
         schema_extra = {
             "example": {
@@ -83,8 +77,92 @@ class User(SQLModel, table=True):
                 "email": "taro.yamada@example.com",
                 "password": "password123",
                 "authority": "admin",
-                "major": "fugafuga専攻",
+                "major_id": 1,
                 "pub_data": "2024-06-29T12:34:56",
+            }
+        }
+
+
+class Major(SQLModel, table=True):
+    """
+    専攻モデル: ユーザが属する専攻を表現するデータモデル。
+    """
+
+    id: int | None = Field(
+        None,
+        primary_key=True,
+        title="専攻ID",
+        description="専攻を一意に識別するためのID",
+    )
+    name: str = Field(
+        default="未設定",
+        sa_column=Column(Unicode(150)),
+        title="専攻名",
+        description="専攻の名前",
+    )
+    pub_data: datetime | None = Field(
+        None,
+        title="公開日時",
+        description="専攻情報の公開日時",
+        index=True,
+    )
+    world_id: int = Field(
+        ...,
+        foreign_key="world.id",
+        title="ワールドID",
+        description="この専攻が属するワールドのID",
+    )
+
+    # MajorとUserのリレーション (1:N)
+    users: list["User"] = Relationship(back_populates="major")
+
+    # MajorとWorldのリレーション (N:1)
+    world: Optional["World"] = Relationship(back_populates="majors")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "name": "コンピュータサイエンス",
+                "pub_data": "2025-02-07T12:00:00",
+                "world_id": 1,
+            }
+        }
+
+
+class World(SQLModel, table=True):
+    """
+    ワールドモデル: 各専攻 (Major) が属する世界を表現するデータモデル。
+    """
+
+    id: int | None = Field(
+        None,
+        primary_key=True,
+        title="ワールドID",
+        description="ワールドを一意に識別するためのID",
+    )
+    name: str = Field(
+        default="未設定",
+        sa_column=Column(Unicode(150)),
+        title="ワールド名",
+        description="ワールドの名前",
+    )
+    pub_data: datetime | None = Field(
+        None,
+        title="公開日時",
+        description="ワールド情報の公開日時",
+        index=True,
+    )
+
+    # WorldとMajorのリレーション (1:N)
+    majors: list["Major"] = Relationship(back_populates="world")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "name": "技術・科学",
+                "pub_data": "2025-02-07T12:00:00",
             }
         }
 
@@ -181,6 +259,12 @@ class SchoolInfo(SQLModel, table=True):
         title="ID",
         description="情報を一意に識別するためのID",
     )
+    title: str = Field(
+        ...,
+        sa_column=Column(Unicode(255)),
+        title="タイトル",
+        description="学校に関する情報のタイトル",
+    )
     contents: str = Field(
         ...,
         sa_column=Column(UnicodeText),
@@ -206,6 +290,7 @@ class SchoolInfo(SQLModel, table=True):
         schema_extra = {
             "example": {
                 "id": 1,
+                "title": "本校設立年",
                 "contents": "本校は2024年に設立されました。",
                 "pub_date": "2024-06-29T12:34:56",
                 "updated_at": "2024-07-01T09:30:00",
