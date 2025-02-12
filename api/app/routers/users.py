@@ -40,6 +40,12 @@ async def create_user(
 
     session = Session(engine)
 
+    if user.email is None:
+        logger.error("ユーザーの email が None です。適切な値を設定してください。")
+    elif user.password is None:
+        logger.error("ユーザーの password が None です。認証に必要な値を設定してください。")
+
+
     # 既存のメールアドレスのチェック
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
 
@@ -119,50 +125,57 @@ async def view_user(
     limit: int | None = None,
     offset: int | None = 0,
 ) -> list[UserDTO]:
-    logger.info(f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}")
-    conditions = {}
-    like_conditions = {}
+    try:
+        logger.info(f"ユーザー一覧の取得リクエストを受け付けました。検索条件: {search_params}")
+        conditions = {}
+        like_conditions = {}
 
-    # 検索条件をDTOから適用
-    if search_params.name:
-        conditions["name"] = search_params.name
+        # 検索条件をDTOから適用
+        if search_params.name:
+            conditions["name"] = search_params.name
 
-    if search_params.name_like:
-        like_conditions["name"] = search_params.name_like
+        if search_params.name_like:
+            like_conditions["name"] = search_params.name_like
 
-    if search_params.email:
-        conditions["email"] = search_params.email
+        if search_params.email:
+            conditions["email"] = search_params.email
 
-    if search_params.authority:
-        conditions["authority"] = search_params.authority
+        if search_params.authority:
+            conditions["authority"] = search_params.authority
 
-    if search_params.major_id:
-        conditions["major_id"] = search_params.major_id
+        if search_params.major_id:
+            conditions["major_id"] = search_params.major_id
 
-    users = await select_table(
-        engine,
-        User,
-        conditions,
-        like_conditions=like_conditions,
-        offset=offset,
-        limit=limit,
-        order_by=order_by,
-    )
-
-    logger.info(f"ユーザー一覧取得完了: {len(users)}件")
-
-    user_dto_list = [
-        UserDTO(
-            id=user.id,
-            name=user.name,
-            email=user.email,
-            authority=user.authority,
-            major_id=user.major_id,
+        users = await select_table(
+            engine,
+            User,
+            conditions,
+            like_conditions=like_conditions,
+            offset=offset,
+            limit=limit,
+            order_by=order_by,
         )
-        for user in users
-    ]
 
-    return user_dto_list
+        logger.info(f"ユーザー一覧取得完了: {len(users)}件")
+
+        user_dto_list = [
+            UserDTO(
+                id=user.id,
+                name=user.name,
+                email=user.email,
+                authority=user.authority,
+                major_id=user.major_id,
+            )
+            for user in users
+        ]
+
+        return user_dto_list
+    except Exception as e:
+            logger.error(f"ユーザー情報取得中にエラーが発生しました: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"ユーザー情報の取得中にエラーが発生しました。{str(e)}",
+            ) from e
 
 
 @router.put("/update/user/{user_id}", response_model=UserDTO, tags=["user_put"])

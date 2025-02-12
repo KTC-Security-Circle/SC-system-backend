@@ -10,6 +10,7 @@ class ChatLogDTO(SQLModel):
     bot_reply: str | None = None
     pub_data: datetime | None = None
     session_id: int
+    document_id: int | None = None
 
     class Config:
         schema_extra = {
@@ -19,6 +20,7 @@ class ChatLogDTO(SQLModel):
                 "bot_reply": "こんにちは！何かお手伝いできますか？",
                 "pub_data": "2024-06-29T12:34:56",
                 "session_id": 1,
+                "documentid": 1,
             }
         }
 
@@ -28,8 +30,6 @@ class ChatCreateDTO(SQLModel):
     bot_reply: str | None = None  # ボットの返信はオプショナル
     pub_data: datetime | None = None  # 公開日時はオプショナル
     session_id: int | None = None  # セッションIDもオプショナル
-    documentid: int | None
-
 
 class ChatOrderBy(str, Enum):
     message = "message"

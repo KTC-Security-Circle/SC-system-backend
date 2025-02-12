@@ -372,7 +372,7 @@ async def create_chatlog(
             bot_reply=chat_log_data.bot_reply,
             pub_data=chat_log_data.pub_data,
             session_id=chat_log_data.session_id,
-            documentid=raw_response["document_id"],
+            document_id=raw_response["document_id"],
         )
 
     except Exception as e:

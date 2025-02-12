@@ -54,13 +54,14 @@ headers = {
     "Authorization": f"Bearer {token}"
 }
 
-url = f"{base_url}/api/input/chat"
+url = f"{base_url}/api/delete/schoolinfo/9/"
 
 payload = {
     "message":"学校にある専攻について教えてください",
 }
 try :
-    response = requests.post(url, json=payload, headers=headers)
+    # , json=payload
+    response = requests.delete(url, headers=headers)
 except requests.exceptions.RequestException as e:
     print(f"{e}")
 

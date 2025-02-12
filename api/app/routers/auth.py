@@ -49,6 +49,11 @@ async def signup(
         if existing_user:
             logger.warning("Attempted to register with existing email: %s", user.email)
             raise HTTPException(status_code=400, detail="Email already registered")
+        
+        if user.email is None:
+            logger.error("ユーザーの email が None です。適切な値を設定してください。")
+        elif user.password is None:
+            logger.error("ユーザーの password が None です。認証に必要な値を設定してください。")
 
         # パスワードをハッシュ化して保存
         hashed_password = get_password_hash(user.password)
