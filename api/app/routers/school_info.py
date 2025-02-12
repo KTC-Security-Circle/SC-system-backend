@@ -292,6 +292,12 @@ async def delete_school_info(
     """
     logger.info(f"学校情報削除リクエスト: {school_info_id}")
 
+    cosmos_manager = CosmosDBManager(create_container=True)
+
+    cosmos_manager.delete_document_by_source_id(
+        source_id=school_info_id,
+    )
+
     conditions = {"id": school_info_id}
     await delete_record(engine, SchoolInfo, conditions)
 

@@ -54,14 +54,14 @@ headers = {
     "Authorization": f"Bearer {token}"
 }
 
-url = f"{base_url}/api/view/schoolinfo/7"
+url = f"{base_url}/api/delete/schoolinfo/9/"
 
 payload = {
     "message":"学校にある専攻について教えてください",
 }
 try :
     # , json=payload
-    response = requests.get(url, headers=headers)
+    response = requests.delete(url, headers=headers)
 except requests.exceptions.RequestException as e:
     print(f"{e}")
 
