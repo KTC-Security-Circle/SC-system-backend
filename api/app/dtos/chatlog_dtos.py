@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import Dict
 
 from sqlmodel import SQLModel
 
@@ -11,7 +11,7 @@ class ChatLogDTO(SQLModel):
     bot_reply: str | None = None
     pub_data: datetime | None = None
     session_id: int
-    document_id: List[int] | None = None
+    document_id: Dict{int:str} | None = None
 
     class Config:
         schema_extra = {
