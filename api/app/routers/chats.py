@@ -376,13 +376,16 @@ async def create_chatlog(
 
             results = await asyncio.gather(*tasks)  # 非同期タスクを並列実行
             logger.info(f"ドキュメント: {results}")
-            if type(results[0][0])==SchoolInfo:
-                logger.info(f"ドキュメントタイトル: {results[0][0].title}")
-                logger.info(f"ドキュメントタイプ: {type(results[0][0])}")
-
+            if results==[[]]:
+                logger.info(f"ドキュメント無し")
+            elif type(results[0][0])==SchoolInfo:
                 response_document = {
-                    document_id: i[0].title for i in results for document_id in raw_response["document_id"]
+                    document_id: i[0].title
+                    for i in results
+                    if i and i[0]  # 空リストやNoneをスキップ
+                    for document_id in raw_response.get("document_id", [])
                 }
+
                 logger.info(f"レスポンスドキュメント: {response_document}")
 
         # DTO形式でレスポンスを返却
