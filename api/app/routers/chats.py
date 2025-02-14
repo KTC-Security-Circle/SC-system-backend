@@ -26,7 +26,7 @@ from api.app.dtos.chatlog_dtos import (
     ChatSearchDTO,
     ChatUpdateDTO,
 )
-from api.app.models import ChatLog, User, Session
+from api.app.models import ChatLog, SchoolInfo, User, Session
 from api.app.security.role import Role, role_required
 from api.app.security.jwt_token import get_current_user
 from api.app.security.role import Role, role_required
@@ -366,6 +366,24 @@ async def create_chatlog(
         )
         logger.info(f"セッション名を更新しました: {session_name}")
 
+        response_document=None
+
+        if raw_response["document_id"] is not None:
+            tasks = [
+                select_table(engine=engine, model=SchoolInfo, conditions={"id": document_id})
+                for document_id in raw_response["document_id"]
+            ]
+
+            results = await asyncio.gather(*tasks)  # 非同期タスクを並列実行
+            logger.info(f"ドキュメント: {results}")
+            logger.info(f"ドキュメントタイトル: {results[0][0].title}")
+            logger.info(f"ドキュメントタイプ: {type(results)}")
+
+            response_document = {
+                document_id: i[0].title for i in results for document_id in raw_response["document_id"]
+            }
+            logger.info(f"レスポンスドキュメント: {response_document}")
+
         # DTO形式でレスポンスを返却
         return ChatLogDTO(
             id=chat_log_data.id,
@@ -373,7 +391,7 @@ async def create_chatlog(
             bot_reply=chat_log_data.bot_reply,
             pub_data=chat_log_data.pub_data,
             session_id=chat_log_data.session_id,
-            document_id=raw_response["document_id"],
+            document_id=response_document,
         )
 
     except Exception as e:
