@@ -4,6 +4,7 @@ import logging
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime
 from typing import Annotated, Any
+import traceback
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -379,9 +380,10 @@ async def create_chatlog(
         logger.error(
             f"チャットログ作成中にエラーが発生しました: {str(e)}", exc_info=True
         )
+        tb = traceback.format_exc()
         raise HTTPException(
             status_code=500,
-            detail=f"チャットログの作成中にエラーが発生しました: {str(e)}",
+            detail=f"チャットログの作成中にエラーが発生しました: {str(e)}\n" + tb,
         ) from e
 
 
