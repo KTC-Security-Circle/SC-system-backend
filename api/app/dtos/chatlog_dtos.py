@@ -10,7 +10,7 @@ class ChatLogDTO(SQLModel):
     bot_reply: str | None = None
     pub_data: datetime | None = None
     session_id: int
-    document_id: int | None = None
+    document_id: str | None = None
 
     class Config:
         schema_extra = {
