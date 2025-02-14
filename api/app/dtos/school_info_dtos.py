@@ -17,7 +17,7 @@ class SchoolInfoDTO(SQLModel):
         schema_extra = {
             "example": {
                 "id": 1,
-                "title": "本校設立年",
+                "title": "学校の設立年",
                 "contents": "本校は2024年に設立されました。",
                 "pub_date": "2024-06-29T12:34:56",
                 "updated_at": "2024-07-01T09:30:00",
@@ -61,7 +61,7 @@ class SchoolInfoUpdateDTO(SQLModel):
 
 
 class SchoolInfoSearchDTO(SQLModel):
-    title_like: str | None = Field(None, title="内容の部分一致", description="内容で部分一致検索")
+    title_like: str | None = Field(None, title="タイトルの部分一致", description="タイトルで部分一致検索")
     contents_like: str | None = Field(None, title="内容の部分一致", description="内容で部分一致検索")
     created_by: str | None = Field(None, title="作成者ID", description="作成者IDで検索")
 

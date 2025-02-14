@@ -141,6 +141,7 @@ async def view_school_info(
     response_model=list[SchoolInfoTitleDTO],
     tags=["schoolinfo_get"],
 )
+
 @role_required(Role.STUDENT)
 async def view_school_info_title(
     engine: Annotated[Session, Depends(get_engine)],
@@ -171,6 +172,8 @@ async def view_school_info_title(
         like_conditions["contents"] = search_params.contents_like
     if search_params.created_by:
         conditions["created_by"] = search_params.created_by
+    if search_params.title_like:
+        like_conditions["title"] = search_params.title_like
 
     school_infos = await select_table(
         engine,
@@ -250,6 +253,7 @@ async def update_school_info(
     updates_dict = updates.model_dump(exclude_unset=True)
 
     conditions = {"id": school_info_id}
+    # TODO: ベクターデータベースの情報を更新するか、削除してから再作成する
     updated_record = await update_record(engine, SchoolInfo, conditions, updates_dict)
 
     cosmos_manager = CosmosDBManager(create_container=True)
@@ -299,6 +303,7 @@ async def delete_school_info(
     )
 
     conditions = {"id": school_info_id}
+    # TODO: ベクターデータベースから情報を削除する
     await delete_record(engine, SchoolInfo, conditions)
 
     logger.info(f"学校情報を削除しました。ID: {school_info_id}")
