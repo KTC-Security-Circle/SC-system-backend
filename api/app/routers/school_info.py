@@ -58,16 +58,28 @@ async def create_school_info(
     await add_db_record(engine, new_school_info)
 
     logger.info(f"新しい学校情報が作成されました。ID: {new_school_info.id}")
-    cosmos_manager = CosmosDBManager(create_container=True)
-
-    cosmos_manager.create_document(
-        text=new_school_info.contents,
-        title=new_school_info.title,
-        source_id=new_school_info.id,
-    )
-
-    logger.info(f"新しい学校情報が作成されました。ID: {new_school_info.id}")
-
+    try:
+        cosmos_manager = CosmosDBManager(create_container=True)
+        logger.info("CosmosDBManager インスタンスを作成しました。")
+    
+        cosmos_manager.create_document(
+            text=new_school_info.contents,
+            title=new_school_info.title,
+            source_id=new_school_info.id,
+        )
+        logger.info(f"CosmosDBにドキュメントを作成しました: {new_school_info.title}")
+    
+    except ConnectionError as e:
+        logger.error(f"CosmosDBへの接続に失敗しました: {e}")
+        raise
+    
+    except ValueError as e:
+        logger.error(f"データのバリデーションエラー: {e}")
+        raise
+    
+    except Exception as e:
+        logger.exception(f"CosmosDBドキュメント作成中に予期しないエラーが発生しました: {e}")
+        raise
 
     return SchoolInfoDTO(
         id=new_school_info.id,

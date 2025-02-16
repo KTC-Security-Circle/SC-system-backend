@@ -28,7 +28,7 @@ class SchoolInfoDTO(SQLModel):
 
 class SchoolInfoCreateDTO(SQLModel):
     title: str = Field(..., max_length=255, title="タイトル", description="学校情報のタイトル")
-    contents: str = Field(..., max_length=1000, title="内容", description="学校情報の内容")
+    contents: str = Field(..., title="内容", description="学校情報の内容")
     pub_date: datetime | None = Field(None, title="公開日時", description="学校情報の公開日時")
     updated_at: datetime | None = Field(None, title="更新日時", description="学校情報の最終更新日時")
 

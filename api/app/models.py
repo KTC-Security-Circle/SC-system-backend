@@ -267,7 +267,7 @@ class SchoolInfo(SQLModel, table=True):
     )
     contents: str = Field(
         ...,
-        sa_column=Column(UnicodeText),
+        sa_column=Column(Unicode(None)),
         title="内容",
         description="学校に関する情報の内容",
     )

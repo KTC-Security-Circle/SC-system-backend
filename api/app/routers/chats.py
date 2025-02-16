@@ -378,13 +378,14 @@ async def create_chatlog(
             logger.info(f"ドキュメント: {results}")
             if results==[[]]:
                 logger.info(f"ドキュメント無し")
-            elif type(results[0][0])==SchoolInfo:
+            else:
                 response_document = {
                     document_id: i[0].title
                     for i in results
-                    if i and i[0]  # 空リストやNoneをスキップ
+                    if i and isinstance(i[0], SchoolInfo)  # 空リストやNoneをスキップし、かつSchoolInfo型のみ
                     for document_id in raw_response.get("document_id", [])
                 }
+
 
                 logger.info(f"レスポンスドキュメント: {response_document}")
 
